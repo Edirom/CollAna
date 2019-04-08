@@ -1,0 +1,29 @@
+<!--replace everything in this file with the code below.-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" href="#">
+    ZenMEM
+  </a>
+  <div>
+    <fileservice (complete)="import($event)"> </fileservice>
+  </div>
+</nav>
+<div class="container-fluid" *ngIf="faksimiles?.length > 0" style="text-align:center" cdkDropList>
+  <div class="row" style="margin-bottom:50px;">
+    <div class="card" *ngFor="let a of faksimiles;">
+      <div class="card-header clearfix">
+        {{ a.title }}
+        <button type="button" class="close" (click)="close(a)" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="card-block container-fluid">
+          <div class="row horizontal-slide">
+            <div class="col-xs-12 col-md-6 col-sm-6 col-lg-6">
+              <img [src]="a.contain" onError="this.src='';" width="500"/>
+            </div>
+          </div>
+        </div>     
+    </div>
+  </div>
+</div>
+<h2><router-outlet></router-outlet> </h2>
