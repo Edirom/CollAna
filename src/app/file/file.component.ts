@@ -25,7 +25,7 @@ export class FileComponent {
 
     myReader.readAsDataURL(file);
     //var resultSet = [];
-    myReader.onloadend = function (e) {
+    myReader.onloadend = function (e: any) {
       self.contain = e.target.result;
       var faksimile = new Faksimile(file.name, self.contain);
       self.fileService.addFaksimile(faksimile);
