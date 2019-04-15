@@ -10,7 +10,7 @@
 <div class="boundary">
 <div class="container-fluid" *ngIf="faksimiles?.length > 0" style="text-align:center">
   <div class="row" style="margin-bottom:50px;">
-    <div class="card" *ngFor="let a of faksimiles;"  cdkDrag cdkDragBoundary=".boundary">
+    <div class="card" *ngFor="let a of faksimiles;"  (cdkDragEnded)="onTaskDrop($event, a)" cdkDrag cdkDragBoundary=".boundary">
       <div class="card-header clearfix">
         {{ a.title }}
         <button type="button" class="close" (click)="close(a)" aria-label="Close">
