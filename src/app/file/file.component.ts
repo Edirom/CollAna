@@ -18,24 +18,33 @@ export class FileComponent {
 
   }
 
+
   onSelectFile(event: any) {
     var self = this;
     var file: File = event.target.files[0];
     var myReader: FileReader = new FileReader();
-
     myReader.readAsDataURL(file);
     //var resultSet = [];
     myReader.onloadend = function (e: any) {
+     
       self.contain = e.target.result;
-      var faksimile = new Faksimile(file.name, self.contain);
-      self.fileService.addFaksimile(faksimile);
       self.complete.next({
         fileContent: myReader.result,
-        fileName: file.name
+        fileName: file.name,
       }); // pass along the data which whould be used by the parent component
 
+      var img = new Image();
+      img.src = e.target.result,
+      img.onload = function () {
+        var w = this.width;
+        var h = this.height;
+        var faksimile = new Faksimile(file.name, self.contain, 100, w, h, w);
+        self.fileService.addFaksimile(faksimile);
+      }
     };
 
+   
+    
     //self.fileService.setUrl(self.contain);
     
   }

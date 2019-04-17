@@ -12,9 +12,14 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 export class AppComponent{
   faksimiles: Faksimile[];
 
-  constructor(private fileService: FileService) {
-    //this.page = 0;
+  onEnter(event: any, data: Faksimile) {
+    data.scaleFactor = event.target.value;
+    data.actualwidth = data.scaleFactor * data.width / 100;
   }
+  constructor(private fileService: FileService) {
+
+  }
+
 
   import(data: any): void {
     this.faksimiles = this.fileService.getFaksimiles();

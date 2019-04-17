@@ -13,14 +13,24 @@
     <div class="card" *ngFor="let a of faksimiles;"  (cdkDragEnded)="onTaskDrop($event, a)" cdkDrag cdkDragBoundary=".boundary">
       <div class="card-header clearfix">
         {{ a.title }}
-        <button type="button" class="close" (click)="close(a)" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <div class="row">
+          <div class="col-lg-4">
+            <span>Scale factor: </span>
+          </div>
+          <div class="col-lg-3">
+            <input class="form-control" type="number" [value]="a.scaleFactor" (input)="a.scaleFactor = $event.target.value" (keyup.enter)="onEnter($event, a)">
+          </div>
+          <div class="col-lg-1">
+            <button type="button" class="close" (click)="close(a)" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        </div>
       </div>
       <div class="card-block container-fluid">
           <div class="row horizontal-slide">
             <div class="col-xs-12 col-md-6 col-sm-6 col-lg-6">
-              <img [src]="a.contain" onError="this.src='';" width="500"/>
+              <img id="faksimile-{{ a.title }}" [src]="a.contain" onError="this.src='';" width={{a.actualwidth}}/>
             </div>
           </div>
         </div>     
