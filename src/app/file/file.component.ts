@@ -38,7 +38,7 @@ export class FileComponent {
       img.onload = function () {
         var w = this.width;
         var h = this.height;
-        var faksimile = new Faksimile(file.name, self.contain, 100, w, h, w);
+        var faksimile = new Faksimile(file.name, self.contain, w, h, w, 100, 0);
         self.fileService.addFaksimile(faksimile);
       }
     };

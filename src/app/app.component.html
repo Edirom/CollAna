@@ -10,7 +10,7 @@
 <div class="boundary">
 <div class="container-fluid" *ngIf="faksimiles?.length > 0" style="text-align:center">
   <div class="row" style="margin-bottom:50px;">
-    <div class="card" *ngFor="let a of faksimiles;"  (cdkDragEnded)="onTaskDrop($event, a)" cdkDrag cdkDragBoundary=".boundary">
+    <div class="col-lg-6" *ngFor="let a of faksimiles;"  (cdkDragEnded)="onTaskDrop($event, a)" cdkDrag cdkDragBoundary=".boundary">
       <div class="card-header clearfix">
         {{ a.title }}
         <div class="row">
@@ -18,7 +18,14 @@
             <span>Scale factor: </span>
           </div>
           <div class="col-lg-3">
-            <input class="form-control" type="number" [value]="a.scaleFactor" (input)="a.scaleFactor = $event.target.value" (keyup.enter)="onEnter($event, a)">
+            <input class="form-control" type="number" [value]="a.scaleFactor" (input)="a.scaleFactor = $event.target.value" (keyup.enter)="onEnterScale($event, a)">
+          </div>
+
+          <div class="col-lg-4">
+            <span>Angle of rotation: </span>
+          </div>
+          <div class="col-lg-3">
+            <input class="form-control" type="number" [value]="a.angle" (input)="a.angle = $event.target.value" (keyup.enter)="onEnterRotation($event, a)">
           </div>
           <div class="col-lg-1">
             <button type="button" class="close" (click)="close(a)" aria-label="Close">
@@ -27,13 +34,10 @@
           </div>
         </div>
       </div>
-      <div class="card-block container-fluid">
-          <div class="row horizontal-slide">
-            <div class="col-xs-12 col-md-6 col-sm-6 col-lg-6">
-              <img id="faksimile-{{ a.title }}" [src]="a.contain" onError="this.src='';" width={{a.actualwidth}}/>
-            </div>
-          </div>
-        </div>     
+      <div id="{{ 'card-block' + a.ID}}">
+        
+        <img id="faksimile-{{ a.title }}"  [ngStyle]="{'transform':'rotate(' + a.angle + 'deg)'}" [src]="a.contain" onError="this.src='';" width={{a.actualwidth}} />
+      </div>     
     </div>
   </div>
 </div>
