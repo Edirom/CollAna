@@ -4,6 +4,7 @@ import { Faksimile } from './types/faksimile';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { forEach } from '@angular/router/src/utils/collection';
 import { DomSanitizer } from '@angular/platform-browser';
+import { FileComponent } from './file/file.component';
 
 
 @Component({
@@ -12,22 +13,46 @@ import { DomSanitizer } from '@angular/platform-browser';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent{
+ 
   faksimiles: Faksimile[];
 
-
+  blackandwhite: boolean;
   public angleStyle: any;
 
 
   onEnterScale(event: any, data: Faksimile) {
     data.scaleFactor = event.target.value;
     data.actualwidth = data.scaleFactor * data.width / 100;
+    data.actualheight = data.scaleFactor * data.height / 100;
+    this.fileComponent.repaintCanvas(data, this.blackandwhite);
   }
 
   onEnterRotation(event: any, data: Faksimile) {
     data.angle = event.target.value;
+    this.fileComponent.rotateCanvas(data, this.blackandwhite);
   }
-  constructor(private fileService: FileService, protected Sanitizer: DomSanitizer) {
+  constructor(
+              private fileService: FileService,
+              private fileComponent: FileComponent,
+              protected Sanitizer: DomSanitizer) {
    
+  }
+
+  onEnterAlpha(event: any, data: Faksimile): void {
+    var alpha = event.target.value;
+    this.fileComponent.alphaBoundary(data, alpha);
+
+  }
+
+  checkValue(event: any, data: Faksimile): void {
+    if (event.currentTarget.checked) {
+      this.blackandwhite = true;
+      this.fileComponent.BlackAndWhite(data);
+    }
+    else {
+      this.blackandwhite = false;
+      this.fileComponent.Restore(data);
+    }
   }
 
  
@@ -38,8 +63,6 @@ export class AppComponent{
   close(data: any) {
     this.fileService.removeFaksimile(data);
     this.faksimiles = this.fileService.getFaksimiles();
-    console.log("close...");
-    console.log("a.." + data.title);
   }
 
 

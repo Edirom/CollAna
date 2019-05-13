@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 import { Faksimile } from '../types/faksimile';
 
+
 @Injectable({ providedIn: 'root' })
 
 export class FileService {
@@ -9,6 +10,14 @@ export class FileService {
   // Observable string sources
   private faksimile = new Subject<any>();
   private faksimiles: Faksimile[] = new Array();
+
+  setActualContain(faksimile: Faksimile, contain: any) {
+    faksimile.actualcontain = contain;
+  }
+
+  getActualContain(faksimile: Faksimile): any {
+    return faksimile.actualcontain;
+  }
 
   getFaksimiles(): Faksimile[] {
     return this.faksimiles;

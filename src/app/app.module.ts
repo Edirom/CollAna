@@ -3,10 +3,12 @@ import { NgModule } from '@angular/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { FileComponent } from './file/file.component';
+
 
 @NgModule({
   declarations: [
@@ -18,9 +20,9 @@ import { FileComponent } from './file/file.component';
     AppRoutingModule,
     NgbModule,
     BrowserAnimationsModule,
-    DragDropModule
+    DragDropModule,
+    FlexLayoutModule
   ],
-  providers: [],
   bootstrap: [AppComponent],
 })
 export class AppModule { }

@@ -6,9 +6,12 @@ export class Faksimile {
   width: number;
   height: number;
   actualwidth: number;
+  actualheight: number;
   ID: string;
-  angle: number; 
-  constructor(title: string, contain: string, width: number, height: number, actualwidth?: number, scaleFactor?: number, angle?: number) {
+  angle: number;
+  actualcontain: any;
+
+  constructor(title: string, contain: string, width: number, height: number, actualcontain?: any, actualwidth?: number, actualheight?: number, scaleFactor?: number, angle?: number) {
     var ID  = function () {
       // Math.random should be unique because of its seeding algorithm.
       // Convert it to base 36 (numbers + letters), and grab the first 9 characters
@@ -23,5 +26,7 @@ export class Faksimile {
     this.width = width;
     this.height = height;
     this.actualwidth = actualwidth;
+    this.actualheight = actualheight;
+    this.actualcontain = actualcontain;
   }
 }

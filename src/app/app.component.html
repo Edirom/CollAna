@@ -8,38 +8,47 @@
   </div>
 </nav>
 <div class="boundary">
-<div class="container-fluid" *ngIf="faksimiles?.length > 0" style="text-align:center">
-  <div class="row" style="margin-bottom:50px;">
-    <div class="col-lg-6" *ngFor="let a of faksimiles;"  (cdkDragEnded)="onTaskDrop($event, a)" cdkDrag cdkDragBoundary=".boundary">
-      <div class="card-header clearfix">
-        {{ a.title }}
-        <div class="row">
-          <div class="col-lg-4">
-            <span>Scale factor: </span>
-          </div>
-          <div class="col-lg-3">
-            <input class="form-control" type="number" [value]="a.scaleFactor" (input)="a.scaleFactor = $event.target.value" (keyup.enter)="onEnterScale($event, a)">
-          </div>
+  <!--<canvas id="canvas" height="1000" width="1000"></canvas>-->
+  <div class="container-fluid" *ngIf="faksimiles?.length > 0" style="text-align:center">
+    <div class="row">
+      <div class="col-lg-8" *ngFor="let a of faksimiles;" (cdkDragEnded)="onTaskDrop($event, a)" cdkDrag cdkDragBoundary=".boundary">
+        <div class="card-header bg-dark text-white">
+          {{ a.title }}
+          <div class="d-flex d-flex-row bd-highlight">
+            <div class="p-2 bd-highlight">
+              <span>Scale factor: </span>
+              <input class="form-control" type="number" [value]="a.scaleFactor" (input)="a.scaleFactor = $event.target.value" (keyup.enter)="onEnterScale($event, a)">
+            </div>
 
-          <div class="col-lg-4">
-            <span>Angle of rotation: </span>
-          </div>
-          <div class="col-lg-3">
-            <input class="form-control" type="number" [value]="a.angle" (input)="a.angle = $event.target.value" (keyup.enter)="onEnterRotation($event, a)">
-          </div>
-          <div class="col-lg-1">
-            <button type="button" class="close" (click)="close(a)" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+            <div class="p-2 bd-highlight">
+              <span>Angle of rotation: </span>
+              <input class="form-control" type="number" [value]="a.angle" (input)="a.angle = $event.target.value" (keyup.enter)="onEnterRotation($event, a)">
+            </div>
+
+            <div class="p-2 bd-highlight">
+              <span>Alpha: </span>
+              <input class="form-control" type="number" (keyup.enter)="onEnterAlpha($event, a)">
+            </div>
+
+
+            <div class="p-2 bd-highlight">
+              <label class="btn-primary" ngbButtonLabel>
+                <input type="checkbox" (change)="checkValue($event, a)"> Black And White
+              </label>
+            </div>
+            <div class="p-2 bd-highlight">
+              <button type="button" class="close" (click)="close(a)" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
           </div>
         </div>
+        <div>
+          <canvas id="{{ 'card-block' + a.ID}}" [ngStyle]="{'transform':'translate(' + a.actualwidth + ',' + a.actualheight +')', 'transform':'rotate(' + a.angle + 'deg)'}"></canvas>
+          <!--<img id="{{ 'card-block' + a.ID}}" [ngStyle]="{'transform':'rotate(' + a.angle + 'deg)'}" [src]="a.contain" onError="this.src='';" width={{a.actualwidth}} />-->
+        </div>
       </div>
-      <div id="{{ 'card-block' + a.ID}}">
-        
-        <img id="faksimile-{{ a.title }}"  [ngStyle]="{'transform':'rotate(' + a.angle + 'deg)'}" [src]="a.contain" onError="this.src='';" width={{a.actualwidth}} />
-      </div>     
     </div>
   </div>
-</div>
 </div>
 <h2><router-outlet></router-outlet> </h2>

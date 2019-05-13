@@ -1,6 +1,12 @@
-import { Output, Component, EventEmitter } from '@angular/core';
-import { FileService } from '../services';
+import { Output, Component, EventEmitter, Injectable } from '@angular/core';
+import { FileService } from '../services/file.services';
 import { Faksimile } from '../types/faksimile';
+
+
+declare var MarvinImage: any;
+declare var Marvin: any;
+
+@Injectable({ providedIn: 'root' })
 
 @Component({
   selector: 'fileservice',
@@ -9,44 +15,135 @@ import { Faksimile } from '../types/faksimile';
 })
 
 export class FileComponent {
+   
+    
   @Output() complete: EventEmitter<any> = new EventEmitter();
 
 
   faksimile: Faksimile;
   contain = '';
-  constructor(private fileService: FileService) {
 
+  imageOriginal = new MarvinImage();
+  imageProcessed = new MarvinImage();
+  imageDisplay = new MarvinImage();
+
+  name;
+  reader;
+  form;
+
+
+
+
+  constructor(private fileService: FileService) {
+  
+  }
+
+  rotateCanvas(data: Faksimile, blackandwhite: boolean): any {
+   //To do!!!
+    this.repaintCanvas(data, blackandwhite);
+
+  }
+
+  alphaBoundary(data: Faksimile, alpha: number): any {
+    this.imageOriginal = this.fileService.getActualContain(data);
+    this.imageProcessed = this.imageOriginal.clone();
+    Marvin.alphaBoundary(this.imageOriginal, this.imageProcessed, alpha);
+    this.fileService.setActualContain(data, this.imageProcessed);
+    this.repaint(data);
+   
+  }
+
+  BlackAndWhite(data: Faksimile): any {
+   
+    this.imageOriginal = this.fileService.getActualContain(data);
+    this.imageProcessed = this.imageOriginal.clone();
+    Marvin.blackAndWhite(this.imageOriginal, this.imageProcessed, 20);
+    this.fileService.setActualContain(data, this.imageProcessed);
+    this.repaint(data);
+   
+  }
+
+  Restore(data: Faksimile): any {
+    var self = this;
+    this.imageOriginal.load(data.contain, imageLoaded);
+
+    function imageLoaded() {
+      self.imageProcessed = self.imageOriginal.clone();
+      self.fileService.setActualContain(data, self.imageProcessed);
+      self.repaint(data);
+    }
+
+  }
+  
+
+  repaint(data: Faksimile) {
+    var canvas: any = document.getElementById('card-block' + data.ID);
+
+    canvas.getContext("2d").fillStyle = "#eeeeee";
+
+    canvas.width = data.actualwidth;
+    canvas.height = data.actualheight;
+   
+    //canvas.getContext("2d").fillRect(0, 0, this.imageProcessed.getWidth(), this.imageProcessed.getHeight());
+
+    Marvin.scale(this.imageProcessed.clone(), this.imageProcessed, Math.round(data.actualwidth), Math.round(data.actualheight));
+
+    this.imageProcessed.draw(canvas);
+    this.imageProcessed.update();
+}
+
+  repaintCanvas(data: Faksimile, blackandwhite: boolean) {
+    var self = this;
+    this.imageOriginal.load(data.contain, imageLoaded);
+
+    function imageLoaded() {
+      self.imageProcessed = self.imageOriginal.clone();
+
+      //Marvin.scale(self.imageProcessed.clone(), self.imageProcessed, data.actualwidth, data.actualheight);
+      if (blackandwhite)
+        Marvin.blackAndWhite(self.imageProcessed.clone(), self.imageProcessed, 20);  
+      self.repaint(data);
+    }
   }
 
 
   onSelectFile(event: any) {
     var self = this;
     var file: File = event.target.files[0];
-    var myReader: FileReader = new FileReader();
-    myReader.readAsDataURL(file);
-    //var resultSet = [];
-    myReader.onloadend = function (e: any) {
-     
-      self.contain = e.target.result;
+    var faksimile; 
+    this.reader = new FileReader();
+    this.reader.readAsDataURL(file);
+ 
+    this.reader.onloadend = function (e: any) {
+      self.contain = self.reader.result;
       self.complete.next({
-        fileContent: myReader.result,
+        fileContent: self.reader.result,
         fileName: file.name,
-      }); // pass along the data which whould be used by the parent component
+      }); 
 
-      var img = new Image();
-      img.src = e.target.result,
-      img.onload = function () {
-        var w = this.width;
-        var h = this.height;
-        var faksimile = new Faksimile(file.name, self.contain, w, h, w, 100, 0);
+      var image = new Image();
+      image.src = self.reader.result;
+      var w;
+      var h;
+      
+      image.onload = function () {
+        w = image.width;
+        h = image.height;
+        faksimile = new Faksimile(file.name, self.contain, w, h, self.contain, w, h, 100, 0);
         self.fileService.addFaksimile(faksimile);
-      }
-    };
+      };
 
+
+      self.imageOriginal.load(self.contain, imageLoaded);
+
+      function imageLoaded() {
+        self.imageProcessed = self.imageOriginal.clone();
+        self.fileService.setActualContain(faksimile, self.imageProcessed)
+        self.repaint(faksimile);
+      }
+
+    };
    
-    
-    //self.fileService.setUrl(self.contain);
-    
   }
 
 
