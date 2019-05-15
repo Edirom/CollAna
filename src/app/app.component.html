@@ -7,36 +7,44 @@
     <fileservice (complete)="import($event)"> </fileservice>
   </div>
 </nav>
-<div class="boundary">
+<div>
   <!--<canvas id="canvas" height="1000" width="1000"></canvas>-->
   <div class="container-fluid" *ngIf="faksimiles?.length > 0" style="text-align:center">
     <div class="row">
-      <div class="col-lg-8" *ngFor="let a of faksimiles;" (cdkDragEnded)="onTaskDrop($event, a)" cdkDrag cdkDragBoundary=".boundary">
-        <div class="card-header bg-dark text-white">
+      <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;" cdkDrag>
+        <div class="card-header card-success-outline clearfix">
           {{ a.title }}
-          <div class="d-flex d-flex-row bd-highlight">
-            <div class="p-2 bd-highlight">
+          <div class="d-sm-flex d-flex-row">
+            <div class="p-1">
               <span>Scale factor: </span>
               <input class="form-control" type="number" [value]="a.scaleFactor" (input)="a.scaleFactor = $event.target.value" (keyup.enter)="onEnterScale($event, a)">
             </div>
 
-            <div class="p-2 bd-highlight">
+            <div class="p-1">
               <span>Angle of rotation: </span>
               <input class="form-control" type="number" [value]="a.angle" (input)="a.angle = $event.target.value" (keyup.enter)="onEnterRotation($event, a)">
             </div>
 
-            <div class="p-2 bd-highlight">
+            <div class="p-1">
               <span>Alpha: </span>
-              <input class="form-control" type="number" (keyup.enter)="onEnterAlpha($event, a)">
+              <input class="form-control" [value]="a.alpha" (input)="a.alpha = $event.target.value" type="number" (keyup.enter)="onEnterAlpha($event, a)">
             </div>
 
-
-            <div class="p-2 bd-highlight">
-              <label class="btn-primary" ngbButtonLabel>
-                <input type="checkbox" (change)="checkValue($event, a)"> Black And White
-              </label>
+            <div class="btn-group mr-3">
+              <button type="button" class="btn btn-primary" (click)="blackAndWhite(a)">Black And White</button>
+              <div class="btn-group" ngbDropdown role="group">
+                <button class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
+                <div class="dropdown-menu" ngbDropdownMenu>
+                  <button ngbDropdownItem (click)="restoreBlackAndWhite(a)">Restore</button>
+                </div>
+              </div>
             </div>
-            <div class="p-2 bd-highlight">
+            <div class="p-1">
+              <button type="button" class="btn btn-primary" (click)="moveToFront($event, a)" aria-label="To Front">
+                <span aria-hidden="false">To Front</span>
+              </button>
+            </div>
+            <div class="p-1">
               <button type="button" class="close" (click)="close(a)" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -44,7 +52,7 @@
           </div>
         </div>
         <div>
-          <canvas id="{{ 'card-block' + a.ID}}" [ngStyle]="{'transform':'translate(' + a.actualwidth + ',' + a.actualheight +')', 'transform':'rotate(' + a.angle + 'deg)'}"></canvas>
+          <canvas cdkDrag id="{{ 'card-block' + a.ID}}" [ngStyle]="{'transform':'translate(' + a.actualwidth + ',' + a.actualheight +')', 'transform':'rotate(' + a.angle + 'deg)'}"></canvas>
           <!--<img id="{{ 'card-block' + a.ID}}" [ngStyle]="{'transform':'rotate(' + a.angle + 'deg)'}" [src]="a.contain" onError="this.src='';" width={{a.actualwidth}} />-->
         </div>
       </div>

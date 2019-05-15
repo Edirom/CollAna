@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Faksimile = /** @class */ (function () {
-    function Faksimile(title, contain, width, height, actualcontain, actualwidth, actualheight, scaleFactor, angle) {
+    function Faksimile(title, contain, width, height, actualcontain, actualwidth, actualheight, scaleFactor, angle, alpha) {
         var ID = function () {
             // Math.random should be unique because of its seeding algorithm.
             // Convert it to base 36 (numbers + letters), and grab the first 9 characters
@@ -18,6 +18,7 @@ var Faksimile = /** @class */ (function () {
         this.actualwidth = actualwidth;
         this.actualheight = actualheight;
         this.actualcontain = actualcontain;
+        this.alpha = alpha;
     }
     return Faksimile;
 }());

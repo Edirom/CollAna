@@ -17,8 +17,16 @@ export class AppComponent{
   faksimiles: Faksimile[];
 
   blackandwhite: boolean;
-  public angleStyle: any;
 
+  public angleStyle: any;
+  public level: number = 20;
+
+  constructor(
+    private fileService: FileService,
+    private fileComponent: FileComponent,
+    protected Sanitizer: DomSanitizer) {
+
+  }
 
   onEnterScale(event: any, data: Faksimile) {
     data.scaleFactor = event.target.value;
@@ -31,28 +39,38 @@ export class AppComponent{
     data.angle = event.target.value;
     this.fileComponent.rotateCanvas(data, this.blackandwhite);
   }
-  constructor(
-              private fileService: FileService,
-              private fileComponent: FileComponent,
-              protected Sanitizer: DomSanitizer) {
-   
-  }
+  
 
   onEnterAlpha(event: any, data: Faksimile): void {
-    var alpha = event.target.value;
-    this.fileComponent.alphaBoundary(data, alpha);
+    data.alpha = event.target.value;
+    this.fileComponent.alphaBoundary(data, data.alpha);
 
+  }
+
+  inc_index = 100;
+  dec_index = 99;
+  moveToFront(event: any, data: Faksimile): void{
+    var canvas: any = document.getElementById('card-div' + data.ID);
+    canvas.style.zIndex = ++this.inc_index;
   }
 
   checkValue(event: any, data: Faksimile): void {
     if (event.currentTarget.checked) {
       this.blackandwhite = true;
-      this.fileComponent.BlackAndWhite(data);
+     // this.fileComponent.BlackAndWhite(data);
     }
     else {
       this.blackandwhite = false;
       this.fileComponent.Restore(data);
     }
+  }
+
+  blackAndWhite(data: Faksimile): void {
+      this.fileComponent.BlackAndWhite(data, this.level);  
+  }
+
+  restoreBlackAndWhite(data: Faksimile): void {
+    this.fileComponent.Restore(data);  
   }
 
  
@@ -64,38 +82,6 @@ export class AppComponent{
     this.fileService.removeFaksimile(data);
     this.faksimiles = this.fileService.getFaksimiles();
   }
-
-
- compareallDescendants(node, id, parent) {
-  for (var i = 0; i < node.childNodes.length; i++) {
-    var child = node.childNodes[i];
-    if (child.tagName == "DIV" && child.id != "card-block" + id && child.parentNode != parent) {
-      child.style.opacity = "1.0";
-      child.parentElement.style.zIndex = "1";
-    }
-   
-    this.compareallDescendants(child, id, parent);
-  }
-}
-  onTaskDrop(event: any, data: Faksimile) {
-
-    var myElement = event.source.element.nativeElement;
-    var children = myElement.childNodes;
-    for (var i = 0, len = children.length; i < len; i++) {
-      if (children[i].id == "card-block" + data.ID) {
-        children[i].style.opacity = "0.5";
-        children[i].parentElement.style.zIndex = "999";
-      }
-    }
-   
-    //myElement.style.opacity = 0.5;
-    //myElement.style.zIndex = 999;
-    //console.log("ID: " + data.ID);
-    //myElement.parentNode.appendChild(myElement);
-    var children = myElement.parentNode;
-    this.compareallDescendants(children, data.ID, myElement);
-   
-  }
-
+  
   title = 'ng7-pre';
 }
