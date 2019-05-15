@@ -53,11 +53,11 @@ export class FileComponent {
    
   }
 
-  BlackAndWhite(data: Faksimile): any {
+  BlackAndWhite(data: Faksimile, level: number): any {
    
     this.imageOriginal = this.fileService.getActualContain(data);
     this.imageProcessed = this.imageOriginal.clone();
-    Marvin.blackAndWhite(this.imageOriginal, this.imageProcessed, 20);
+    Marvin.blackAndWhite(this.imageOriginal, this.imageProcessed, level);
     this.fileService.setActualContain(data, this.imageProcessed);
     this.repaint(data);
    
@@ -98,8 +98,6 @@ export class FileComponent {
 
     function imageLoaded() {
       self.imageProcessed = self.imageOriginal.clone();
-
-      //Marvin.scale(self.imageProcessed.clone(), self.imageProcessed, data.actualwidth, data.actualheight);
       if (blackandwhite)
         Marvin.blackAndWhite(self.imageProcessed.clone(), self.imageProcessed, 20);  
       self.repaint(data);
@@ -129,7 +127,7 @@ export class FileComponent {
       image.onload = function () {
         w = image.width;
         h = image.height;
-        faksimile = new Faksimile(file.name, self.contain, w, h, self.contain, w, h, 100, 0);
+        faksimile = new Faksimile(file.name, self.contain, w, h, self.contain, w, h, 100, 0, 0);
         self.fileService.addFaksimile(faksimile);
       };
 
