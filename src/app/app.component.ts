@@ -32,40 +32,35 @@ export class AppComponent{
     data.scaleFactor = event.target.value;
     data.actualwidth = data.scaleFactor * data.width / 100;
     data.actualheight = data.scaleFactor * data.height / 100;
-    this.fileComponent.repaintCanvas(data, this.blackandwhite);
+    this.fileComponent.repaint(data);
   }
 
   remove(event: any, data: Faksimile) {
     this.fileComponent.white2transparent(data);
   }
+
+  edgeDetection(data: Faksimile) {
+    this.fileComponent.edgeDetection(data);
+  }
+
   onEnterRotation(event: any, data: Faksimile) {
     data.angle = event.target.value;
-    this.fileComponent.rotateCanvas(data, this.blackandwhite);
+    this.fileComponent.repaint(data);
   }
   
   inc_index = 100;
   dec_index = 99;
+
   moveToFront(event: any, data: Faksimile): void{
     var canvas: any = document.getElementById('card-div' + data.ID);
     canvas.style.zIndex = ++this.inc_index;
-  }
-
-  checkValue(event: any, data: Faksimile): void {
-    if (event.currentTarget.checked) {
-      this.blackandwhite = true;
-     // this.fileComponent.BlackAndWhite(data);
-    }
-    else {
-      this.blackandwhite = false;
-      this.fileComponent.Restore(data);
-    }
   }
 
   blackAndWhite(data: Faksimile): void {
       this.fileComponent.BlackAndWhite(data, this.level);  
   }
 
-  restoreBlackAndWhite(data: Faksimile): void {
+  restore(data: Faksimile): void {
     this.fileComponent.Restore(data);  
   }
 

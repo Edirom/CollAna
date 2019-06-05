@@ -39,9 +39,14 @@
               </button>
             </div>
             <div class="p-1">
-              <button type="button" class="btn btn-primary" (click)="restoreBlackAndWhite(a)" aria-label="To Front">
+              <button type="button" class="btn btn-primary" (click)="edgeDetection(a)" aria-label="Edge Detection">
+                <span aria-hidden="false">Edge detection</span>
+              </button>
+            </div>
+            <div class="p-1">
+              <button type="button" class="btn btn-primary" (click)="restore(a)" aria-label="To Front">
                 <span aria-hidden="false">Restore</span>
-              </button>             
+              </button>
             </div>
             <div class="p-1">
               <button type="button" class="close" (click)="close(a)" aria-label="Close">

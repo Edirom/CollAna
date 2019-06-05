@@ -38,12 +38,20 @@ export class FileComponent {
   
   }
 
-  rotateCanvas(data: Faksimile, blackandwhite: boolean): any {
-   //To do!!!
-    this.repaintCanvas(data, blackandwhite);
 
+  edgeDetection(data: Faksimile) {
+    this.imageOriginal = this.fileService.getActualContain(data);
+    this.imageProcessed = this.imageOriginal.clone();
+    this.imageProcessed.clear(0xFF000000);
+    //1. Version
+   // Marvin.prewitt(this.imageOriginal, this.imageProcessed);
+
+    Marvin.prewitt(this.imageOriginal, this.imageProcessed);
+    Marvin.invertColors(this.imageProcessed, this.imageProcessed);
+    Marvin.thresholding(this.imageProcessed, this.imageProcessed, 150);
+    this.fileService.setActualContain(data, this.imageProcessed);
+    this.repaint(data);
   }
-
 
   BlackAndWhite(data: Faksimile, level: number): any {
    
@@ -75,7 +83,7 @@ export class FileComponent {
       this.imageProcessed = this.imageOriginal.clone();
 
       this.imageProcessed.imageData = imageData;
-
+      this.fileService.setActualContain(data, this.imageProcessed);
       this.repaint(data);
 }
 
@@ -99,7 +107,8 @@ export class FileComponent {
 
     canvas.width = data.actualwidth;
     canvas.height = data.actualheight;
-   
+
+    this.imageProcessed = data.actualcontain;
     //canvas.getContext("2d").fillRect(0, 0, this.imageProcessed.getWidth(), this.imageProcessed.getHeight());
 
     Marvin.scale(this.imageProcessed.clone(), this.imageProcessed, Math.round(data.actualwidth), Math.round(data.actualheight));
@@ -108,7 +117,7 @@ export class FileComponent {
     this.imageProcessed.update();
 }
 
-  repaintCanvas(data: Faksimile, blackandwhite: boolean) {
+  /*repaintCanvas(data: Faksimile, blackandwhite: boolean) {
     var self = this;
     this.imageOriginal.load(data.contain, imageLoaded);
 
@@ -117,8 +126,8 @@ export class FileComponent {
       if (blackandwhite)
         Marvin.blackAndWhite(self.imageProcessed.clone(), self.imageProcessed, 20);  
       self.repaint(data);
-    }
-  }
+    
+  }}*/
 
 
   onSelectFile(event: any) {
