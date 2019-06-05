@@ -26,23 +26,22 @@
             </div>
 
             <div class="p-1">
-              <span>Alpha: </span>
-              <input class="form-control" [value]="a.alpha" (input)="a.alpha = $event.target.value" type="number" (keyup.enter)="onEnterAlpha($event, a)">
-            </div>
-
-            <div class="btn-group mr-3">
               <button type="button" class="btn btn-primary" (click)="blackAndWhite(a)">Black And White</button>
-              <div class="btn-group" ngbDropdown role="group">
-                <button class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
-                <div class="dropdown-menu" ngbDropdownMenu>
-                  <button ngbDropdownItem (click)="restoreBlackAndWhite(a)">Restore</button>
-                </div>
-              </div>
+            </div>
+            <div class="p-1">
+              <button type="button" class="btn btn-primary" (click)="remove($event, a)" aria-label="To Front">
+                <span aria-hidden="false">Remove Background</span>
+              </button>
             </div>
             <div class="p-1">
               <button type="button" class="btn btn-primary" (click)="moveToFront($event, a)" aria-label="To Front">
                 <span aria-hidden="false">To Front</span>
               </button>
+            </div>
+            <div class="p-1">
+              <button type="button" class="btn btn-primary" (click)="restoreBlackAndWhite(a)" aria-label="To Front">
+                <span aria-hidden="false">Restore</span>
+              </button>             
             </div>
             <div class="p-1">
               <button type="button" class="close" (click)="close(a)" aria-label="Close">

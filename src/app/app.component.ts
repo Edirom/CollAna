@@ -19,7 +19,7 @@ export class AppComponent{
   blackandwhite: boolean;
 
   public angleStyle: any;
-  public level: number = 20;
+  public level: number = 30;
 
   constructor(
     private fileService: FileService,
@@ -35,18 +35,14 @@ export class AppComponent{
     this.fileComponent.repaintCanvas(data, this.blackandwhite);
   }
 
+  remove(event: any, data: Faksimile) {
+    this.fileComponent.white2transparent(data);
+  }
   onEnterRotation(event: any, data: Faksimile) {
     data.angle = event.target.value;
     this.fileComponent.rotateCanvas(data, this.blackandwhite);
   }
   
-
-  onEnterAlpha(event: any, data: Faksimile): void {
-    data.alpha = event.target.value;
-    this.fileComponent.alphaBoundary(data, data.alpha);
-
-  }
-
   inc_index = 100;
   dec_index = 99;
   moveToFront(event: any, data: Faksimile): void{

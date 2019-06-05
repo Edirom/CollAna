@@ -10,7 +10,7 @@ declare var Marvin: any;
 
 @Component({
   selector: 'fileservice',
-  template: '<div class="btn btn-file btn-outline-primary"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > Import </span><input type="file"   (change)="onSelectFile($event)" accept=".jpg, .png, .*" /></div>',
+    template: '<div class="btn btn-file btn-outline-primary"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > Import </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .*" /></div>',
   styleUrls: ['./file.component.css']
 })
 
@@ -44,14 +44,6 @@ export class FileComponent {
 
   }
 
-  alphaBoundary(data: Faksimile, alpha: number): any {
-    this.imageOriginal = this.fileService.getActualContain(data);
-    this.imageProcessed = this.imageOriginal.clone();
-    Marvin.alphaBoundary(this.imageOriginal, this.imageProcessed, alpha);
-    this.fileService.setActualContain(data, this.imageProcessed);
-    this.repaint(data);
-   
-  }
 
   BlackAndWhite(data: Faksimile, level: number): any {
    
@@ -62,6 +54,30 @@ export class FileComponent {
     this.repaint(data);
    
   }
+
+  white2transparent(data: Faksimile) {
+
+
+    var imageData = data.actualcontain.imageData;
+    var pixel = imageData.data;
+
+    var r = 0, g = 1, b = 2, a = 3;
+    for (var p = 0; p < pixel.length; p += 4) {
+
+      if (
+        pixel[p + r] == 255 &&
+        pixel[p + g] == 255 &&
+        pixel[p + b] == 255) // if white then change alpha to 0
+      { pixel[p + a] = 0; }
+      }
+
+      this.imageOriginal = this.fileService.getActualContain(data);
+      this.imageProcessed = this.imageOriginal.clone();
+
+      this.imageProcessed.imageData = imageData;
+
+      this.repaint(data);
+}
 
   Restore(data: Faksimile): any {
     var self = this;
