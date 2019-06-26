@@ -10,6 +10,7 @@ import { AppComponent } from './app.component';
 import { FileComponent } from './file/file.component';
 
 
+
 @NgModule({
   declarations: [
     AppComponent,

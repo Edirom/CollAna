@@ -10,54 +10,10 @@
 <div>
   <!--<canvas id="canvas" height="1000" width="1000"></canvas>-->
   <div class="container-fluid" *ngIf="faksimiles?.length > 0" style="text-align:center">
-    <div class="row">
-      <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;" cdkDrag>
-        <div class="card-header card-success-outline clearfix">
-          {{ a.title }}
-          <div class="d-sm-flex d-flex-row">
-            <div class="p-1">
-              <span>Scale factor: </span>
-              <input class="form-control" type="number" [value]="a.scaleFactor" (input)="a.scaleFactor = $event.target.value" (keyup.enter)="onEnterScale($event, a)">
-            </div>
-
-            <div class="p-1">
-              <span>Angle of rotation: </span>
-              <input class="form-control" type="number" [value]="a.angle" (input)="a.angle = $event.target.value" (keyup.enter)="onEnterRotation($event, a)">
-            </div>
-
-            <div class="p-1">
-              <button type="button" class="btn btn-primary" (click)="blackAndWhite(a)">Black And White</button>
-            </div>
-            <div class="p-1">
-              <button type="button" class="btn btn-primary" (click)="remove($event, a)" aria-label="To Front">
-                <span aria-hidden="false">Remove Background</span>
-              </button>
-            </div>
-            <div class="p-1">
-              <button type="button" class="btn btn-primary" (click)="moveToFront($event, a)" aria-label="To Front">
-                <span aria-hidden="false">To Front</span>
-              </button>
-            </div>
-            <div class="p-1">
-              <button type="button" class="btn btn-primary" (click)="edgeDetection(a)" aria-label="Edge Detection">
-                <span aria-hidden="false">Edge detection</span>
-              </button>
-            </div>
-            <div class="p-1">
-              <button type="button" class="btn btn-primary" (click)="restore(a)" aria-label="To Front">
-                <span aria-hidden="false">Restore</span>
-              </button>
-            </div>
-            <div class="p-1">
-              <button type="button" class="close" (click)="close(a)" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div>
-          <canvas cdkDrag id="{{ 'card-block' + a.ID}}" [ngStyle]="{'transform':'translate(' + a.actualwidth + ',' + a.actualheight +')', 'transform':'rotate(' + a.angle + 'deg)'}"></canvas>
-          <!--<img id="{{ 'card-block' + a.ID}}" [ngStyle]="{'transform':'rotate(' + a.angle + 'deg)'}" [src]="a.contain" onError="this.src='';" width={{a.actualwidth}} />-->
+    <div class="d-flex" fxFlexFill fxLayoutGap="5px" fxLayout="column" >
+      <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;">
+        <div cdkDrag>
+          <div class="ol-boxnew" id="{{ 'card-block' + a.ID}}"></div>
         </div>
       </div>
     </div>

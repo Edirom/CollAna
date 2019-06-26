@@ -1,1 +1,6 @@
-/* You can add global styles to this file, and also import other style files */
+.ol-boxnew {
+  box-sizing: border-box;
+  border-radius: 5px;
+  border: 5px solid;
+  border-color: #2E86C1;
+}
