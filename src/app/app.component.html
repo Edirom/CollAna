@@ -10,7 +10,7 @@
 <div>
   <!--<canvas id="canvas" height="1000" width="1000"></canvas>-->
   <div class="container-fluid" *ngIf="faksimiles?.length > 0" style="text-align:center">
-    <div class="d-flex" fxFlexFill fxLayoutGap="5px" fxLayout="column" >
+    <div class="d-flex" fxFlex="80%" fxFlexFill fxLayoutGap="5px" fxLayout="column" >
       <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;">
         <div cdkDrag>
           <div class="ol-boxnew" id="{{ 'card-block' + a.ID}}"></div>
