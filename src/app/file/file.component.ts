@@ -16,11 +16,13 @@ import { defaults as defaultControls, FullScreen, Rotate } from 'ol/control.js';
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction.js';
 import Bar from 'ol-ext/control/Bar';
 import Legend from 'ol-ext/control/Legend';
+import Toggle from 'ol-ext/control/Toggle';
 import Button from 'ol-ext/control/Button';
-
+import Magnify from 'ol-ext/overlay/Magnify';
 
 declare var MarvinImage: any;
 declare var Marvin: any;
+
 
 
 
@@ -44,7 +46,7 @@ export class FileComponent {
 
   inc_index = 100;
 
-  imageOriginal = new MarvinImage();
+  imageOriginal;
   imageProcessed = new MarvinImage();
   imageDisplay = new MarvinImage();
 
@@ -76,7 +78,8 @@ export class FileComponent {
   onSelectFile(event: any) {
     var self = this;
     var file: File = event.target.files[0];
-    var faksimile; 
+    var faksimile;
+    this.imageOriginal = new MarvinImage();
     this.reader = new FileReader();
     this.reader.readAsDataURL(file);
  
@@ -151,6 +154,7 @@ export class FileComponent {
 
       var mapf = new MapFaksimile(map, faksimile);
       this.mapService.addMap(mapf);
+      
     }
 
     
@@ -179,6 +183,7 @@ export class FileComponent {
     var blackwhite = new Button(
       {
         html: '<i class="fa fa-adjust"></i>',
+        title: 'Black and White',
         handleClick: function () {
           var level = 30;
           self.imageOriginal = self.fileService.getActualContain(faksimile);
@@ -194,6 +199,7 @@ export class FileComponent {
     var edgedetection = new Button(
       {
         html: '<i class="fa fa-music"></i>',
+        title: 'Edge Detection',
         handleClick: function () {
           self.imageOriginal = self.fileService.getActualContain(faksimile);
           self.imageProcessed = self.imageOriginal.clone();
@@ -212,6 +218,7 @@ export class FileComponent {
     var removebackground = new Button(
       {
         html: '<i class="fa fa-eraser"></i>',
+        title: 'Remove Background',
         handleClick: function () {
 
           var imageData = faksimile.actualcontain.imageData;
@@ -241,6 +248,7 @@ export class FileComponent {
     var movetofront = new Button(
       {
         html: '<i class="fa fa-clone"></i>',
+        title: 'Move To Front',
         handleClick: function () {
           var canvas: any = document.getElementById('card-div' + faksimile.ID);
           canvas.style.zIndex = ++self.inc_index;
@@ -252,6 +260,7 @@ export class FileComponent {
     var undo = new Button(
       {
         html: '<i class="fa fa-undo"></i>',
+        title: 'Undo',
         handleClick: function () {
           self.imageOriginal.load(faksimile.contain, imageLoaded);
 
@@ -264,85 +273,32 @@ export class FileComponent {
         }
       });
     mainbartopright.addControl(undo);
-
-    var magnify = new Button(
+  
+    var magnify = new Toggle(
       {
-        html: '<i class="fa fa-binoculars"></i>',
-        handleClick: function () {
-          var radius = 75;
-          document.addEventListener('keydown', function (evt) {
-            if (evt.which === 38) {
-              radius = Math.min(radius + 5, 150);
-              map.render();
-              evt.preventDefault();
-            } else if (evt.which === 40) {
-              radius = Math.max(radius - 5, 25);
-              map.render();
-              evt.preventDefault();
-            }
-          });
+        html: '<i class="fa fa-search"></i>',
+        title: "Magnify",
+        active: false,
+        onToggle: function (active) {
+         var ov = new Magnify(
+           {
+             layers: [layer],
+             zoomOffset: 1,
+             projection: projection,
+           });
 
-          // get the pixel position with every move
-          var mousePosition = null;
-          var container = document.getElementById('card-block' + faksimile.ID);
-          container.addEventListener('mousemove', function (event) {
-            mousePosition = map.getEventPixel(event);
-            map.render();
-          });
+          if (active) {
+            map.addOverlay(ov);
+          }
 
-          container.addEventListener('mouseout', function () {
-            mousePosition = null;
-            map.render();
-          });
-
-          var layer = map.getLayers().getArray()[0];
-          // after rendering the layer, show an oversampled version around the pointer
-          layer.on('postcompose', function (event) {
-            if (mousePosition) {
-              var context = event.context;
-              var pixelRatio = event.frameState.pixelRatio;
-              var half = radius * pixelRatio;
-              var centerX = mousePosition[0] * pixelRatio;
-              var centerY = mousePosition[1] * pixelRatio;
-              var originX = centerX - half;
-              var originY = centerY - half;
-              var size = 2 * half + 1;
-              var sourceData = context.getImageData(originX, originY, size, size).data;
-              var dest = context.createImageData(size, size);
-              var destData = dest.data;
-              for (var j = 0; j < size; ++j) {
-                for (var i = 0; i < size; ++i) {
-                  var dI = i - half;
-                  var dJ = j - half;
-                  var dist = Math.sqrt(dI * dI + dJ * dJ);
-                  var sourceI = i;
-                  var sourceJ = j;
-                  if (dist < half) {
-                    sourceI = Math.round(half + dI / 2);
-                    sourceJ = Math.round(half + dJ / 2);
-                  }
-                  var destOffset = (j * size + i) * 4;
-                  var sourceOffset = (sourceJ * size + sourceI) * 4;
-                  destData[destOffset] = sourceData[sourceOffset];
-                  destData[destOffset + 1] = sourceData[sourceOffset + 1];
-                  destData[destOffset + 2] = sourceData[sourceOffset + 2];
-                  destData[destOffset + 3] = sourceData[sourceOffset + 3];
-                }
-              }
-              context.beginPath();
-              context.arc(centerX, centerY, half, 0, 2 * Math.PI);
-              context.lineWidth = 3 * pixelRatio;
-              context.strokeStyle = 'rgba(255,255,255,0.5)';
-              context.putImageData(dest, originX, originY);
-              context.stroke();
-              context.restore();
-            }
-          });
-          console.log("Center: " + map.getView().getCenter() + " - zoom: " + map.getView().getZoom());
+          else {
+            ov.stopEvent = true;
+            map.removeOverlay(map.getOverlays().getArray()[0]);
+          }
         }
       });
-    mainbartopright.addControl(magnify);
 
+    mainbartopright.addControl(magnify);
 
     var mainbarbuttom = new Bar();
     map.addControl(mainbarbuttom);
@@ -354,6 +310,7 @@ export class FileComponent {
     var close = new Button(
       {
         html: '<i class="fa fa-times-circle"></i>',
+        title: "Close",
         handleClick: function () {
           self.fileService.removeFaksimile(faksimile);
           self.faksimiles = self.fileService.getFaksimiles();
