@@ -122,6 +122,12 @@ export class FileComponent {
 
     var extent = [0, 0, this.imageProcessed.width, this.imageProcessed.height];
 
+    var projection = new Projection({
+      code: 'xkcd-image',
+      units: 'pixels',
+      extent: extent
+    });
+
     this.imageProcessed.draw(this.imageProcessed.canvas);
 
     var url = this.imageProcessed.canvas.toDataURL();
@@ -131,13 +137,10 @@ export class FileComponent {
       var map = mapfk.map;
       var layers = mapfk.map.getLayers();
       mapfk.map.removeLayer(layers.getArray()[0]);
+
+      mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
     }
     else {
-      var projection = new Projection({
-        code: 'xkcd-image',
-        units: 'pixels',
-        extent: extent
-      });
       var map = new Map({
         target: 'card-block' + faksimile.ID,
         interactions: defaultInteractions().extend([
@@ -221,7 +224,7 @@ export class FileComponent {
         title: 'Remove Background',
         handleClick: function () {
 
-          var imageData = faksimile.actualcontain.imageData;
+          var imageData = self.fileService.getActualContain(faksimile).imageData;
           var pixel = imageData.data;
 
           var r = 0, g = 1, b = 2, a = 3;
@@ -234,11 +237,11 @@ export class FileComponent {
             { pixel[p + a] = 0; }
           }
 
-          self.imageOriginal = self.fileService.getActualContain(faksimile);
-          self.imageProcessed = self.imageOriginal.clone();
+          //self.imageOriginal = self.fileService.getActualContain(faksimile);
+          //self.imageProcessed = self.imageOriginal.clone();
 
           self.imageProcessed.imageData = imageData;
-          self.fileService.setActualContain(faksimile, this.imageProcessed);
+          self.fileService.setActualContain(faksimile, self.imageProcessed);
           self.repaint(faksimile);
           console.log("remove Background");
         }
@@ -305,7 +308,7 @@ export class FileComponent {
     mainbarbuttom.setPosition("bottom");
 
     // mainbar.addControl(new Magnify(faksimile, map));
-    mainbarbuttom.addControl(new Rotate());
+   
     mainbarbuttom.addControl(new FullScreen());
     var close = new Button(
       {

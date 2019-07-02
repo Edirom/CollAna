@@ -24,7 +24,12 @@
             ],
             "styles": [
               "src/styles.css",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css"
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+			  "node_modules/font-awesome/css/font-awesome.css",
+			  "node_modules/ol/ol.css",
+			  "node_modules/ol-ext/dist/ol-ext.css",
+			  "node_modules/ol-ext/overlay/Magnify.css",
+			  "node_modules/angular2-draggable/css/resizable.min.css"
             ],
             "scripts": [
               "src/assets/library/marvinj-0.9.js"

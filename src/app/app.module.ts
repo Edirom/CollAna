@@ -4,6 +4,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { AngularDraggableModule } from 'angular2-draggable';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -22,7 +23,8 @@ import { FileComponent } from './file/file.component';
     NgbModule,
     BrowserAnimationsModule,
     DragDropModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    AngularDraggableModule
   ],
   bootstrap: [AppComponent],
 })

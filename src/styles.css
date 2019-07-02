@@ -4,3 +4,7 @@
   border: 5px solid;
   border-color: #2E86C1;
 }
+
+mwlResizable {
+  box-sizing: border-box;
+}
