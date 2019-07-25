@@ -1,7 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FileService } from './services';
 import { DomSanitizer } from '@angular/platform-browser';
-import { FileComponent } from './file/file.component';
 import { Faksimile } from './types/faksimile';
 
 
@@ -17,13 +16,14 @@ export class AppComponent{
   constructor(
     private fileService: FileService,
     protected Sanitizer: DomSanitizer) {
-  
+
   }
 
  
   import(data: any): void {
     this.faksimiles = this.fileService.getFaksimiles();
   }
-  
+
+
   title = 'ng7-pre';
 }

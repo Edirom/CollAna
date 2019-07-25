@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 import { Faksimile } from '../types/faksimile';
+import { Pages } from '../types/pages';
 
 
 @Injectable({ providedIn: 'root' })
@@ -11,12 +12,13 @@ export class FileService {
   private faksimile = new Subject<any>();
   private faksimiles: Faksimile[] = new Array();
 
-  setActualContain(faksimile: Faksimile, contain: any) {
-    faksimile.actualcontain = contain;
+
+  setActualContain(faksimile: Faksimile, page: Pages, contain: any) {
+    faksimile.pages[page.index-1].actualcontain = contain;
   }
 
-  getActualContain(faksimile: Faksimile): any {
-    return faksimile.actualcontain;
+  getActualContain(faksimile: Faksimile, page: Pages): any {
+    return faksimile.pages[page.index-1].actualcontain;
   }
 
   getFaksimiles(): Faksimile[] {
@@ -29,7 +31,23 @@ export class FileService {
   
   }
 
-  
+  getPages(faksimile: Faksimile): Pages[] {
+    return faksimile.pages;
+  }
+
+  addPage(faksimile: Faksimile, page: Pages) {
+    faksimile.pages.push(page);
+   
+  }
+
+  checkPage(faksimile: Faksimile, page: Pages): boolean {
+    for (var index = 0; index < faksimile.pages.length; ++index) {
+      if (faksimile.pages[index].index == page.index)
+        return true;
+    }
+    return false;
+
+  }
 
   removeFaksimile(faksimile: Faksimile){
     const index = this.faksimiles.indexOf(faksimile, 0);

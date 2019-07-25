@@ -1,18 +1,16 @@
+import { Pages } from './pages';
+
 export class Faksimile {
 
+  type: string;
   title: string;
-  contain: string;
-  scaleFactor: number;
-  width: number;
-  height: number;
-  actualwidth: number;
-  actualheight: number;
   ID: string;
-  angle: number;
-  actualcontain: any;
-  alpha: number;
+  numPages: number;
+  pages: Pages[];
+  actualPage: number;
+  pdfDoc: any;
 
-  constructor(title: string, contain: string, width: number, height: number,  actualcontain?: any, actualwidth?: number, actualheight?: number, scaleFactor?: number, angle?: number, alpha?:number) {
+  constructor(type: string, title: string, pages?: Pages[], numPages?: number, actualPage?: number, pdfDoc?: any) {
     var ID  = function () {
       // Math.random should be unique because of its seeding algorithm.
       // Convert it to base 36 (numbers + letters), and grab the first 9 characters
@@ -20,15 +18,11 @@ export class Faksimile {
       return '_' + Math.random().toString(36).substr(2, 9);
     };
     this.ID = ID();
+    this.type = type;
     this.title = title;
-    this.contain = contain;
-    this.angle = angle | 0;
-    this.scaleFactor = scaleFactor | 100;
-    this.width = width;
-    this.height = height;
-    this.actualwidth = actualwidth;
-    this.actualheight = actualheight;
-    this.actualcontain = actualcontain;
-    this.alpha = alpha;
+    this.numPages = numPages;
+    this.pages = pages || [];
+    this.actualPage = actualPage;
+    this.pdfDoc = pdfDoc;
   }
 }

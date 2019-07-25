@@ -19,18 +19,21 @@ import Legend from 'ol-ext/control/Legend';
 import Toggle from 'ol-ext/control/Toggle';
 import Button from 'ol-ext/control/Button';
 import Magnify from 'ol-ext/overlay/Magnify';
+import { Pages } from '../types/pages';
+
+
 
 declare var MarvinImage: any;
 declare var Marvin: any;
 
-
+declare var pdfjsLib: any;
 
 
 @Injectable({ providedIn: 'root' })
 
 @Component({
   selector: 'fileservice',
-    template: '<div class="btn btn-file btn-outline-primary"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > Import </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .*" /></div>',
+    template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > Import </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
   styleUrls: ['./file.component.css']
 })
 
@@ -47,15 +50,13 @@ export class FileComponent {
   inc_index = 100;
 
   imageOriginal;
-  imageProcessed = new MarvinImage();
   imageDisplay = new MarvinImage();
 
 
   name;
   reader;
   form;
-
-
+  pdfDoc;
 
   constructor(private fileService: FileService, private mapService: MapService) {
     
@@ -70,8 +71,8 @@ export class FileComponent {
   }
 
 
-  repaint(data: Faksimile) {
-    this.generateMap(data);
+  repaint(data: Faksimile, num: number) {
+    this.generateMap(data, num);
 
 }
 
@@ -80,47 +81,70 @@ export class FileComponent {
     var file: File = event.target.files[0];
     var faksimile;
     this.imageOriginal = new MarvinImage();
+    var imageProcessed = new MarvinImage();
     this.reader = new FileReader();
-    this.reader.readAsDataURL(file);
- 
-    this.reader.onloadend = function (e: any) {
-      self.contain = self.reader.result;
-      self.complete.next({
-        fileContent: self.reader.result,
-        fileName: file.name,
-      }); 
 
-      var image = new Image();
-      image.src = self.reader.result;
-      var w;
-      var h;
-      
-      image.onload = function () {
-        w = image.width;
-        h = image.height;
-        faksimile = new Faksimile(file.name, self.contain, w, h, self.contain, w, h, 100, 0, 0);
+    if (file.type == "image/png" || file.type == "image/jpeg") {
+      this.reader.readAsDataURL(file);
+
+      this.reader.onloadend = function (e: any) {
+        self.contain = self.reader.result;
+        self.complete.next({
+          fileContent: self.reader.result,
+          fileName: file.name,
+        });
+
+        faksimile = new Faksimile("image", file.name, null, 1, null);
         self.fileService.addFaksimile(faksimile);
-        
+        var page: Pages = new Pages(1, faksimile.title, self.contain, imageProcessed);
+        self.fileService.addPage(faksimile, page);
+        self.imageOriginal.load(self.contain, imageLoaded);
+
+        function imageLoaded() {
+          imageProcessed = self.imageOriginal.clone();
+          self.fileService.setActualContain(faksimile, page, imageProcessed);
+
+          //self.imageProcessed = faksimile.actualcontain;
+
+          self.generateMap(faksimile, 1);
+        }
+
       };
+    }
 
-      self.imageOriginal.load(self.contain, imageLoaded);
+    else
+      if (file.type == "application/pdf") {
+        this.reader.readAsArrayBuffer(file);
 
-      function imageLoaded() {
-        self.imageProcessed = self.imageOriginal.clone();
-        self.fileService.setActualContain(faksimile, self.imageProcessed);
+        this.reader.onloadend = function () {
+          self.complete.next({
+            fileName: file.name,
+          });
 
-        self.imageProcessed = faksimile.actualcontain;
-        
-        self.generateMap(faksimile);
-      
-      }
-    };
+          /**
+           * Asynchronously downloads PDF.
+           */
+          pdfjsLib.getDocument({ data: this.result }).promise.then(function (pdfDoc_) {
+            self.pdfDoc = pdfDoc_;
+            
+            // Initial/first page rendering
+            self.renderPage(null, 1, file.name, self.pdfDoc.numPages, self.pdfDoc);
+          });
+        };
+
+
+    }
+
+   
    
   }
 
-  generateMap(faksimile: Faksimile) {
 
-    var extent = [0, 0, this.imageProcessed.width, this.imageProcessed.height];
+  generateMap(faksimile: Faksimile, num: number) {
+    var imageProcessed = new MarvinImage();
+    var containt: any = faksimile.pages[num-1].actualcontain;
+    
+    var extent = [0, 0, containt.canvas.width, containt.canvas.height];
 
     var projection = new Projection({
       code: 'xkcd-image',
@@ -128,9 +152,9 @@ export class FileComponent {
       extent: extent
     });
 
-    this.imageProcessed.draw(this.imageProcessed.canvas);
+    containt.draw(containt.canvas);
 
-    var url = this.imageProcessed.canvas.toDataURL();
+    var url = containt.canvas.toDataURL();
 
     var mapfk: MapFaksimile = this.getMap(faksimile.ID);
     if (mapfk != null) {
@@ -155,6 +179,12 @@ export class FileComponent {
         })
       });
 
+      var legend = new Legend({
+        title: faksimile.title,
+        collapsed: true
+      });
+      map.addControl(legend);
+
       var mapf = new MapFaksimile(map, faksimile);
       this.mapService.addMap(mapf);
       
@@ -165,7 +195,7 @@ export class FileComponent {
       new ImageLayer({
         source: new Static({
           url: url,
-          imageSize: [this.imageProcessed.width, this.imageProcessed.height],
+          imageSize: [containt.canvas.width, containt.canvas.height],
           projection: projection,
           imageExtent: extent
         })
@@ -189,11 +219,11 @@ export class FileComponent {
         title: 'Black and White',
         handleClick: function () {
           var level = 30;
-          self.imageOriginal = self.fileService.getActualContain(faksimile);
-          self.imageProcessed = self.imageOriginal.clone();
-          Marvin.blackAndWhite(self.imageOriginal, self.imageProcessed, level);
-          self.fileService.setActualContain(faksimile, self.imageProcessed);
-          self.repaint(faksimile);
+          self.imageOriginal = self.fileService.getActualContain(faksimile, faksimile.pages[num-1]);
+          imageProcessed = self.imageOriginal.clone();
+          Marvin.blackAndWhite(self.imageOriginal, imageProcessed, level);
+          self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], imageProcessed );
+          self.repaint(faksimile, num);
           console.log("Black and White");
         }
       });
@@ -204,15 +234,15 @@ export class FileComponent {
         html: '<i class="fa fa-music"></i>',
         title: 'Edge Detection',
         handleClick: function () {
-          self.imageOriginal = self.fileService.getActualContain(faksimile);
-          self.imageProcessed = self.imageOriginal.clone();
-          self.imageProcessed.clear(0xFF000000);
+          self.imageOriginal = self.fileService.getActualContain(faksimile, faksimile.pages[num - 1]);
+          imageProcessed = self.imageOriginal.clone();
+          imageProcessed.clear(0xFF000000);
 
-          Marvin.prewitt(self.imageOriginal, self.imageProcessed);
-          Marvin.invertColors(self.imageProcessed, self.imageProcessed);
-          Marvin.thresholding(self.imageProcessed, self.imageProcessed, 150);
-          self.fileService.setActualContain(faksimile, self.imageProcessed);
-          self.repaint(faksimile);
+          Marvin.prewitt(self.imageOriginal, imageProcessed);
+          Marvin.invertColors(imageProcessed, imageProcessed);
+          Marvin.thresholding(imageProcessed, imageProcessed, 150);
+          self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], imageProcessed);
+          self.repaint(faksimile, num);
          
         }
       });
@@ -224,7 +254,7 @@ export class FileComponent {
         title: 'Remove Background',
         handleClick: function () {
 
-          var imageData = self.fileService.getActualContain(faksimile).imageData;
+          var imageData = self.fileService.getActualContain(faksimile, faksimile.pages[num-1]).imageData;
           var pixel = imageData.data;
 
           var r = 0, g = 1, b = 2, a = 3;
@@ -238,11 +268,11 @@ export class FileComponent {
           }
 
           //self.imageOriginal = self.fileService.getActualContain(faksimile);
-          //self.imageProcessed = self.imageOriginal.clone();
+          imageProcessed = self.imageOriginal.clone();
 
-          self.imageProcessed.imageData = imageData;
-          self.fileService.setActualContain(faksimile, self.imageProcessed);
-          self.repaint(faksimile);
+          imageProcessed.imageData = imageData;
+         // self.fileService.setActualContain(faksimile, self.imageProcessed);
+          self.repaint(faksimile, num);
           console.log("remove Background");
         }
       });
@@ -265,12 +295,12 @@ export class FileComponent {
         html: '<i class="fa fa-undo"></i>',
         title: 'Undo',
         handleClick: function () {
-          self.imageOriginal.load(faksimile.contain, imageLoaded);
+          self.imageOriginal.load(faksimile.pages[num-1].contain, imageLoaded);
 
           function imageLoaded() {
-            self.imageProcessed = self.imageOriginal.clone();
-            self.fileService.setActualContain(faksimile, self.imageProcessed);
-            self.repaint(faksimile);
+            imageProcessed = self.imageOriginal.clone();
+            self.fileService.setActualContain(faksimile, faksimile.pages[num-1], imageProcessed);
+            self.repaint(faksimile, num);
           }
 
         }
@@ -310,6 +340,42 @@ export class FileComponent {
     // mainbar.addControl(new Magnify(faksimile, map));
    
     mainbarbuttom.addControl(new FullScreen());
+   
+    if (faksimile.type == "pdf") {
+    
+      var previous = new Button(
+        {
+          html: '<i class="fa fa-arrow-left"></i>',
+          title: "Previous",
+          handleClick: function () {
+            if (faksimile.actualPage <= 1) {
+              return;
+            }
+            faksimile.actualPage--;
+            self.queueRenderPage(faksimile, faksimile.actualPage, faksimile.title, faksimile.numPages);
+
+
+          }
+        });
+      mainbarbuttom.addControl(previous);
+
+      var next = new Button(
+        {
+          html: '<i class="fa fa-arrow-right"></i>',
+          title: "Next",
+          handleClick: function () {
+            if (faksimile.actualPage >= faksimile.numPages) {
+              return;
+            }
+            faksimile.actualPage++;
+            self.queueRenderPage(faksimile, faksimile.actualPage, faksimile.title, faksimile.numPages);
+
+          }
+        });
+      mainbarbuttom.addControl(next);
+    }
+
+
     var close = new Button(
       {
         html: '<i class="fa fa-times-circle"></i>',
@@ -322,12 +388,104 @@ export class FileComponent {
       });
     mainbarbuttom.addControl(close);
 
-    var legend = new Legend({
-      title: faksimile.title,
-      collapsed: false
-    });
-    map.addControl(legend);
-
-
   }
+
+  pageRendering = false;
+  pageNumPending = null;
+  scale = 2;
+/**
+ * If another page rendering in progress, waits until the rendering is
+ * finised. Otherwise, executes rendering immediately.
+ */
+   queueRenderPage(faksimile: Faksimile, num: number, title: string, numPages: number) {
+    if (this.pageRendering) {
+      this.pageNumPending = num;
+    }
+    else {
+      this.renderPage(faksimile, num, title, numPages, faksimile.pdfDoc);
+    }
+  }
+
+
+  /**
+ * Get page info from document, resize canvas accordingly, and render page.
+ * @param num Page number.
+ */
+  renderPage(faksimile: Faksimile, num: number, filename: string, numPages: number, pdfDoc: any) {
+    if (faksimile == null || typeof faksimile.pages[num] === "undefined") {
+      var self = this;
+      this.pageRendering = true;
+
+      // Using promise to fetch the page
+      pdfDoc.getPage(num).then(function (page) {
+        console.log('Page loaded');
+
+        var viewport = page.getViewport({ scale: self.scale });
+
+        // Prepare canvas using PDF page dimensions
+        var canvas: any = document.createElement('canvas');
+
+        var context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        // Render PDF page into canvas context
+        var renderContext = {
+          canvasContext: context,
+          viewport: viewport
+        };
+        var renderTask = page.render(renderContext);
+        renderTask.promise.then(function () {
+          var src = canvas.toDataURL();
+
+          if (faksimile == null) {
+            faksimile = new Faksimile("pdf", filename, null, numPages, num, pdfDoc);
+
+            var page: Pages = new Pages(num, faksimile.title, src, self.imageProcessed);
+            faksimile.pages.push(page);
+            self.fileService.addFaksimile(faksimile);
+
+          }
+
+          else {
+            var page: Pages = new Pages(num, faksimile.title, src, self.imageProcessed);
+            if (!self.fileService.checkPage(faksimile, page)) {
+              self.fileService.addPage(faksimile, page);
+            }
+          }
+
+          self.imageOriginal.load(src, imageLoaded);
+
+          function imageLoaded() {
+            self.imageProcessed = self.imageOriginal.clone();
+            self.fileService.setActualContain(faksimile, page, self.imageProcessed);
+            self.imageProcessed = faksimile.pages[num - 1].actualcontain;
+            self.generateMap(faksimile, num);
+
+          }
+
+          var canvas_element = document.getElementsByName("canvas");
+          canvas_element.forEach(function (element) {
+            document.removeChild(element);
+          });
+
+          self.pageRendering = false;
+          if (self.pageNumPending !== null) {
+            // New page rendering is pending
+            self.renderPage(faksimile, self.pageNumPending, filename, numPages, pdfDoc);
+            self.pageNumPending = null;
+          }
+
+          console.log('Page rendered');
+        });
+      });
+    }
+
+    else {
+      this.generateMap(faksimile, num);
+    }
+}
+
+ 
+ 
 }
