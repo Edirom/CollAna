@@ -36,8 +36,19 @@ export class FileService {
   }
 
   addPage(faksimile: Faksimile, page: Pages) {
-    faksimile.pages.push(page);
+    this.insertArrayAt(faksimile.pages, page.index-1, page);
+    //faksimile.pages.push(page);
    
+  }
+
+  insertArrayAt(array, index, arrayToInsert) {
+    if (index >= array.length) {
+      for (var i = array.length; i <= index; i++) {
+        array.push(new Array());
+      }
+    }
+    array[index] = arrayToInsert;
+    return array;
   }
 
   checkPage(faksimile: Faksimile, page: Pages): boolean {

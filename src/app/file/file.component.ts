@@ -18,6 +18,7 @@ import Bar from 'ol-ext/control/Bar';
 import Legend from 'ol-ext/control/Legend';
 import Toggle from 'ol-ext/control/Toggle';
 import Button from 'ol-ext/control/Button';
+import TextButton from 'ol-ext/control/TextButton';
 import Magnify from 'ol-ext/overlay/Magnify';
 import { Pages } from '../types/pages';
 
@@ -41,7 +42,6 @@ export class FileComponent {
    
     
   @Output() complete: EventEmitter<any> = new EventEmitter();
-
  
   faksimiles: Faksimile[];
   faksimile: Faksimile;
@@ -359,6 +359,19 @@ export class FileComponent {
         });
       mainbarbuttom.addControl(previous);
 
+
+      var pagenum = new TextButton(
+        {
+          html: '<input class= "fa fa-lg" style="width: 2.5em;" type="number" value="' + faksimile.actualPage + '"> / ' + faksimile.numPages + '',
+         // html: '<input [value]="pagenr" (input)="pagenr = $event.target.value" type="number" min = "1">',
+          title: "Page number",
+          handleClick: function (event: any) {	
+            self.bindInputs(event, faksimile);
+          }
+
+        });
+      mainbarbuttom.addControl(pagenum);
+
       var next = new Button(
         {
           html: '<i class="fa fa-arrow-right"></i>',
@@ -390,6 +403,28 @@ export class FileComponent {
 
   }
 
+
+  bindInputs(event: any, faksimile: Faksimile) {
+    var idxInput = event.target;
+    //var idxInput: any = document.getElementById(id + faksimile.ID);
+   // idxInput.value = 1;
+    var self = this;
+    idxInput.onchange = function () {
+      console.log(idxInput.value);
+      if (idxInput.value > faksimile.numPages) {
+        return;
+      }
+      if (idxInput.value <= 0) {
+        return;
+      }
+      faksimile.actualPage = Number(idxInput.value);
+      self.queueRenderPage(faksimile, faksimile.actualPage, faksimile.title, faksimile.numPages);
+
+      //layer.setZIndex(parseInt(this.value, 10) || 0);
+    };
+    //idxInput.value = String(layer.getZIndex());
+  }
+
   pageRendering = false;
   pageNumPending = null;
   scale = 2;
@@ -412,7 +447,7 @@ export class FileComponent {
  * @param num Page number.
  */
   renderPage(faksimile: Faksimile, num: number, filename: string, numPages: number, pdfDoc: any) {
-    if (faksimile == null || typeof faksimile.pages[num] === "undefined") {
+    if (faksimile == null || typeof faksimile.pages[num-1] === "undefined" || typeof faksimile.pages[num-1].contain === "undefined") {
       var self = this;
       this.pageRendering = true;
 
@@ -441,14 +476,14 @@ export class FileComponent {
           if (faksimile == null) {
             faksimile = new Faksimile("pdf", filename, null, numPages, num, pdfDoc);
 
-            var page: Pages = new Pages(num, faksimile.title, src, self.imageProcessed);
+            var page: Pages = new Pages(num, faksimile.title, src, src);
             faksimile.pages.push(page);
             self.fileService.addFaksimile(faksimile);
 
           }
 
           else {
-            var page: Pages = new Pages(num, faksimile.title, src, self.imageProcessed);
+            var page: Pages = new Pages(num, faksimile.title, src, src);
             if (!self.fileService.checkPage(faksimile, page)) {
               self.fileService.addPage(faksimile, page);
             }
@@ -457,9 +492,9 @@ export class FileComponent {
           self.imageOriginal.load(src, imageLoaded);
 
           function imageLoaded() {
-            self.imageProcessed = self.imageOriginal.clone();
-            self.fileService.setActualContain(faksimile, page, self.imageProcessed);
-            self.imageProcessed = faksimile.pages[num - 1].actualcontain;
+            var imageProcessed = self.imageOriginal.clone();
+            self.fileService.setActualContain(faksimile, page, imageProcessed);
+            imageProcessed = faksimile.pages[num - 1].actualcontain;
             self.generateMap(faksimile, num);
 
           }
