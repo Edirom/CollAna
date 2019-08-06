@@ -12,9 +12,11 @@
   <div class="container-fluid" *ngIf="faksimiles?.length > 0" style="text-align:center">
     <div class="d-flex" fxFlex="80%" fxFlexFill fxLayoutGap="5px" fxLayout="column">
       <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;">
-        <div ngDraggable ngResizable>
-          <!--cdkDrag>-->
-          <div class="ol-boxnew" id="{{ 'card-block' + a.ID}}"></div>
+        <div ngDraggable >
+          
+            <div class="ol-boxnew" id="{{ 'card-block' + a.ID}}"></div>
+
+          
         </div>
       </div>
     </div>

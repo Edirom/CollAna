@@ -119,6 +119,7 @@ export class FileComponent {
         this.reader.onloadend = function () {
           self.complete.next({
             fileName: file.name,
+            fileContent: self.reader.result,
           });
 
           /**
@@ -129,6 +130,7 @@ export class FileComponent {
             
             // Initial/first page rendering
             self.renderPage(null, 1, file.name, self.pdfDoc.numPages, self.pdfDoc);
+        
           });
         };
 
@@ -141,6 +143,7 @@ export class FileComponent {
 
 
   generateMap(faksimile: Faksimile, num: number) {
+    var zoomFactorDelta = 100;
     var imageProcessed = new MarvinImage();
     var containt: any = faksimile.pages[num-1].actualcontain;
     
@@ -170,12 +173,13 @@ export class FileComponent {
         interactions: defaultInteractions().extend([
           new DragRotateAndZoom()
         ]),
+        keyboardEventTarget: document,
         view: new View({
           projection: projection,
           center: getCenter(extent),
-          zoom: 2,
-
-          maxZoom: 8
+          zoomFactor: Math.pow(2, 1 / zoomFactorDelta),
+          zoom: 100,
+          maxZoom: 20 * zoomFactorDelta
         })
       });
 
@@ -222,12 +226,30 @@ export class FileComponent {
           self.imageOriginal = self.fileService.getActualContain(faksimile, faksimile.pages[num-1]);
           imageProcessed = self.imageOriginal.clone();
           Marvin.blackAndWhite(self.imageOriginal, imageProcessed, level);
+         // Marvin.colorChannel(self.imageOriginal, imageProcessed, 139,0,0);
           self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], imageProcessed );
           self.repaint(faksimile, num);
           console.log("Black and White");
         }
       });
     mainbartopright.addControl(blackwhite);
+
+    var red_white = new Button(
+      {
+        html: '<i class="fa fa-adjust" style="color:#ffc0cb;"></i>',
+        title: 'Red and White',
+        handleClick: function () {
+
+          self.imageOriginal = self.fileService.getActualContain(faksimile, faksimile.pages[num - 1]);
+          imageProcessed = self.imageOriginal.clone();
+
+          Marvin.colorChannel(self.imageOriginal, imageProcessed, 139, 26, 26);
+          self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], imageProcessed);
+          self.repaint(faksimile, num);
+          console.log("Red and White");
+        }
+      });
+    mainbartopright.addControl(red_white);
 
     var edgedetection = new Button(
       {
@@ -342,7 +364,27 @@ export class FileComponent {
     mainbarbuttom.addControl(new FullScreen());
    
     if (faksimile.type == "pdf") {
-    
+
+      var synchronous_previous = new Button(
+        {
+          html: '<i class="fa fa-backward"></i>',
+          title: "Previous",
+          handleClick: function () {
+
+            var faksimiles: Faksimile[] = self.fileService.getFaksimiles();
+
+
+            for (let a of faksimiles) {
+              if (a.actualPage <= 1) {
+                return;
+              }
+              a.actualPage--;
+              self.queueRenderPage(a, a.actualPage, a.title, a.numPages);
+            }
+          }
+        });
+      mainbarbuttom.addControl(synchronous_previous);
+
       var previous = new Button(
         {
           html: '<i class="fa fa-arrow-left"></i>',
@@ -386,6 +428,26 @@ export class FileComponent {
           }
         });
       mainbarbuttom.addControl(next);
+
+      var synchronous_next = new Button(
+        {
+          html: '<i class="fa fa-forward"></i>',
+          title: "Synchronous Next",
+          handleClick: function () {
+            var faksimiles: Faksimile[] = self.fileService.getFaksimiles();
+            
+         
+            for (let a of faksimiles) {
+              if (a.actualPage >= a.numPages) {
+                return;
+              }
+              a.actualPage++;
+              self.queueRenderPage(a, a.actualPage, a.title, a.numPages);
+            }
+            
+          }
+        });
+      mainbarbuttom.addControl(synchronous_next);
     }
 
 
@@ -426,18 +488,19 @@ export class FileComponent {
   }
 
   pageRendering = false;
-  pageNumPending = null;
   scale = 2;
+  renderQueue = [];
 /**
  * If another page rendering in progress, waits until the rendering is
  * finised. Otherwise, executes rendering immediately.
  */
    queueRenderPage(faksimile: Faksimile, num: number, title: string, numPages: number) {
-    if (this.pageRendering) {
-      this.pageNumPending = num;
+     if (this.pageRendering) {
+       this.renderQueue.push(faksimile);
     }
-    else {
-      this.renderPage(faksimile, num, title, numPages, faksimile.pdfDoc);
+   else {
+     this.renderPage(faksimile, num, title, numPages, faksimile.pdfDoc);
+     
     }
   }
 
@@ -449,6 +512,7 @@ export class FileComponent {
   renderPage(faksimile: Faksimile, num: number, filename: string, numPages: number, pdfDoc: any) {
     if (faksimile == null || typeof faksimile.pages[num-1] === "undefined" || typeof faksimile.pages[num-1].contain === "undefined") {
       var self = this;
+
       this.pageRendering = true;
 
       // Using promise to fetch the page
@@ -475,7 +539,7 @@ export class FileComponent {
 
           if (faksimile == null) {
             faksimile = new Faksimile("pdf", filename, null, numPages, num, pdfDoc);
-
+           
             var page: Pages = new Pages(num, faksimile.title, src, src);
             faksimile.pages.push(page);
             self.fileService.addFaksimile(faksimile);
@@ -496,7 +560,6 @@ export class FileComponent {
             self.fileService.setActualContain(faksimile, page, imageProcessed);
             imageProcessed = faksimile.pages[num - 1].actualcontain;
             self.generateMap(faksimile, num);
-
           }
 
           var canvas_element = document.getElementsByName("canvas");
@@ -505,13 +568,15 @@ export class FileComponent {
           });
 
           self.pageRendering = false;
-          if (self.pageNumPending !== null) {
+          if (self.renderQueue.length!= 0) {
             // New page rendering is pending
-            self.renderPage(faksimile, self.pageNumPending, filename, numPages, pdfDoc);
-            self.pageNumPending = null;
+            var renderFaksimile: Faksimile = self.renderQueue[0];
+            self.renderPage(renderFaksimile, renderFaksimile.actualPage, renderFaksimile.title, renderFaksimile.numPages, renderFaksimile.pdfDoc);
+            self.renderQueue.shift();
           }
 
           console.log('Page rendered');
+         
         });
       });
     }

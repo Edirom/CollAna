@@ -9,7 +9,6 @@ export class Faksimile {
   pages: Pages[];
   actualPage: number;
   pdfDoc: any;
-
   constructor(type: string, title: string, pages?: Pages[], numPages?: number, actualPage?: number, pdfDoc?: any) {
     var ID  = function () {
       // Math.random should be unique because of its seeding algorithm.

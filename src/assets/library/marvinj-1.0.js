@@ -1,3 +1,4 @@
+
 function MarvinColorModelConverter() { }
 
 MarvinColorModelConverter.rgbToBinary = function (img, threshold) {
