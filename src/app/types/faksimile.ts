@@ -9,7 +9,9 @@ export class Faksimile {
   pages: Pages[];
   actualPage: number;
   pdfDoc: any;
-  constructor(type: string, title: string, pages?: Pages[], numPages?: number, actualPage?: number, pdfDoc?: any) {
+  funqueueexecute: boolean;
+  funqueue: any[];
+  constructor(type: string, title: string, pages?: Pages[], numPages?: number, actualPage?: number, pdfDoc?: any, funqueueexecute?: boolean, funqueue?: any[]) {
     var ID  = function () {
       // Math.random should be unique because of its seeding algorithm.
       // Convert it to base 36 (numbers + letters), and grab the first 9 characters
@@ -23,5 +25,7 @@ export class Faksimile {
     this.pages = pages || [];
     this.actualPage = actualPage;
     this.pdfDoc = pdfDoc;
+    this.funqueueexecute = funqueueexecute;
+    this.funqueue = funqueue || [];;
   }
 }

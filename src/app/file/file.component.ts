@@ -62,6 +62,118 @@ export class FileComponent {
     
   }
 
+  wrapFunction = function (fn, context, params) {
+  return function () {
+    fn.apply(context, params);
+  };
+  }
+  fun_blue_and_white;
+  fun_red_and_white;
+  fun_black_and_white;
+  fun_edge_detection;
+  fun_remove_background;
+
+  blue_and_white = function (faksimile: Faksimile) {
+    var imageProcessed = new MarvinImage();
+    var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
+    var pixel = imageData.data;
+
+    var r = 0, g = 1, b = 2, a = 3;
+    for (var p = 0; p < pixel.length; p += 4) {
+
+      if (
+        pixel[p + r] != 255 ||
+        pixel[p + g] != 255 ||
+        pixel[p + b] != 255) {
+        pixel[p + r] = 5;
+        pixel[p + g] = 139;
+        pixel[p + b] = 255;
+        pixel[p + a] = 170;
+      }
+    }
+    imageProcessed = this.imageOriginal.clone();
+
+    imageProcessed.imageData = imageData;
+    // self.fileService.setActualContain(faksimile, self.imageProcessed);
+    this.repaint(faksimile, faksimile.actualPage);
+    console.log("Blue and White");
+
+  }
+
+
+  red_and_white = function (faksimile: Faksimile) {
+    var imageProcessed = new MarvinImage();
+    var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
+    var pixel = imageData.data;
+
+    var r = 0, g = 1, b = 2, a = 3;
+    for (var p = 0; p < pixel.length; p += 4) {
+
+      if (
+        pixel[p + r] != 255 ||
+        pixel[p + g] != 255 ||
+        pixel[p + b] != 255) {
+        pixel[p + r] = 255;
+        pixel[p + g] = 130;
+        pixel[p + b] = 0;
+        pixel[p + a] = 200;
+      }
+    }
+    imageProcessed = this.imageOriginal.clone();
+    imageProcessed.imageData = imageData;
+    this.repaint(faksimile, faksimile.actualPage);
+    console.log("Red and White");
+
+
+  }
+
+  black_and_white = function (faksimile: Faksimile) {
+    var imageProcessed = new MarvinImage();
+    var level = 30;
+    this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
+    imageProcessed = this.imageOriginal.clone();
+    Marvin.blackAndWhite(this.imageOriginal, imageProcessed, level);
+    // Marvin.colorChannel(self.imageOriginal, imageProcessed, 139,0,0);
+    this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
+    this.repaint(faksimile, faksimile.actualPage);
+    console.log("Black and White");
+  }
+
+  remove_background = function (faksimile: Faksimile) {
+    var imageProcessed = new MarvinImage();
+    var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
+    var pixel = imageData.data;
+
+    var r = 0, g = 1, b = 2, a = 3;
+    for (var p = 0; p < pixel.length; p += 4) {
+
+      if (
+        pixel[p + r] == 255 &&
+        pixel[p + g] == 255 &&
+        pixel[p + b] == 255) // if white then change alpha to 0
+      { pixel[p + a] = 0; }
+    }
+
+    imageProcessed = this.imageOriginal.clone();
+
+    imageProcessed.imageData = imageData;
+    this.repaint(faksimile, faksimile.actualPage);
+    console.log("remove Background");
+  }
+
+  edge_detection = function (faksimile: Faksimile) {
+    var imageProcessed = new MarvinImage();
+    this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
+    imageProcessed = this.imageOriginal.clone();
+    imageProcessed.clear(0xFF000000);
+
+    Marvin.prewitt(this.imageOriginal, imageProcessed);
+    Marvin.invertColors(imageProcessed, imageProcessed);
+    Marvin.thresholding(imageProcessed, imageProcessed, 150);
+    this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
+    this.repaint(faksimile, faksimile.actualPage);
+  }
+
   getMap(id): MapFaksimile {
     var obj: MapFaksimile = this.mapService.getMaps().filter(function (node) {
       return node.ID == id;
@@ -73,7 +185,6 @@ export class FileComponent {
 
   repaint(data: Faksimile, num: number) {
     this.generateMap(data, num);
-
 }
 
   onSelectFile(event: any) {
@@ -94,7 +205,7 @@ export class FileComponent {
           fileName: file.name,
         });
 
-        faksimile = new Faksimile("image", file.name, null, 1, null);
+        faksimile = new Faksimile("image", file.name, null, 1, null, false, null);
         self.fileService.addFaksimile(faksimile);
         var page: Pages = new Pages(1, faksimile.title, self.contain, imageProcessed);
         self.fileService.addPage(faksimile, page);
@@ -141,7 +252,6 @@ export class FileComponent {
    
   }
 
-
   generateMap(faksimile: Faksimile, num: number) {
     var zoomFactorDelta = 100;
     var imageProcessed = new MarvinImage();
@@ -177,11 +287,13 @@ export class FileComponent {
         view: new View({
           projection: projection,
           center: getCenter(extent),
-          zoomFactor: Math.pow(2, 1 / zoomFactorDelta),
-          zoom: 100,
-          maxZoom: 20 * zoomFactorDelta
+          //zoomFactor: 1,
+           zoom: 3,
+          //maxZoom: 20 * zoomFactorDelta
         })
       });
+     
+      map.setSize([containt.canvas.width, containt.canvas.height]);
 
       var legend = new Legend({
         title: faksimile.title,
@@ -199,7 +311,7 @@ export class FileComponent {
       new ImageLayer({
         source: new Static({
           url: url,
-          imageSize: [containt.canvas.width, containt.canvas.height],
+          //imageSize: [containt.canvas.width, containt.canvas.height],
           projection: projection,
           imageExtent: extent
         })
@@ -215,21 +327,41 @@ export class FileComponent {
     mainbartopright.setPosition("top-right");
 
     var self = this;
+    
+    var hold = new Toggle(
+      {
+        html: '<i class="fa fa-check-circle"></i>',
+        title: "Hold",
+        active: faksimile.funqueueexecute,
+        onToggle: function (active) {
 
+          if (active) {
+            // Remove and execute all items in the array
+            faksimile.funqueueexecute = true;
+            console.log("aktiv");
+          }
+
+          else {
+            faksimile.funqueueexecute = false;
+            // Remove all items in the array
+            while (faksimile.funqueue.length > 0) {
+              faksimile.funqueue.shift();
+            }
+            console.log("nicht aktiv");
+          }
+        }
+      });
+
+    mainbartopright.addControl(hold);
   
     var blackwhite = new Button(
       {
         html: '<i class="fa fa-adjust"></i>',
         title: 'Black and White',
         handleClick: function () {
-          var level = 30;
-          self.imageOriginal = self.fileService.getActualContain(faksimile, faksimile.pages[num-1]);
-          imageProcessed = self.imageOriginal.clone();
-          Marvin.blackAndWhite(self.imageOriginal, imageProcessed, level);
-         // Marvin.colorChannel(self.imageOriginal, imageProcessed, 139,0,0);
-          self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], imageProcessed );
-          self.repaint(faksimile, num);
-          console.log("Black and White");
+          self.black_and_white(faksimile);
+          self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
+          faksimile.funqueue.push(self.fun_black_and_white);
         }
       });
     mainbartopright.addControl(blackwhite);
@@ -239,33 +371,33 @@ export class FileComponent {
         html: '<i class="fa fa-adjust" style="color:#ffc0cb;"></i>',
         title: 'Red and White',
         handleClick: function () {
-
-          self.imageOriginal = self.fileService.getActualContain(faksimile, faksimile.pages[num - 1]);
-          imageProcessed = self.imageOriginal.clone();
-
-          Marvin.colorChannel(self.imageOriginal, imageProcessed, 139, 26, 26);
-          self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], imageProcessed);
-          self.repaint(faksimile, num);
-          console.log("Red and White");
+          self.red_and_white(faksimile);
+          self.fun_red_and_white = self.wrapFunction(self.red_and_white, self, [faksimile]);
+          faksimile.funqueue.push(self.fun_red_and_white);
         }
       });
     mainbartopright.addControl(red_white);
+
+    var blue_white = new Button(
+      {
+        html: '<i class="fa fa-adjust" style="color:#0000ff;"></i>',
+        title: 'Blue and White',
+        handleClick: function () {
+          self.blue_and_white(faksimile);
+          self.fun_blue_and_white = self.wrapFunction(self.blue_and_white, self, [faksimile]);
+          faksimile.funqueue.push(self.fun_blue_and_white);
+        }
+      });
+    mainbartopright.addControl(blue_white);
 
     var edgedetection = new Button(
       {
         html: '<i class="fa fa-music"></i>',
         title: 'Edge Detection',
         handleClick: function () {
-          self.imageOriginal = self.fileService.getActualContain(faksimile, faksimile.pages[num - 1]);
-          imageProcessed = self.imageOriginal.clone();
-          imageProcessed.clear(0xFF000000);
-
-          Marvin.prewitt(self.imageOriginal, imageProcessed);
-          Marvin.invertColors(imageProcessed, imageProcessed);
-          Marvin.thresholding(imageProcessed, imageProcessed, 150);
-          self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], imageProcessed);
-          self.repaint(faksimile, num);
-         
+          self.edge_detection(faksimile);
+          self.fun_edge_detection = self.wrapFunction(self.edge_detection, self, [faksimile]);
+          faksimile.funqueue.push(self.fun_edge_detection);
         }
       });
     mainbartopright.addControl(edgedetection);
@@ -275,27 +407,9 @@ export class FileComponent {
         html: '<i class="fa fa-eraser"></i>',
         title: 'Remove Background',
         handleClick: function () {
-
-          var imageData = self.fileService.getActualContain(faksimile, faksimile.pages[num-1]).imageData;
-          var pixel = imageData.data;
-
-          var r = 0, g = 1, b = 2, a = 3;
-          for (var p = 0; p < pixel.length; p += 4) {
-
-            if (
-              pixel[p + r] == 255 &&
-              pixel[p + g] == 255 &&
-              pixel[p + b] == 255) // if white then change alpha to 0
-            { pixel[p + a] = 0; }
-          }
-
-          //self.imageOriginal = self.fileService.getActualContain(faksimile);
-          imageProcessed = self.imageOriginal.clone();
-
-          imageProcessed.imageData = imageData;
-         // self.fileService.setActualContain(faksimile, self.imageProcessed);
-          self.repaint(faksimile, num);
-          console.log("remove Background");
+          self.remove_background(faksimile);
+          self.fun_remove_background = self.wrapFunction(self.remove_background, self, [faksimile]);
+          faksimile.funqueue.push(self.fun_remove_background);
         }
       });
     mainbartopright.addControl(removebackground);
@@ -462,7 +576,7 @@ export class FileComponent {
         }
       });
     mainbarbuttom.addControl(close);
-
+  
   }
 
 
@@ -538,7 +652,7 @@ export class FileComponent {
           var src = canvas.toDataURL();
 
           if (faksimile == null) {
-            faksimile = new Faksimile("pdf", filename, null, numPages, num, pdfDoc);
+            faksimile = new Faksimile("pdf", filename, null, numPages, num, pdfDoc, false, null);
            
             var page: Pages = new Pages(num, faksimile.title, src, src);
             faksimile.pages.push(page);
@@ -559,6 +673,11 @@ export class FileComponent {
             var imageProcessed = self.imageOriginal.clone();
             self.fileService.setActualContain(faksimile, page, imageProcessed);
             imageProcessed = faksimile.pages[num - 1].actualcontain;
+            if (faksimile.funqueueexecute) {
+              for (let a of faksimile.funqueue) {
+                (a)();
+              }
+            }
             self.generateMap(faksimile, num);
           }
 
@@ -576,12 +695,16 @@ export class FileComponent {
           }
 
           console.log('Page rendered');
-         
         });
       });
     }
 
     else {
+      if (faksimile.funqueueexecute) {
+        for (let a of faksimile.funqueue) {
+          (a)();
+        }
+      }
       this.generateMap(faksimile, num);
     }
 }
