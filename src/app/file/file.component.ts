@@ -678,6 +678,12 @@ export class FileComponent {
                 (a)();
               }
             }
+
+            else {
+                while (faksimile.funqueue.length > 0) {
+                  faksimile.funqueue.shift();
+                }
+            }
             self.generateMap(faksimile, num);
           }
 
@@ -704,6 +710,12 @@ export class FileComponent {
         for (let a of faksimile.funqueue) {
           (a)();
         }
+      }
+      else {
+        while (faksimile.funqueue.length > 0) {
+          faksimile.funqueue.shift();
+        }
+        
       }
       this.generateMap(faksimile, num);
     }
