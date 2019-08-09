@@ -1,0 +1,16 @@
+pipelines:
+    branches:
+        master:
+            - step:
+                script:
+                    - docker login -u $DOCKER_USER -p $DOCKER_PASS
+                    - docker build -t zenmem/zenmem-frontend-sourceanalysis:latest .
+                    - docker push zenmem/zenmem-frontend-sourceanalysis:latest
+        develop:
+            - step:
+                script:
+                    - docker login -u $DOCKER_USER -p $DOCKER_PASS
+                    - docker build -t zenmem/zenmem-frontend-sourceanalysis:develop .
+                    - docker push zenmem/zenmem-frontend-sourceanalysis:develop
+options:
+    docker: true
