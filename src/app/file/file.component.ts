@@ -254,6 +254,8 @@ export class FileComponent {
 
   generateMap(faksimile: Faksimile, num: number) {
     var zoomFactorDelta = 100;
+    var scaleFactor = 1.01;
+    var zoomMultiplier = Math.log(2) / Math.log(scaleFactor)
     var imageProcessed = new MarvinImage();
     var containt: any = faksimile.pages[num-1].actualcontain;
     
@@ -287,8 +289,11 @@ export class FileComponent {
         view: new View({
           projection: projection,
           center: getCenter(extent),
+          zoom: 3 * zoomMultiplier,
+          maxZoom: 8 * zoomMultiplier,
+          zoomFactor: scaleFactor
           //zoomFactor: 1,
-           zoom: 3,
+          // zoom: 3,
           //maxZoom: 20 * zoomFactorDelta
         })
       });
@@ -311,16 +316,16 @@ export class FileComponent {
       new ImageLayer({
         source: new Static({
           url: url,
-          //imageSize: [containt.canvas.width, containt.canvas.height],
+         // imageSize: map.getSize(),//[containt.canvas.width, containt.canvas.height],
           projection: projection,
           imageExtent: extent
         })
       });
-
+    
     map.addLayer(layer);
     var zoomslider = new ZoomSlider();
     map.addControl(zoomslider);
-
+    //map.updateSize();
     // Main control bar
     var mainbartopright = new Bar();
     map.addControl(mainbartopright);
