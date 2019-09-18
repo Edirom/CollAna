@@ -8,6 +8,7 @@ import { AngularDraggableModule } from 'angular2-draggable';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { FileComponent } from './file/file.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 
 
@@ -22,7 +23,8 @@ import { FileComponent } from './file/file.component';
     NgbModule,
     BrowserAnimationsModule,
     FlexLayoutModule,
-    AngularDraggableModule
+    AngularDraggableModule,
+    DragDropModule
   ],
   bootstrap: [AppComponent],
 })

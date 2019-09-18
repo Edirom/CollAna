@@ -1,4 +1,4 @@
-import { Output, Component, EventEmitter, Injectable } from '@angular/core';
+import { Output, Component, EventEmitter, Injectable, Input } from '@angular/core';
 import { FileService } from '../services/file.services';
 import { MapService } from '../services/map.service';
 import { Faksimile } from '../types/faksimile';
@@ -42,11 +42,12 @@ export class FileComponent {
    
     
   @Output() complete: EventEmitter<any> = new EventEmitter();
+  @Input() canvas_index: number;
  
   faksimiles: Faksimile[];
   faksimile: Faksimile;
   contain = '';
-
+  
   inc_index = 100;
 
   imageOriginal;
@@ -187,6 +188,26 @@ export class FileComponent {
     this.generateMap(data, num);
 }
 
+
+ 
+
+  generateMinPreview(faksimile: Faksimile) {
+
+    var element: any = document.getElementById("mini-card-canvas" + faksimile.ID);
+    
+
+    element.innerText = faksimile.index + 1;
+    element.style.color = faksimile.Color;
+
+   // ctx.fillRect(rectX + (cornerRadius / 2), rectY + (cornerRadius / 2), rectWidth - cornerRadius, rectHeight - cornerRadius);
+  /*  ctx.font = "30px Comic Sans MS";
+    ctx.fillStyle = "red";
+    ctx.textAlign = "center";
+    ctx.borde
+    ctx.fillText("Hello World", canvas.width / 2, canvas.height / 2);*/
+
+  }
+
   onSelectFile(event: any) {
     var self = this;
     var file: File = event.target.files[0];
@@ -218,6 +239,7 @@ export class FileComponent {
           //self.imageProcessed = faksimile.actualcontain;
 
           self.generateMap(faksimile, 1);
+          self.generateMinPreview(faksimile);
         }
 
       };
@@ -244,6 +266,7 @@ export class FileComponent {
         
           });
         };
+        
 
 
     }
@@ -253,6 +276,9 @@ export class FileComponent {
   }
 
   generateMap(faksimile: Faksimile, num: number) {
+    if (num == null)
+      num = 1;
+
     var zoomFactorDelta = 100;
     var scaleFactor = 1.01;
     var zoomMultiplier = Math.log(2) / Math.log(scaleFactor)
@@ -690,6 +716,7 @@ export class FileComponent {
                 }
             }
             self.generateMap(faksimile, num);
+            self.generateMinPreview(faksimile);
           }
 
           var canvas_element = document.getElementsByName("canvas");
@@ -723,6 +750,7 @@ export class FileComponent {
         
       }
       this.generateMap(faksimile, num);
+      this.generateMinPreview(faksimile);
     }
 }
 

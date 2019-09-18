@@ -14,11 +14,18 @@ export class FileService {
 
 
   setActualContain(faksimile: Faksimile, page: Pages, contain: any) {
-    faksimile.pages[page.index-1].actualcontain = contain;
+    if (typeof page !== "undefined")
+      faksimile.pages[page.index - 1].actualcontain = contain;
+    else
+      faksimile.pages[0].actualcontain = contain;
   }
 
   getActualContain(faksimile: Faksimile, page: Pages): any {
-    return faksimile.pages[page.index-1].actualcontain;
+
+    if (typeof page !== "undefined")
+      return faksimile.pages[page.index - 1].actualcontain;
+    else
+      return faksimile.pages[0].actualcontain;
   }
 
   getFaksimiles(): Faksimile[] {
