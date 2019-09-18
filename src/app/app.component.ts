@@ -37,6 +37,32 @@ export class AppComponent{
     this.inc_index = ++this.inc_index
     element.style.zIndex = this.inc_index.toString();
   }
+
+  onMoving(event: any, faksimile: Faksimile) {
+    let element = document.getElementById('card-div' + faksimile.ID);
+    let boundingClientRect: any = element.getBoundingClientRect();
+    let parentPosition = this.getPosition(element);
+
+    let drag_element = document.getElementById('mini-card-canvas' + faksimile.ID);
+
+    console.log("boundingClientRect.y" + boundingClientRect.y);
+
+    var newPos = ((boundingClientRect.y * 100) / boundingClientRect.height);
+    if (newPos < 0)
+      newPos = 0;
+    drag_element.style.top = newPos + "px";
+    this.inc_index = ++this.inc_index
+    drag_element.style.zIndex = this.inc_index.toString();
+
+    console.log("Moved" + parentPosition.top)
+  }
+
+  onDragBegin(event: any, faksimile: Faksimile) {
+    let element = document.getElementById('card-div' + faksimile.ID);
+    this.inc_index = ++this.inc_index
+    element.style.zIndex = this.inc_index.toString();
+  }
+
   dragMoved(event: CdkDragEnd, faksimile: Faksimile) {
     let element = event.source.element.nativeElement;
     let boundingClientRect: any = element.getBoundingClientRect();
@@ -50,10 +76,6 @@ export class AppComponent{
     this.inc_index = ++this.inc_index
     drag_element.style.zIndex = this.inc_index.toString();
 
-    console.log('new pos   ' + newPos );
-
-
-    console.log("Moved")
   }
   dragEnded(event: CdkDragEnd, faksimile: Faksimile) {
     //event.source.getRootElement().getBoundingClientRect();
