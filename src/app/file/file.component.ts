@@ -21,6 +21,13 @@ import Button from 'ol-ext/control/Button';
 import TextButton from 'ol-ext/control/TextButton';
 import Magnify from 'ol-ext/overlay/Magnify';
 import { Pages } from '../types/pages';
+import Draw, { createBox } from 'ol/interaction/Draw';
+import {Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
+
+import { Stroke, Fill, Circle, Style } from 'ol/style';
+import GeometryType from 'ol/geom/GeometryType';
+
 
 
 
@@ -194,17 +201,9 @@ export class FileComponent {
   generateMinPreview(faksimile: Faksimile) {
 
     var element: any = document.getElementById("mini-card-canvas" + faksimile.ID);
-    
 
     element.innerText = faksimile.index + 1;
     element.style.color = faksimile.Color;
-
-   // ctx.fillRect(rectX + (cornerRadius / 2), rectY + (cornerRadius / 2), rectWidth - cornerRadius, rectHeight - cornerRadius);
-  /*  ctx.font = "30px Comic Sans MS";
-    ctx.fillStyle = "red";
-    ctx.textAlign = "center";
-    ctx.borde
-    ctx.fillText("Hello World", canvas.width / 2, canvas.height / 2);*/
 
   }
 
@@ -279,14 +278,10 @@ export class FileComponent {
     if (num == null)
       num = 1;
 
-    var zoomFactorDelta = 100;
-    var scaleFactor = 1.01;
-    var zoomMultiplier = Math.log(2) / Math.log(scaleFactor)
     var imageProcessed = new MarvinImage();
     var containt: any = faksimile.pages[num-1].actualcontain;
-    
-    var extent = [0, 0, containt.canvas.width, containt.canvas.height];
 
+    var extent = [0, 0, containt.canvas.width, containt.canvas.height];
     var projection = new Projection({
       code: 'xkcd-image',
       units: 'pixels',
@@ -306,31 +301,37 @@ export class FileComponent {
       mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
     }
     else {
+
       var map = new Map({
         target: 'card-block' + faksimile.ID,
-        interactions: defaultInteractions().extend([
+        /*interactions: defaultInteractions().extend([
           new DragRotateAndZoom()
-        ]),
+        ]),*/
+        interactions: defaultInteractions({
+          doubleClickZoom: true,
+          dragPan: true,
+          mouseWheelZoom: false,
+        }),
         keyboardEventTarget: document,
         view: new View({
           projection: projection,
           center: getCenter(extent),
-          zoom: 3 * zoomMultiplier,
-          maxZoom: 8 * zoomMultiplier,
-          zoomFactor: scaleFactor
-          //zoomFactor: 1,
-          // zoom: 3,
-          //maxZoom: 20 * zoomFactorDelta
+          zoom: 3,
+   
         })
       });
      
-      map.setSize([containt.canvas.width, containt.canvas.height]);
-
       var legend = new Legend({
         title: faksimile.title,
         collapsed: true
       });
-      map.addControl(legend);
+     
+
+      var barbottomright = new Bar();
+      map.addControl(barbottomright);
+      barbottomright.setPosition("bottom-right");
+
+      barbottomright.addControl(legend);
 
       var mapf = new MapFaksimile(map, faksimile);
       this.mapService.addMap(mapf);
@@ -342,20 +343,64 @@ export class FileComponent {
       new ImageLayer({
         source: new Static({
           url: url,
-         // imageSize: map.getSize(),//[containt.canvas.width, containt.canvas.height],
+          //imageSize: [containt.canvas.width, containt.canvas.height],
           projection: projection,
           imageExtent: extent
         })
       });
     
     map.addLayer(layer);
+
+    var source = new VectorSource({ wrapX: false });
+
+    var vector = new VectorLayer({
+      source: source,
+      style: new Style({
+        fill: new Fill({
+          color: 'rgba(255, 255, 255, 0.2)'
+        }),
+        stroke: new Stroke({
+          color: '#ffcc33',
+          width: 2
+        }),
+        image: new Circle({
+          radius: 7,
+          fill: new Fill({
+            color: '#ffcc33'
+          })
+        })
+      })
+    });
+
+
+    map.addLayer(vector);
+
     var zoomslider = new ZoomSlider();
     map.addControl(zoomslider);
     //map.updateSize();
     // Main control bar
+
+    var barbottomleft = new Bar();
+    map.addControl(barbottomleft);
+    barbottomleft.setPosition("bottom-left");
+
+    var zoommfactor = new TextButton(
+      {
+        html: ' Zoom: <input id= "zoom-div'+ faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="1" max="30" step="0.01" type="number" value="' + map.getView().getZoom() + '"> ',
+        title: "Zoom factor",
+        handleClick: function (event: any) {
+          self.bindZoomInputs(event, faksimile);
+        }
+
+      });
+    barbottomleft.addControl(zoommfactor);
+
     var mainbartopright = new Bar();
     map.addControl(mainbartopright);
     mainbartopright.setPosition("top-right");
+
+    // Control
+   
 
     var self = this;
     
@@ -445,7 +490,7 @@ export class FileComponent {
       });
     mainbartopright.addControl(removebackground);
 
-    var movetofront = new Button(
+   /* var movetofront = new Button(
       {
         html: '<i class="fa fa-clone"></i>',
         title: 'Move To Front',
@@ -455,7 +500,34 @@ export class FileComponent {
         
         }
       });
-    mainbartopright.addControl(movetofront);
+    mainbartopright.addControl(movetofront);*/
+    var geometryFunction;
+    var value;
+    var drawBox = new Button(
+      {
+        html: '<i class="fa fa-clone"></i>',
+        title: 'Draw Box',
+        handleClick: function () {
+         // var canvas: any = document.getElementById('card-div' + faksimile.ID);
+         /* map.removeInteraction(draw);
+          value = 'Box' as GeometryType;
+          geometryFunction = createBox();
+
+          var draw = new Draw({
+            source: source,
+            type: value,
+            geometryFunction: geometryFunction
+          });
+          map.addInteraction(draw);*/
+         // canvas.style.zIndex = ++self.inc_index;
+
+        }
+      });
+    mainbartopright.addControl(drawBox);
+
+
+   
+  
 
     var undo = new Button(
       {
@@ -485,6 +557,7 @@ export class FileComponent {
              layers: [layer],
              zoomOffset: 1,
              projection: projection,
+             imageExtent: extent
            });
 
           if (active) {
@@ -607,6 +680,19 @@ export class FileComponent {
         }
       });
     mainbarbuttom.addControl(close);
+
+    var currZoom = map.getView().getZoom();
+    map.on('moveend', function (e) {
+      var newZoom = map.getView().getZoom();
+      if (currZoom != newZoom) {
+        console.log('zoom end, new zoom: ' + newZoom);
+        currZoom = newZoom;
+        var zoomdiv: any = document.getElementById("zoom-div" + faksimile.ID);
+        currZoom = Math.round(currZoom * 100) / 100;
+        zoomdiv.value = currZoom;
+       
+      }
+    });
   
   }
 
@@ -630,6 +716,24 @@ export class FileComponent {
       //layer.setZIndex(parseInt(this.value, 10) || 0);
     };
     //idxInput.value = String(layer.getZIndex());
+  }
+
+
+
+  bindZoomInputs(event: any, faksimile: Faksimile) {
+    var idxInput = event.target;
+    //var idxInput: any = document.getElementById(id + faksimile.ID);
+    // idxInput.value = 1;
+    var self = this;
+    idxInput.onchange = function () {
+      console.log(idxInput.value);
+      if (idxInput.value > 0) {
+        var view = self.getMap(faksimile.ID).map.getView();
+        var zoom = view.setZoom(idxInput.value);
+        console.log("zoom: " + zoom);
+      }
+    };
+
   }
 
   pageRendering = false;
