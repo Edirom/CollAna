@@ -165,6 +165,8 @@ export class FileComponent {
     imageProcessed = this.imageOriginal.clone();
 
     imageProcessed.imageData = imageData;
+    this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
+   
     this.repaint(faksimile, faksimile.actualPage);
     console.log("remove Background");
   }
@@ -296,7 +298,12 @@ export class FileComponent {
     if (mapfk != null) {
       var map = mapfk.map;
       var layers = mapfk.map.getLayers();
-      mapfk.map.removeLayer(layers.getArray()[0]);
+     // mapfk.map.removeLayer(layers.getArray()[0]);
+
+      for (var i = layers.getArray().length - 1; i >= 0; --i) {
+        var layer = layers[i];
+        mapfk.map.removeLayer(layers.getArray()[i]);
+      }
 
       mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
     }
