@@ -736,6 +736,7 @@ export class FileComponent {
       if (idxInput.value > 0) {
         var view = self.getMap(faksimile.ID).map.getView();
         var zoom = view.setZoom(idxInput.value);
+        console.log("toom value: " + idxInput.value);
         console.log("zoom: " + zoom);
       }
     };

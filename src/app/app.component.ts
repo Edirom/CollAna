@@ -3,7 +3,7 @@ import { FileService } from './services';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Faksimile } from './types/faksimile';
 import { CdkDragEnd, CdkDragMove } from "@angular/cdk/drag-drop";
-import { forEach } from '@angular/router/src/utils/collection';
+
 
 
 
@@ -79,19 +79,12 @@ export class AppComponent{
 
     var maxi_distance = (mini_distance * maxi_current_boundingClientRect.height) / mini_current_boundingClientRect.height;
 
-    //var newPos = this.maxi_old_boundingClientRect.y + maxi_distance -56;
     var newPos = ((mini_current_boundingClientRect.y - parentPosition.top) * maxi_current_boundingClientRect.height) / 100;
     drag_element.style.top = newPos + "px";
     this.inc_index = ++this.inc_index
     drag_element.style.zIndex = this.inc_index.toString();
-
-    console.log('new pos   ' + newPos);
-
-
-    console.log("Moved")
   }
   drag_mini_block_Ended(event: CdkDragEnd, faksimile: Faksimile) {
-    //event.source.getRootElement().getBoundingClientRect();
     let element = event.source.element.nativeElement;
     this.inc_index = ++this.inc_index
     element.style.zIndex = this.inc_index.toString();
