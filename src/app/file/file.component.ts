@@ -301,7 +301,6 @@ export class FileComponent {
      // mapfk.map.removeLayer(layers.getArray()[0]);
 
       for (var i = layers.getArray().length - 1; i >= 0; --i) {
-        var layer = layers[i];
         mapfk.map.removeLayer(layers.getArray()[i]);
       }
 
