@@ -2,8 +2,8 @@ import { Component, OnDestroy } from '@angular/core';
 import { FileService } from './services';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Faksimile } from './types/faksimile';
-import { CdkDragEnd } from "@angular/cdk/drag-drop";
-import { forEach } from '@angular/router/src/utils/collection';
+import { CdkDragEnd, CdkDragMove } from "@angular/cdk/drag-drop";
+
 
 
 
@@ -16,6 +16,10 @@ export class AppComponent{
 
   faksimiles: Faksimile[];
   inc_index = 100;
+
+
+  mini_old_boundingClientRect: any;
+  maxi_old_boundingClientRect: any;
 
   constructor(
     private fileService: FileService,
@@ -32,14 +36,10 @@ export class AppComponent{
     this.faksimiles = this.fileService.getFaksimiles();
   }
 
-  dragStarted(event: CdkDragEnd, faksimile: Faksimile) {
-    let element = event.source.element.nativeElement;
-    this.inc_index = ++this.inc_index
-    element.style.zIndex = this.inc_index.toString();
-  }
 
-  onMoving(event: any, faksimile: Faksimile) {
-    let element = document.getElementById('card-div' + faksimile.ID);
+
+  drag_maxi_block_Moved(event: CdkDragMove, faksimile: Faksimile) {
+    let element = document.getElementById('card-block' + faksimile.ID);
     let boundingClientRect: any = element.getBoundingClientRect();
     let parentPosition = this.getPosition(element);
 
@@ -57,32 +57,48 @@ export class AppComponent{
     console.log("Moved" + parentPosition.top)
   }
 
-  onDragBegin(event: any, faksimile: Faksimile) {
-    let element = document.getElementById('card-div' + faksimile.ID);
+
+  drag_mini_block_Started(event: CdkDragEnd, faksimile: Faksimile) {
+    let element = event.source.element.nativeElement;
+    this.mini_old_boundingClientRect = element.getBoundingClientRect();
+
+    let maxi_elem = document.getElementById('card-block' + faksimile.ID);
+    this.maxi_old_boundingClientRect = maxi_elem.getBoundingClientRect();
+
     this.inc_index = ++this.inc_index
     element.style.zIndex = this.inc_index.toString();
   }
-
-  dragMoved(event: CdkDragEnd, faksimile: Faksimile) {
+  drag_mini_block_Moved(event: CdkDragEnd, faksimile: Faksimile) {
     let element = event.source.element.nativeElement;
-    let boundingClientRect: any = element.getBoundingClientRect();
+    let mini_current_boundingClientRect: any = element.getBoundingClientRect();
     let parentPosition = this.getPosition(element);
 
-    let drag_element = document.getElementById('card-div' + faksimile.ID);
-    let dragboundingClientRect: any = drag_element.getBoundingClientRect();
+    let drag_element = document.getElementById('card-block' + faksimile.ID);
+    let maxi_current_boundingClientRect: any = drag_element.getBoundingClientRect();
 
-    var newPos = ((boundingClientRect.y - parentPosition.top) * dragboundingClientRect.height) / 100;
+    var mini_distance = mini_current_boundingClientRect.y - this.mini_old_boundingClientRect.y;
+
+    var maxi_distance = (mini_distance * maxi_current_boundingClientRect.height) / mini_current_boundingClientRect.height;
+
+    var newPos = ((mini_current_boundingClientRect.y - parentPosition.top) * maxi_current_boundingClientRect.height) / 100;
     drag_element.style.top = newPos + "px";
     this.inc_index = ++this.inc_index
     drag_element.style.zIndex = this.inc_index.toString();
-
   }
-  dragEnded(event: CdkDragEnd, faksimile: Faksimile) {
-    //event.source.getRootElement().getBoundingClientRect();
+  drag_mini_block_Ended(event: CdkDragEnd, faksimile: Faksimile) {
     let element = event.source.element.nativeElement;
     this.inc_index = ++this.inc_index
     element.style.zIndex = this.inc_index.toString();
   }
+
+  drag_maxi_block_Started(event: any, faksimile: Faksimile) {
+    let element = document.getElementById('card-block' + faksimile.ID);
+    this.inc_index = ++this.inc_index
+    element.style.zIndex = this.inc_index.toString();
+  }
+
+
+
 
   getPosition(el) {
     let x = 0;

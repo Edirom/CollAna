@@ -8,30 +8,23 @@
   </div>
 </nav>
 <div>
-  <!--<canvas id="canvas" height="1000" width="1000"></canvas>-->
-  <div class="container-fluid" *ngIf="faksimiles?.length > 0" fxLayout="row" fxLayoutAlign="space-between">
+  <div class="container-fluid" *ngIf="faksimiles?.length > 0" fxLayoutAlign="space-between">
     <div fxFlex="93%" fxLayoutGap="5px" fxLayout="column">
-      <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;" ngDraggable (started)="onDragBegin($event, a)" (movingOffset)="onMoving($event, a)" ngResizable rzHandles="n,s,e,w,se,sw">
-        <!--<div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;" ngDraggable (started)="onDragBegin($event, a)" (movingOffset)="onMoving($event, a)" ngResizable rzHandles="n,s,e,w,se,sw">-->
+      <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;">
+        <!--[ngStyle]="{'height': a.size[1]+'px'}" -->
+        <!--cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)"-->
+        <div class="ol-boxnew" id="{{ 'card-block' + a.ID}}" cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)" [style.border-color]="a.Color"></div>
 
-        <div>
-          <div class="ol-boxnew" id="{{ 'card-block' + a.ID}}" [style.border-color]="a.Color"></div>
-
-          <!--cdkDrag>-->
-          <!--<div ngResizable [rzHandles]="'n,e,s,w,se,sw,ne,nw'" class="resizable-widget">
-      <div class="ol-boxnew" id="{{ 'card-block' + a.ID}}"></div>
-    </div>-->
-        </div>
       </div>
       </div>
-    <div class="faksimile-mini-boundary">
-      <div fxFlex="5%" fxLayoutGap="5px" fxLayout="column">
-        <div *ngFor="let a of faksimiles; trackBy:trackByIndex">
-          <div class="faksimile-box text "  cdkDragBoundary=".faksimile-mini-boundary" cdkDragLockAxis="y" cdkDrag (cdkDragMoved)="dragMoved($event, a)" (cdkDragStarted)="dragStarted($event, a)" (cdkDragEnded)="dragEnded($event, a)" id="{{ 'mini-card-canvas' + a.ID}}">  </div>
+      <div class="faksimile-mini-boundary">
+        <div fxFlex="5%" fxLayoutGap="5px" fxLayout="column">
+          <div *ngFor="let a of faksimiles; trackBy:trackByIndex">
+            <div class="faksimile-box text " cdkDragBoundary=".faksimile-mini-boundary" cdkDragLockAxis="y" cdkDrag (cdkDragMoved)="drag_mini_block_Moved($event, a)" (cdkDragStarted)="drag_mini_block_Started($event, a)" (cdkDragEnded)="drag_mini_block_Ended($event, a)" id="{{ 'mini-card-canvas' + a.ID}}">  </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
   </div>
 <!--<ngx-extended-pdf-viewer [src]="src"  useBrowserLocale="true" height="80vh"></ngx-extended-pdf-viewer>-->
 <h2><router-outlet></router-outlet> </h2>
