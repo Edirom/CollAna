@@ -1,6 +1,6 @@
 {
-  "name": "ng7-pre",
-  "version": "0.0.0",
+  "name": "ehinman",
+  "version": "0.1.0-alpha",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
