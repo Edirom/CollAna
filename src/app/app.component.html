@@ -8,10 +8,13 @@
   </div>
 </nav>
 <div>
-  <div class="container-fluid" *ngIf="faksimiles?.length > 0" fxLayout="row" fxLayoutAlign="space-between">
+  <div class="container-fluid" *ngIf="faksimiles?.length > 0" fxLayoutAlign="space-between">
     <div fxFlex="93%" fxLayoutGap="5px" fxLayout="column">
-      <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;" >
-         <div class="ol-boxnew" id="{{ 'card-block' + a.ID}}" cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)" [style.border-color]="a.Color"></div>
+      <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;">
+        <!--[ngStyle]="{'height': a.size[1]+'px'}" -->
+        <!--cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)"-->
+        <div class="ol-boxnew" id="{{ 'card-block' + a.ID}}" cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)" [style.border-color]="a.Color"></div>
+
       </div>
       </div>
       <div class="faksimile-mini-boundary">

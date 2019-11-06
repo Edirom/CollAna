@@ -37,6 +37,7 @@ export class AppComponent{
   }
 
 
+
   drag_maxi_block_Moved(event: CdkDragMove, faksimile: Faksimile) {
     let element = document.getElementById('card-block' + faksimile.ID);
     let boundingClientRect: any = element.getBoundingClientRect();

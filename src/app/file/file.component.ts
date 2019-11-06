@@ -20,10 +20,12 @@ import Toggle from 'ol-ext/control/Toggle';
 import Button from 'ol-ext/control/Button';
 import TextButton from 'ol-ext/control/TextButton';
 import Magnify from 'ol-ext/overlay/Magnify';
+import Modify from 'ol/interaction/Modify';
 import { Pages } from '../types/pages';
 import Draw, { createBox } from 'ol/interaction/Draw';
 import {Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
+
 
 import { Stroke, Fill, Circle, Style } from 'ol/style';
 import GeometryType from 'ol/geom/GeometryType';
@@ -314,7 +316,7 @@ export class FileComponent {
           new DragRotateAndZoom()
         ]),*/
         interactions: defaultInteractions({
-          doubleClickZoom: true,
+          doubleClickZoom: false,
           dragPan: true,
           mouseWheelZoom: false,
         }),
@@ -349,7 +351,7 @@ export class FileComponent {
       new ImageLayer({
         source: new Static({
           url: url,
-          //imageSize: [containt.canvas.width, containt.canvas.height],
+         // imageSize: [containt.canvas.width, containt.canvas.height],
           projection: projection,
           imageExtent: extent
         })
@@ -383,6 +385,8 @@ export class FileComponent {
 
     var zoomslider = new ZoomSlider();
     map.addControl(zoomslider);
+    faksimile.size = [containt.canvas.width, containt.canvas.height];
+  //  map.setSize([containt.canvas.width, containt.canvas.height]);
     //map.updateSize();
     // Main control bar
 
@@ -507,31 +511,59 @@ export class FileComponent {
         }
       });
     mainbartopright.addControl(movetofront);*/
-    var geometryFunction;
-    var value;
-    var drawBox = new Button(
+    var geometryFunction = createBox();
+    var value = 'Circle';
+    var draw = new Draw({
+      source: source,
+      type: value as GeometryType,
+      geometryFunction: geometryFunction
+    });
+
+    var drawBox = new Toggle(
       {
-        html: '<i class="fa fa-clone"></i>',
+        html: '<i class="fas fa-square"></i>',
         title: 'Draw Box',
-        handleClick: function () {
-         // var canvas: any = document.getElementById('card-div' + faksimile.ID);
-         /* map.removeInteraction(draw);
-          value = 'Box' as GeometryType;
-          geometryFunction = createBox();
+        active: false,
+        onToggle: function (active) {
+          if (active) {
+            modify.setActive(false);
+            map.addInteraction(draw);
+          }
 
-          var draw = new Draw({
-            source: source,
-            type: value,
-            geometryFunction: geometryFunction
-          });
-          map.addInteraction(draw);*/
-         // canvas.style.zIndex = ++self.inc_index;
-
+          else {
+            map.removeInteraction(draw);
+          }
         }
       });
     mainbartopright.addControl(drawBox);
 
+    var modify = new Toggle(
+      {
+        html: '<i class="fas fa-vector-square"></i>',
+        title: 'Modify',
+        active: false,
+        onToggle: function (active) {
+          if (active) {
+            drawBox.setActive(false);
+            map.removeInteraction(draw);
+            var interactions = {
+             
+              modify: new Modify({
+                source: vector.getSource(),
+                // insertVertexCondition: function(){ return false; }
+              }),
+            }
 
+            for (var i in interactions) map.addInteraction(interactions[i]);
+            //map.addInteraction(draw);
+          }
+
+          else {
+           // map.removeInteraction(draw);
+          }
+        }
+      });
+    mainbartopright.addControl(modify);
    
   
 
@@ -540,6 +572,7 @@ export class FileComponent {
         html: '<i class="fa fa-undo"></i>',
         title: 'Undo',
         handleClick: function () {
+          map.removeInteraction(draw);
           self.imageOriginal.load(faksimile.pages[num-1].contain, imageLoaded);
 
           function imageLoaded() {
@@ -558,6 +591,7 @@ export class FileComponent {
         title: "Magnify",
         active: false,
         onToggle: function (active) {
+         var allLayers = null; 
          var ov = new Magnify(
            {
              layers: [layer],
@@ -699,6 +733,7 @@ export class FileComponent {
        
       }
     });
+
   
   }
 
