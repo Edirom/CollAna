@@ -1,19 +1,19 @@
-# base image
-FROM node:12.2.0
+##################################
+# node image for building the app 
+##################################
+FROM node:lts as builder
 
 # set working directory
 WORKDIR /app
 
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
-
-# install and cache app dependencies
-COPY package.json /app/package.json
-RUN npm install
-RUN npm install -g @angular/cli@7.3.9
-
-# add app
+# build app
 COPY . /app
+RUN npm install \
+    && npm run build
 
-# start app
-CMD ng serve --host 0.0.0.0 --disableHostCheck
+##################################
+# nginx for serving the app
+##################################
+FROM nginx:alpine
+LABEL maintainer="Peter Stadler for the ViFE"
+COPY --from=builder /app/dist/*  /usr/share/nginx/html/ 
