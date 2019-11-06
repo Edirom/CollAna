@@ -13,7 +13,8 @@ export class Faksimile {
   funqueue: any[];
   index: number;
   Color: string;
-  constructor(type: string, title: string, pages?: Pages[], numPages?: number, actualPage?: number, pdfDoc?: any, funqueueexecute?: boolean, funqueue?: any[], index?: number) {
+  size: number[];
+  constructor(type: string, title: string, pages?: Pages[], numPages?: number, actualPage?: number, pdfDoc?: any, funqueueexecute?: boolean, funqueue?: any[], index?: number, size?: number[]) {
     var ID  = function () {
       // Math.random should be unique because of its seeding algorithm.
       // Convert it to base 36 (numbers + letters), and grab the first 9 characters
@@ -41,5 +42,6 @@ export class Faksimile {
     this.funqueueexecute = funqueueexecute;
     this.funqueue = funqueue || [];
     this.index = index || null;
+    this.size = size || [];
   }
 }
