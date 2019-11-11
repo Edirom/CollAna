@@ -25,6 +25,10 @@ import { Pages } from '../types/pages';
 import Draw, { createBox } from 'ol/interaction/Draw';
 import {Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
+import FocusMap from 'ol-ext/interaction/FocusMap';
+import Transform from 'ol-ext/interaction/Transform';
+import Delete from 'ol-ext/interaction/Delete';
+import { shiftKeyOnly } from 'ol/events/condition';
 
 
 import { Stroke, Fill, Circle, Style } from 'ol/style';
@@ -346,6 +350,7 @@ export class FileComponent {
       
     }
 
+
     
     var layer: any =
       new ImageLayer({
@@ -519,6 +524,20 @@ export class FileComponent {
       geometryFunction: geometryFunction
     });
 
+    var focusmap = new FocusMap();
+
+    var transform_interaction = new Transform({
+      addCondition: shiftKeyOnly
+    });
+
+    var delete_interaction = new Delete();
+
+    var modify_interaction = new Modify({
+      source: vector.getSource(),
+      // insertVertexCondition: function(){ return false; }
+    });
+    
+
     var drawBox = new Toggle(
       {
         html: '<i class="fas fa-square"></i>',
@@ -527,6 +546,12 @@ export class FileComponent {
         onToggle: function (active) {
           if (active) {
             modify.setActive(false);
+            select.setActive(false);
+            remove.setActive(false);
+            map.removeInteraction(modify_interaction);
+            map.removeInteraction(transform_interaction);
+            map.removeInteraction(delete_interaction);
+            map.removeInteraction(focusmap);
             map.addInteraction(draw);
           }
 
@@ -537,6 +562,34 @@ export class FileComponent {
       });
     mainbartopright.addControl(drawBox);
 
+    var select = new Toggle(
+      {
+        html: '<i class="fas fa-expand-arrows-alt"></i>',
+        title: 'Select Box',
+        active: false,
+        onToggle: function (active) {
+          if (active) {
+            drawBox.setActive(false);
+            modify.setActive(false);
+            remove.setActive(false);
+            map.removeInteraction(draw);
+            map.removeInteraction(modify_interaction);
+            map.removeInteraction(delete_interaction);
+            map.addInteraction(focusmap);
+            map.addInteraction(transform_interaction);
+
+            //map.addInteraction(draw);
+          }
+
+          else {
+            //map.removeInteraction(draw);
+          }
+        }
+      });
+    mainbartopright.addControl(select);
+
+
+
     var modify = new Toggle(
       {
         html: '<i class="fas fa-vector-square"></i>',
@@ -545,27 +598,47 @@ export class FileComponent {
         onToggle: function (active) {
           if (active) {
             drawBox.setActive(false);
+            select.setActive(false);
+            remove.setActive(false);
             map.removeInteraction(draw);
-            var interactions = {
-             
-              modify: new Modify({
-                source: vector.getSource(),
-                // insertVertexCondition: function(){ return false; }
-              }),
-            }
-
-            for (var i in interactions) map.addInteraction(interactions[i]);
-            //map.addInteraction(draw);
+            map.removeInteraction(transform_interaction);
+            map.removeInteraction(delete_interaction);
+            map.removeInteraction(focusmap);
+            map.addInteraction(modify_interaction);          
           }
 
           else {
-           // map.removeInteraction(draw);
+            map.removeInteraction(modify_interaction);
           }
         }
       });
     mainbartopright.addControl(modify);
    
-  
+    var remove = new Toggle(
+      {
+        html: '<i class="fas fa-trash"></i>',
+        title: 'Remove Box',
+        active: false,
+        onToggle: function (active) {
+          if (active) {
+            drawBox.setActive(false);
+            modify.setActive(false);
+            select.setActive(false);
+            map.removeInteraction(draw);
+            map.removeInteraction(modify);
+            map.removeInteraction(transform_interaction);
+            map.addInteraction(delete_interaction);
+            // map.addInteraction(transform);
+
+            //map.addInteraction(draw);
+          }
+
+          else {
+            map.removeInteraction(delete_interaction);
+          }
+        }
+      });
+    mainbartopright.addControl(remove);
 
     var undo = new Button(
       {
