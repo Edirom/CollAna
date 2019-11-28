@@ -48,3 +48,39 @@
   text-shadow: -1px -1px 1px hsl(190,50%,90%), 1px 1px 1px hsl(190,50%,50%);
 }
 
+
+svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.line {
+  stroke: cyan;
+  stroke-width: 1.5px;
+  stroke-linecap: square;
+}
+
+.handle {
+  fill: none;
+  pointer-events: all;
+  stroke: blue;
+  stroke-width: 2px;
+  cursor: move;
+}
+
+#buttons {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 200;
+}
+
+button {
+  display: block;
+  width: 10em;
+}
+
+  button:focus {
+    outline: none;
+  }

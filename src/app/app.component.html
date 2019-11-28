@@ -1,13 +1,17 @@
 <!--replace everything in this file with the code below.-->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <a class="navbar-brand" href="#">
-    ZenMEM
+    eHinman
   </a>
   <div>
     <fileservice (complete)="import($event)"> </fileservice>
   </div>
 </nav>
 <div>
+  <div class="container" *ngIf="!faksimiles || faksimiles?.length === 0">
+    <div [innerHTML]="data">
+    </div>
+    </div>
   <div class="container-fluid" *ngIf="faksimiles?.length > 0" fxLayoutAlign="space-between">
     <div fxFlex="93%" fxLayoutGap="5px" fxLayout="column">
       <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;">

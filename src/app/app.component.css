@@ -18,3 +18,9 @@
       background-color: #2D6C7A;
       color: #FFFFFF;
     }
+
+displayed {
+  display:block;
+  margin-left:auto;
+  margin-right:auto;
+}
