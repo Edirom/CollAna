@@ -304,6 +304,8 @@ export class FileComponent {
       num = 1;
 
     var imageProcessed = new MarvinImage();
+    if (typeof faksimile.pages[num - 1] == "undefined")
+      return;
     var containt: any = faksimile.pages[num - 1].actualcontain;
 
     var extent = [0, 0, containt.canvas.width, containt.canvas.height];
@@ -1062,7 +1064,8 @@ export class FileComponent {
  * @param num Page number.
  */
   renderPage(faksimile: Faksimile, num: number, filename: string, numPages: number, pdfDoc: any) {
-    if (faksimile == null || typeof faksimile.pages[num-1] === "undefined" || typeof faksimile.pages[num-1].contain === "undefined") {
+    //if (faksimile === null || typeof faksimile.pages[num-1] === "undefined" || typeof faksimile.pages[num-1].contain === "undefined") {
+    
       var self = this;
 
       this.pageRendering = true;
@@ -1142,9 +1145,9 @@ export class FileComponent {
           console.log('Page rendered');
         });
       });
-    }
+ //  }
 
-    else {
+  /* else {
       if (faksimile.funqueueexecute) {
         for (let a of faksimile.funqueue) {
           (a)();
@@ -1158,7 +1161,7 @@ export class FileComponent {
       }
       this.generateMap(faksimile, num);
       this.generateMinPreview(faksimile);
-    }
+    }*/
 }
 
  
