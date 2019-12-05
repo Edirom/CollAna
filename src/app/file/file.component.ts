@@ -431,6 +431,17 @@ export class FileComponent {
       });
     barbottomleft.addControl(zoommfactor);
 
+    var rotation = new TextButton(
+      {
+        html: ' Rotation: <input id= "rotation-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="-360" max="360" step="1.0" type="number" value="' + map.getView().getRotation() * 180 / Math.PI + '"> ',
+        title: "Rotation",
+        handleClick: function (event: any) {
+          self.bindRotationInputs(event, faksimile);
+        }
+
+      });
+    barbottomleft.addControl(rotation);
+
     var mainbartopright = new Bar();
     map.addControl(mainbartopright);
     mainbartopright.setPosition("top-right");
@@ -984,9 +995,11 @@ export class FileComponent {
       });
     mainbarbuttom.addControl(close);
 
+    var currRotation = map.getView().getRotation();
     var currZoom = map.getView().getZoom();
     map.on('moveend', function (e) {
       var newZoom = map.getView().getZoom();
+      var newRotation = map.getView().getRotation();
       if (currZoom != newZoom) {
         console.log('zoom end, new zoom: ' + newZoom);
         currZoom = newZoom;
@@ -994,6 +1007,14 @@ export class FileComponent {
         currZoom = Math.round(currZoom * 100) / 100;
         zoomdiv.value = currZoom;
        
+      }
+      if (currRotation != newRotation) {
+        console.log('new Rotation: ' + newRotation);
+        currRotation = newRotation;
+        var rotationdiv: any = document.getElementById("rotation-div" + faksimile.ID);
+        var rotationDegree = currRotation * (180/Math.PI);
+        rotationdiv.value = rotationDegree;
+
       }
     });
 
@@ -1036,6 +1057,20 @@ export class FileComponent {
         var zoom = view.setZoom(idxInput.value);
         console.log("toom value: " + idxInput.value);
         console.log("zoom: " + zoom);
+      }
+    };
+  }
+
+  bindRotationInputs(event: any, faksimile: Faksimile) {
+    var idxInput = event.target;
+    //var idxInput: any = document.getElementById(id + faksimile.ID);
+    // idxInput.value = 1;
+    var self = this;
+    idxInput.onchange = function () {
+      console.log(idxInput.value);
+      if (idxInput.value > -361 && idxInput.value < 361) {
+        var view = self.getMap(faksimile.ID).map.getView();
+        var rotation = view.setRotation(idxInput.value *(Math.PI / 180));
       }
     };
 
