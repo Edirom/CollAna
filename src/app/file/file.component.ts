@@ -1,19 +1,17 @@
-import { Output, Component, EventEmitter, Injectable, Input, ElementRef } from '@angular/core';
+import { Output, Component, EventEmitter, Injectable, Input } from '@angular/core';
 import { FileService } from '../services/file.services';
 import { MapService } from '../services/map.service';
 import { Faksimile } from '../types/faksimile';
 
 
-
 import Map from 'ol/Map.js';
 import View from 'ol/View.js';
 import Projection from 'ol/proj/Projection.js';
-import { Image as ImageLayer} from 'ol/layer.js';
+import { Image as ImageLayer } from 'ol/layer.js';
 import Static from 'ol/source/ImageStatic.js'
 import { MapFaksimile } from '../types/mapfaksimile';
 import { ZoomSlider } from 'ol/control';
-import { defaults as defaultControls, FullScreen, Rotate, MousePosition } from 'ol/control.js';
-import { createStringXY } from 'ol/coordinate.js'
+import { defaults as defaultControls, FullScreen, Rotate } from 'ol/control.js';
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction.js';
 import Bar from 'ol-ext/control/Bar';
 import Legend from 'ol-ext/control/Legend';
@@ -24,7 +22,7 @@ import Magnify from 'ol-ext/overlay/Magnify';
 import Modify from 'ol/interaction/Modify';
 import { Pages } from '../types/pages';
 import Draw, { createBox } from 'ol/interaction/Draw';
-import { Vector as VectorLayer, Layer} from 'ol/layer';
+import { Vector as VectorLayer, Layer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import FocusMap from 'ol-ext/interaction/FocusMap';
 import Transform from 'ol-ext/interaction/Transform';
@@ -32,6 +30,8 @@ import Delete from 'ol-ext/interaction/Delete';
 import Swipe from 'ol-ext/control/Swipe';
 import { shiftKeyOnly } from 'ol/events/condition';
 import { createRectFromCoords, outlineRectangle, proveRectangle } from '../types/helpers';
+import MousePosition from 'ol/control/MousePosition';
+import { createStringXY } from 'ol/coordinate';
 
 
 import { ImageCanvas as ImageCanvasSource, Stamen } from 'ol/source.js';
@@ -41,21 +41,18 @@ import { fromLonLat, toLonLat } from 'ol/proj';
 
 import { transform } from 'ol/proj'
 import { getWidth, getCenter } from 'ol/extent';
-import {  Tile as TileLayer } from 'ol/layer';
+import { Tile as TileLayer } from 'ol/layer';
 
 import { FrameState } from 'ol/PluggableMap';
 
-import { ImageCanvas } from 'ol/source';
+
 import { Stroke, Fill, Circle, Style } from 'ol/style';
 import GeometryType from 'ol/geom/GeometryType';
 
 import * as d3 from "d3";
 
-import * as topojson from 'topojson-client';
 import { Overlay, Feature } from 'ol';
-import { Pixel } from 'ol/pixel';
 
-import BaseLayer from 'ol/layer/Base';
 
 
 declare var MarvinImage: any;
@@ -71,22 +68,22 @@ declare var pdfjsLib: any;
 
 @Component({
   selector: 'fileservice',
-    template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > Import </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
+  template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > Import </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
   styleUrls: ['./file.component.css']
 })
 
 
 
 export class FileComponent {
-   
-    
+
+
   @Output() complete: EventEmitter<any> = new EventEmitter();
   @Input() canvas_index: number;
- 
+
   faksimiles: Faksimile[];
   faksimile: Faksimile;
   contain = '';
-  
+
   inc_index = 100;
 
   imageOriginal;
@@ -104,23 +101,23 @@ export class FileComponent {
 
 
 
-//this.svg.on('mousedown', drawingstarted).on('mouseup', drawingended).on('mousemove', drawpreview);
- mouseDown: boolean;
- preview: any;
+  //this.svg.on('mousedown', drawingstarted).on('mouseup', drawingended).on('mousemove', drawpreview);
+  mouseDown: boolean;
+  preview: any;
 
   private containerWidth: any;
   private containerHeight: any;
   private aspectRatio: any;
   private scaleFactor: any;
   private relFactor: any;
-  overlay: Overlay; 
+  overlay: Overlay;
 
   htmlElement: HTMLElement;
 
   projection: any;
 
 
-  constructor(private fileService: FileService, private mapService: MapService, private element: ElementRef) {
+  constructor(private fileService: FileService, private mapService: MapService) {
 
 
     // https://github.com/wbkd/d3-extended
@@ -237,7 +234,7 @@ export class FileComponent {
 
     imageProcessed.imageData = imageData;
     this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
-   
+
     this.repaint(faksimile, faksimile.actualPage);
     console.log("remove Background");
   }
@@ -266,10 +263,10 @@ export class FileComponent {
 
   repaint(data: Faksimile, num: number) {
     this.generateMap(data, num);
-}
+  }
 
-  
- 
+
+
 
   generateMinPreview(faksimile: Faksimile) {
 
@@ -334,14 +331,14 @@ export class FileComponent {
            */
           pdfjsLib.getDocument({ data: this.result }).promise.then(function (pdfDoc_) {
             self.pdfDoc = pdfDoc_;
-            
+
             // Initial/first page rendering
             self.renderPage(null, 1, file.name, self.pdfDoc.numPages, self.pdfDoc);
-        
+
           });
         };
-        
-    }   
+
+      }
   }
 
   vector;
@@ -362,7 +359,7 @@ export class FileComponent {
       return coord / factor;
     });
   }
-  
+
 
   private activateSVGMode(faksimile: Faksimile, map: Map) {
     var container = document.getElementById('card-block' + faksimile.ID);
@@ -394,24 +391,24 @@ export class FileComponent {
 
 
       preview = d3.select("#flat").append('polygon')
-                .classed('preview', true)
-                .attr('points', function () { return ""; })
-                .attr('fill', '#000000')
-                .attr('fill-opacity', 0.1)
-             ;
-      
+        .classed('preview', true)
+        .attr('points', function () { return ""; })
+        .attr('fill', '#000000')
+        .attr('fill-opacity', 0.1)
+        ;
+
       if (!final) {
         final = true;
 
         point2 = d3.mouse(this);
         cutCoord2 = mousePosition.map(x => parseInt(x));
         cutCoord2[1] = faksimile.size[1] - cutCoord2[1];
-       
+
         console.log("coord2: " + cutCoord2);
         if (point1 !== []) {
           var coord = createRectFromCoords(point1, point2);
           var cutCoord = createRectFromCoords(cutCoord1, cutCoord2);
-         
+
           console.log("cutCoord: " + cutCoord);
 
           perspectiveTransformation(coord, faksimile, cutCoord);
@@ -422,19 +419,19 @@ export class FileComponent {
       else {
         final = false;
 
-        
+
         point1 = d3.mouse(this);
         cutCoord1 = mousePosition.map(x => parseInt(x));
         cutCoord1[1] = faksimile.size[1] - cutCoord1[1];
-   
+
         console.log("Point1: " + point1);
         console.log("coord1: " + cutCoord1);
-       
+
       }
     }
 
     function perspectiveTransformation(coord, faksimile: Faksimile, cutCoord) {
-    
+
       that.svg.selectAll("circle").remove();
       that.svg.selectAll("image").remove();
       that.svg.selectAll(".line--x").remove();
@@ -462,15 +459,15 @@ export class FileComponent {
 
       var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
       var cropImage = new MarvinImage();
-     
+
       var cropWidth = cutCoord[3][0] - cutCoord[0][0];
       var cropHeight = cutCoord[1][1] - cutCoord[0][1];
       transformed();
-     
+
       Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
 
       cropImage.draw(cropImage.canvas);
-      
+
 
       var url = cropImage.canvas.toDataURL();
 
@@ -497,7 +494,7 @@ export class FileComponent {
         .attr("x2", width)
         .attr("y1", function (d) { return d; })
         .attr("y2", function (d) { return d; });
-    
+
       var handle = svgFlat.select("g").selectAll(".handle")
         .data(targetPoints)
         .enter().append("circle")
@@ -614,7 +611,7 @@ export class FileComponent {
         mapfk.map.removeLayer(layers.getArray()[i]);
       }
       //Es ist wichtig für die Lupefunktion
-     // mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
+      // mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
     }
     else {
 
@@ -672,9 +669,9 @@ export class FileComponent {
 
     map.addLayer(layer);
 
-   // var imgdiv: any = d3.select('#' + map.getTarget()).node();
-   // this.containerWidth = imgdiv.getBoundingClientRect().width;
-   // this.containerHeight = imgdiv.getBoundingClientRect().height;
+    // var imgdiv: any = d3.select('#' + map.getTarget()).node();
+    // this.containerWidth = imgdiv.getBoundingClientRect().width;
+    // this.containerHeight = imgdiv.getBoundingClientRect().height;
 
     var source = new VectorSource({ wrapX: false });
 
@@ -884,7 +881,7 @@ export class FileComponent {
     // and add it to the map
     map.addOverlay(overlay);
 
- 
+
     var drawBox = new Toggle(
       {
         html: '<i class="fas fa-border-all"></i>',
@@ -901,15 +898,15 @@ export class FileComponent {
             map.removeInteraction(focusmap);
 
 
-          
+
             self.resetOverlaySVG(map, faksimile);
             self.buildOverlaySVG(map, faksimile);
             self.activateSVGMode(faksimile, map);
 
-  
+
           }
-    
- 
+
+
           else {
             //self.resetOverlaySVG(map, faksimile);
             //map.un("click", mapclick);
@@ -919,9 +916,9 @@ export class FileComponent {
       });
     mainbartopright.addControl(drawBox);
 
-  
 
- 
+
+
     var mergeArea = new Toggle(
       {
         html: '<i class="fas fa-link"></i>',
@@ -930,7 +927,7 @@ export class FileComponent {
         onToggle: function (active) {
           if (active) {
             drawBox.setActive(false);
-          
+
             //remove.setActive(false);
             map.removeInteraction(draw);
             map.removeInteraction(modify_interaction);
@@ -948,34 +945,34 @@ export class FileComponent {
       });
     mainbartopright.addControl(mergeArea);
 
-  
-   
-   /*var remove = new Toggle(
-      {
-        html: '<i class="fas fa-trash"></i>',
-        title: 'Remove Box',
-        active: false,
-        onToggle: function (active) {
-          if (active) {
-            drawBox.setActive(false);
-            modify.setActive(false);
-            select.setActive(false);
-            map.removeInteraction(draw);
-            map.removeInteraction(modify);
-            map.removeInteraction(transform_interaction);
-            map.addInteraction(delete_interaction);
-            // map.addInteraction(transform);
 
-            //map.addInteraction(draw);
-          }
 
-          else {
-            map.removeInteraction(delete_interaction);
-            
-          }
-        }
-      });
-    mainbartopright.addControl(remove);*/
+    /*var remove = new Toggle(
+       {
+         html: '<i class="fas fa-trash"></i>',
+         title: 'Remove Box',
+         active: false,
+         onToggle: function (active) {
+           if (active) {
+             drawBox.setActive(false);
+             modify.setActive(false);
+             select.setActive(false);
+             map.removeInteraction(draw);
+             map.removeInteraction(modify);
+             map.removeInteraction(transform_interaction);
+             map.addInteraction(delete_interaction);
+             // map.addInteraction(transform);
+ 
+             //map.addInteraction(draw);
+           }
+ 
+           else {
+             map.removeInteraction(delete_interaction);
+             
+           }
+         }
+       });
+     mainbartopright.addControl(remove);*/
 
 
 
@@ -985,31 +982,31 @@ export class FileComponent {
         title: 'Undo',
         handleClick: function () {
           map.removeInteraction(draw);
-          self.imageOriginal.load(faksimile.pages[num-1].contain, imageLoaded);
+          self.imageOriginal.load(faksimile.pages[num - 1].contain, imageLoaded);
 
           function imageLoaded() {
             imageProcessed = self.imageOriginal.clone();
-            self.fileService.setActualContain(faksimile, faksimile.pages[num-1], imageProcessed);
+            self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], imageProcessed);
             self.repaint(faksimile, num);
           }
 
         }
       });
     mainbartopright.addControl(undo);
-  
+
     var magnify = new Toggle(
       {
         html: '<i class="fa fa-search"></i>',
         title: "Magnify",
         active: false,
         onToggle: function (active) {
-         var ov = new Magnify(
-           {
-             layers: [layer],
-             zoomOffset: 1,
-             projection: projection,
-             imageExtent: extent
-           });
+          var ov = new Magnify(
+            {
+              layers: [layer],
+              zoomOffset: 1,
+              projection: projection,
+              imageExtent: extent
+            });
 
           if (active) {
             map.addOverlay(ov);
@@ -1029,9 +1026,9 @@ export class FileComponent {
     mainbarbuttom.setPosition("bottom");
 
     // mainbar.addControl(new Magnify(faksimile, map));
-   
+
     mainbarbuttom.addControl(new FullScreen());
-   
+
     if (faksimile.type == "pdf") {
 
       var synchronous_previous = new Button(
@@ -1074,9 +1071,9 @@ export class FileComponent {
       var pagenum = new TextButton(
         {
           html: '<input class= "fa fa-lg" style="width: 2.5em;" type="number" value="' + faksimile.actualPage + '"> / ' + faksimile.numPages + '',
-         // html: '<input [value]="pagenr" (input)="pagenr = $event.target.value" type="number" min = "1">',
+          // html: '<input [value]="pagenr" (input)="pagenr = $event.target.value" type="number" min = "1">',
           title: "Page number",
-          handleClick: function (event: any) {	
+          handleClick: function (event: any) {
             self.bindInputs(event, faksimile);
           }
 
@@ -1104,8 +1101,8 @@ export class FileComponent {
           title: "Synchronous Next",
           handleClick: function () {
             var faksimiles: Faksimile[] = self.fileService.getFaksimiles();
-            
-         
+
+
             for (let a of faksimiles) {
               if (a.actualPage >= a.numPages) {
                 return;
@@ -1113,7 +1110,7 @@ export class FileComponent {
               a.actualPage++;
               self.queueRenderPage(a, a.actualPage, a.title, a.numPages);
             }
-            
+
           }
         });
       mainbarbuttom.addControl(synchronous_next);
@@ -1136,8 +1133,8 @@ export class FileComponent {
     var currZoom = map.getView().getZoom();
     map.on('postrender', function (e) {
       map.set("frameState", e.frameState);
-     
-     
+
+
       console.log("FrameState " + this.frameState);
     });
 
@@ -1153,26 +1150,26 @@ export class FileComponent {
         var zoomdiv: any = document.getElementById("zoom-div" + faksimile.ID);
         currZoom = Math.round(currZoom * 100) / 100;
         zoomdiv.value = currZoom;
-       
+
       }
       if (currRotation != newRotation) {
         console.log('new Rotation: ' + newRotation);
         currRotation = newRotation;
         var rotationdiv: any = document.getElementById("rotation-div" + faksimile.ID);
-        var rotationDegree = currRotation * (180/Math.PI);
+        var rotationDegree = currRotation * (180 / Math.PI);
         rotationdiv.value = rotationDegree;
 
       }
     });
 
-  
+
   }
 
 
   bindInputs(event: any, faksimile: Faksimile) {
     var idxInput = event.target;
     //var idxInput: any = document.getElementById(id + faksimile.ID);
-   // idxInput.value = 1;
+    // idxInput.value = 1;
     var self = this;
     idxInput.onchange = function () {
       console.log(idxInput.value);
@@ -1217,7 +1214,7 @@ export class FileComponent {
       console.log(idxInput.value);
       if (idxInput.value > -361 && idxInput.value < 361) {
         var view = self.getMap(faksimile.ID).map.getView();
-        var rotation = view.setRotation(idxInput.value *(Math.PI / 180));
+        var rotation = view.setRotation(idxInput.value * (Math.PI / 180));
       }
     };
 
@@ -1226,17 +1223,17 @@ export class FileComponent {
   pageRendering = false;
   scale = 2;
   renderQueue = [];
-/**
- * If another page rendering in progress, waits until the rendering is
- * finised. Otherwise, executes rendering immediately.
- */
-   queueRenderPage(faksimile: Faksimile, num: number, title: string, numPages: number) {
-     if (this.pageRendering) {
-       this.renderQueue.push(faksimile);
+  /**
+   * If another page rendering in progress, waits until the rendering is
+   * finised. Otherwise, executes rendering immediately.
+   */
+  queueRenderPage(faksimile: Faksimile, num: number, title: string, numPages: number) {
+    if (this.pageRendering) {
+      this.renderQueue.push(faksimile);
     }
-   else {
-     this.renderPage(faksimile, num, title, numPages, faksimile.pdfDoc);
-     
+    else {
+      this.renderPage(faksimile, num, title, numPages, faksimile.pdfDoc);
+
     }
   }
 
@@ -1247,107 +1244,107 @@ export class FileComponent {
  */
   renderPage(faksimile: Faksimile, num: number, filename: string, numPages: number, pdfDoc: any) {
     //if (faksimile === null || typeof faksimile.pages[num-1] === "undefined" || typeof faksimile.pages[num-1].contain === "undefined") {
-    
-      var self = this;
 
-      this.pageRendering = true;
+    var self = this;
 
-      // Using promise to fetch the page
-      pdfDoc.getPage(num).then(function (page) {
-        console.log('Page loaded');
+    this.pageRendering = true;
 
-        var viewport = page.getViewport({ scale: self.scale });
+    // Using promise to fetch the page
+    pdfDoc.getPage(num).then(function (page) {
+      console.log('Page loaded');
 
-        // Prepare canvas using PDF page dimensions
-        var canvas: any = document.createElement('canvas');
+      var viewport = page.getViewport({ scale: self.scale });
 
-        var context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+      // Prepare canvas using PDF page dimensions
+      var canvas: any = document.createElement('canvas');
 
-        // Render PDF page into canvas context
-        var renderContext = {
-          canvasContext: context,
-          viewport: viewport
-        };
-        var renderTask = page.render(renderContext);
-        renderTask.promise.then(function () {
-          var src = canvas.toDataURL();
+      var context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
 
-          if (faksimile == null) {
-            faksimile = new Faksimile("pdf", filename, null, numPages, num, pdfDoc, false, null);
-           
-            var page: Pages = new Pages(num, faksimile.title, src, src);
-            faksimile.pages.push(page);
-            self.fileService.addFaksimile(faksimile);
+      // Render PDF page into canvas context
+      var renderContext = {
+        canvasContext: context,
+        viewport: viewport
+      };
+      var renderTask = page.render(renderContext);
+      renderTask.promise.then(function () {
+        var src = canvas.toDataURL();
 
+        if (faksimile == null) {
+          faksimile = new Faksimile("pdf", filename, null, numPages, num, pdfDoc, false, null);
+
+          var page: Pages = new Pages(num, faksimile.title, src, src);
+          faksimile.pages.push(page);
+          self.fileService.addFaksimile(faksimile);
+
+        }
+
+        else {
+          var page: Pages = new Pages(num, faksimile.title, src, src);
+          if (!self.fileService.checkPage(faksimile, page)) {
+            self.fileService.addPage(faksimile, page);
+          }
+        }
+
+        self.imageOriginal.load(src, imageLoaded);
+
+        function imageLoaded() {
+          var imageProcessed = self.imageOriginal.clone();
+          self.fileService.setActualContain(faksimile, page, imageProcessed);
+          imageProcessed = faksimile.pages[num - 1].actualcontain;
+          if (faksimile.funqueueexecute) {
+            for (let a of faksimile.funqueue) {
+              (a)();
+            }
           }
 
           else {
-            var page: Pages = new Pages(num, faksimile.title, src, src);
-            if (!self.fileService.checkPage(faksimile, page)) {
-              self.fileService.addPage(faksimile, page);
+            while (faksimile.funqueue.length > 0) {
+              faksimile.funqueue.shift();
             }
           }
+          self.generateMap(faksimile, num);
+          self.generateMinPreview(faksimile);
+        }
 
-          self.imageOriginal.load(src, imageLoaded);
+        var canvas_element = document.getElementsByName("canvas");
 
-          function imageLoaded() {
-            var imageProcessed = self.imageOriginal.clone();
-            self.fileService.setActualContain(faksimile, page, imageProcessed);
-            imageProcessed = faksimile.pages[num - 1].actualcontain;
-            if (faksimile.funqueueexecute) {
-              for (let a of faksimile.funqueue) {
-                (a)();
-              }
-            }
-
-            else {
-                while (faksimile.funqueue.length > 0) {
-                  faksimile.funqueue.shift();
-                }
-            }
-            self.generateMap(faksimile, num);
-            self.generateMinPreview(faksimile);
-          }
-
-          var canvas_element = document.getElementsByName("canvas");
-
-          canvas_element.forEach(function (element) {
-            document.removeChild(element);
-          });
-         
-
-          self.pageRendering = false;
-          if (self.renderQueue.length!= 0) {
-            // New page rendering is pending
-            var renderFaksimile: Faksimile = self.renderQueue[0];
-            self.renderPage(renderFaksimile, renderFaksimile.actualPage, renderFaksimile.title, renderFaksimile.numPages, renderFaksimile.pdfDoc);
-            self.renderQueue.shift();
-          }
-
-          console.log('Page rendered');
+        canvas_element.forEach(function (element) {
+          document.removeChild(element);
         });
+
+
+        self.pageRendering = false;
+        if (self.renderQueue.length != 0) {
+          // New page rendering is pending
+          var renderFaksimile: Faksimile = self.renderQueue[0];
+          self.renderPage(renderFaksimile, renderFaksimile.actualPage, renderFaksimile.title, renderFaksimile.numPages, renderFaksimile.pdfDoc);
+          self.renderQueue.shift();
+        }
+
+        console.log('Page rendered');
       });
- //  }
+    });
+    //  }
 
-  /* else {
-      if (faksimile.funqueueexecute) {
-        for (let a of faksimile.funqueue) {
-          (a)();
+    /* else {
+        if (faksimile.funqueueexecute) {
+          for (let a of faksimile.funqueue) {
+            (a)();
+          }
         }
-      }
-      else {
-        while (faksimile.funqueue.length > 0) {
-          faksimile.funqueue.shift();
+        else {
+          while (faksimile.funqueue.length > 0) {
+            faksimile.funqueue.shift();
+          }
+          
         }
-        
-      }
-      this.generateMap(faksimile, num);
-      this.generateMinPreview(faksimile);
-    }*/
-}
+        this.generateMap(faksimile, num);
+        this.generateMinPreview(faksimile);
+      }*/
+  }
 
- 
- 
+
+
 }
