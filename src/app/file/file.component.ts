@@ -1,7 +1,8 @@
-import { Output, Component, EventEmitter, Injectable, Input } from '@angular/core';
+import { Output, Component, EventEmitter, Injectable, Input, ElementRef } from '@angular/core';
 import { FileService } from '../services/file.services';
 import { MapService } from '../services/map.service';
 import { Faksimile } from '../types/faksimile';
+
 
 
 import Map from 'ol/Map.js';
@@ -11,7 +12,8 @@ import { Image as ImageLayer} from 'ol/layer.js';
 import Static from 'ol/source/ImageStatic.js'
 import { MapFaksimile } from '../types/mapfaksimile';
 import { ZoomSlider } from 'ol/control';
-import { defaults as defaultControls, FullScreen, Rotate } from 'ol/control.js';
+import { defaults as defaultControls, FullScreen, Rotate, MousePosition } from 'ol/control.js';
+import { createStringXY } from 'ol/coordinate.js'
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction.js';
 import Bar from 'ol-ext/control/Bar';
 import Legend from 'ol-ext/control/Legend';
@@ -22,26 +24,38 @@ import Magnify from 'ol-ext/overlay/Magnify';
 import Modify from 'ol/interaction/Modify';
 import { Pages } from '../types/pages';
 import Draw, { createBox } from 'ol/interaction/Draw';
-import {Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorLayer, Layer} from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import FocusMap from 'ol-ext/interaction/FocusMap';
 import Transform from 'ol-ext/interaction/Transform';
 import Delete from 'ol-ext/interaction/Delete';
 import Swipe from 'ol-ext/control/Swipe';
 import { shiftKeyOnly } from 'ol/events/condition';
+import { createRectFromCoords, outlineRectangle, proveRectangle } from '../types/helpers';
 
+
+import { ImageCanvas as ImageCanvasSource, Stamen } from 'ol/source.js';
+import { toStringHDMS } from 'ol/coordinate.js';
 import SourceState from 'ol/source/State';
 import { fromLonLat, toLonLat } from 'ol/proj';
+
+import { transform } from 'ol/proj'
 import { getWidth, getCenter } from 'ol/extent';
-import { Layer, Tile as TileLayer } from 'ol/layer';
+import {  Tile as TileLayer } from 'ol/layer';
 
+import { FrameState } from 'ol/PluggableMap';
 
+import { ImageCanvas } from 'ol/source';
 import { Stroke, Fill, Circle, Style } from 'ol/style';
 import GeometryType from 'ol/geom/GeometryType';
 
 import * as d3 from "d3";
-import { Overlay } from 'ol';
-import OverlayPositioning from 'ol/OverlayPositioning';
+
+import * as topojson from 'topojson-client';
+import { Overlay, Feature } from 'ol';
+import { Pixel } from 'ol/pixel';
+
+import BaseLayer from 'ol/layer/Base';
 
 
 declare var MarvinImage: any;
@@ -60,6 +74,8 @@ declare var pdfjsLib: any;
     template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > Import </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
   styleUrls: ['./file.component.css']
 })
+
+
 
 export class FileComponent {
    
@@ -82,11 +98,45 @@ export class FileComponent {
   form;
   pdfDoc;
 
-  host: any;
   svg: any;
+  rect: any;
+  g: any;
 
-  constructor(private fileService: FileService, private mapService: MapService) {
-    
+
+
+//this.svg.on('mousedown', drawingstarted).on('mouseup', drawingended).on('mousemove', drawpreview);
+ mouseDown: boolean;
+ preview: any;
+
+  private containerWidth: any;
+  private containerHeight: any;
+  private aspectRatio: any;
+  private scaleFactor: any;
+  private relFactor: any;
+  overlay: Overlay; 
+
+  htmlElement: HTMLElement;
+
+  projection: any;
+
+
+  constructor(private fileService: FileService, private mapService: MapService, private element: ElementRef) {
+
+
+    // https://github.com/wbkd/d3-extended
+    d3.selection.prototype.moveToFront = function () {
+      return this.each(function () {
+        this.parentNode.appendChild(this);
+      });
+    };
+    d3.selection.prototype.moveToBack = function () {
+      return this.each(function () {
+        var firstChild = this.parentNode.firstChild;
+        if (firstChild) {
+          this.parentNode.insertBefore(this, firstChild);
+        }
+      });
+    };
   }
 
   wrapFunction = function (fn, context, params) {
@@ -223,6 +273,8 @@ export class FileComponent {
 
   generateMinPreview(faksimile: Faksimile) {
 
+
+
     var element: any = document.getElementById("mini-card-canvas" + faksimile.ID);
 
     element.innerText = faksimile.index + 1;
@@ -289,16 +341,249 @@ export class FileComponent {
           });
         };
         
-
-
-    }
-
-   
-   
+    }   
   }
 
   vector;
 
+
+  frameState;
+
+
+  private absoluteToRelative = function (point: number[], factor: number): number[] {
+    return point.map(function (coord) {
+      return coord * factor;
+    });
+
+  }
+
+  private relativeToAbsolute = function (point: number[], factor: number): number[] {
+    return point.map(function (coord) {
+      return coord / factor;
+    });
+  }
+  
+
+  private activateSVGMode(faksimile: Faksimile, map: Map) {
+    var container = document.getElementById('card-block' + faksimile.ID);
+    var mousePosition;
+    container.addEventListener('mousemove', function (event) {
+      mousePosition = map.getEventCoordinate(event);
+    });
+    var that = this;
+    //console.log("Point:" + point);
+
+    this.svg.on('click', drawingstarted).on('mousemove', drawpreview);
+    var final: boolean = true;
+    var point1: number[] = [];
+    var point2: number[] = [];
+    var cutCoord1;
+    var cutCoord2;
+    //this.svg.on('mousedown', drawingstarted).on('mouseup', drawingended).on('mousemove', drawpreview);
+    var mouseDown: boolean = false;
+    var that = this;
+    var preview;
+    //var preview= that.svg.select('polygon.preview');
+    //console.log("Coordinate: " + point);
+    that.g = that.svg.append('g');
+    //that.svg.select('#polygon').remove();
+
+
+    function drawingstarted() {
+      mouseDown = true;
+
+
+      preview = d3.select("#flat").append('polygon')
+                .classed('preview', true)
+                .attr('points', function () { return ""; })
+                .attr('fill', '#000000')
+                .attr('fill-opacity', 0.1)
+             ;
+      
+      if (!final) {
+        final = true;
+
+        point2 = d3.mouse(this);
+        cutCoord2 = mousePosition.map(x => parseInt(x));
+        cutCoord2[1] = faksimile.size[1] - cutCoord2[1];
+       
+        console.log("coord2: " + cutCoord2);
+        if (point1 !== []) {
+          var coord = createRectFromCoords(point1, point2);
+          var cutCoord = createRectFromCoords(cutCoord1, cutCoord2);
+         
+          console.log("cutCoord: " + cutCoord);
+
+          perspectiveTransformation(coord, faksimile, cutCoord);
+          drawingended();
+        }
+
+      }
+      else {
+        final = false;
+
+        
+        point1 = d3.mouse(this);
+        cutCoord1 = mousePosition.map(x => parseInt(x));
+        cutCoord1[1] = faksimile.size[1] - cutCoord1[1];
+   
+        console.log("Point1: " + point1);
+        console.log("coord1: " + cutCoord1);
+       
+      }
+    }
+
+    function perspectiveTransformation(coord, faksimile: Faksimile, cutCoord) {
+    
+      that.svg.selectAll("circle").remove();
+      that.svg.selectAll("image").remove();
+      that.svg.selectAll(".line--x").remove();
+      that.svg.selectAll(".line--y").remove();
+      that.svg.selectAll(".handle").remove();
+
+
+
+      var width = coord[3][0] - coord[0][0],
+        height = coord[1][1] - coord[0][1];
+
+
+      var transform = ["", "-webkit-", "-moz-", "-ms-", "-o-"].reduce(function (p, v) { return v + "transform" in document.body.style ? v : p; }) + "transform";
+
+      var sourcePoints = [[0, 0], [width, 0], [width, height], [0, height]],
+        targetPoints = [[0, 0], [width, 0], [width, height], [0, height]];
+
+      that.g
+        .attr("transform", "translate(" + coord[0][0] + "," + coord[0][1] + ")");
+
+      var svgTransform = d3.select("#transform")
+        .style(transform + "-origin", coord[0][0] + "px " + coord[0][1] + "px 0");
+
+      var svgFlat = d3.select("#flat");
+
+      var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
+      var cropImage = new MarvinImage();
+     
+      var cropWidth = cutCoord[3][0] - cutCoord[0][0];
+      var cropHeight = cutCoord[1][1] - cutCoord[0][1];
+      transformed();
+     
+      Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
+
+      cropImage.draw(cropImage.canvas);
+      
+
+      var url = cropImage.canvas.toDataURL();
+
+
+      svgTransform.select("g").append("image")
+        .attr("xlink:href", url)
+        .attr("width", width)
+        .attr("height", height);
+
+      svgTransform.select("g").selectAll(".line--x")
+        .data(d3.range(0, width + 1, 40))
+        .enter().append("line")
+        .attr("class", "line line--x")
+        .attr("x1", function (d) { return d; })
+        .attr("x2", function (d) { return d; })
+        .attr("y1", 0)
+        .attr("y2", height);
+
+      svgTransform.select("g").selectAll(".line--y")
+        .data(d3.range(0, height + 1, 40))
+        .enter().append("line")
+        .attr("class", "line line--y")
+        .attr("x1", 0)
+        .attr("x2", width)
+        .attr("y1", function (d) { return d; })
+        .attr("y2", function (d) { return d; });
+    
+      var handle = svgFlat.select("g").selectAll(".handle")
+        .data(targetPoints)
+        .enter().append("circle")
+        .attr("class", "handle")
+        .attr("transform", function (d) { return "translate(" + d + ")"; })
+        .attr("r", 7)
+        .call(d3.drag()
+          .subject(function (d) { return { x: d[0], y: d[1] }; })
+          .on("drag", dragged));
+
+
+      function dragged(d) {
+        d3.select(this).attr("transform", "translate(" + (d[0] = d3.event.x) + "," + (d[1] = d3.event.y) + ")");
+        transformed();
+      }
+
+      function transformed() {
+        for (var a = [], b = [], i = 0, n = sourcePoints.length; i < n; ++i) {
+          var s = sourcePoints[i], t = targetPoints[i];
+          a.push([s[0], s[1], 1, 0, 0, 0, -s[0] * t[0], -s[1] * t[0]]), b.push(t[0]);
+          a.push([0, 0, 0, s[0], s[1], 1, -s[0] * t[1], -s[1] * t[1]]), b.push(t[1]);
+        }
+
+        var X = solve(a, b, true), matrix = [
+          X[0], X[3], 0, X[6],
+          X[1], X[4], 0, X[7],
+          0, 0, 1, 0,
+          X[2], X[5], 0, 1
+        ].map(function (x) {
+          return x;
+        });
+
+
+        svgTransform.style(transform, "matrix3d(" + matrix + ")");
+
+      }
+
+    }
+
+    function drawpreview() {
+      if (mouseDown) {
+        point2 = that.relativeToAbsolute(d3.mouse(this), that.relFactor);
+        var previewPoints = createRectFromCoords(point1, point2);
+        preview.attr('points', function () {
+          return previewPoints.map(v => that.absoluteToRelative(v, that.relFactor)
+          ).join(' ');
+        });
+      }
+    }
+
+    function drawingended() {
+      mouseDown = false;
+      point1 = null;
+      point2 = null;
+      that.svg.selectAll('polygon').remove();
+      //that.g.select('polygon.preview').style('visibility', 'hidden');
+    }
+
+  }
+
+
+  buildOverlaySVG(map: Map, faksimile: Faksimile) {
+
+    var imgdiv: any = d3.select('#' + map.getTarget()).node();
+    var containerWidth = imgdiv.getBoundingClientRect().width;
+    var containerHeight = imgdiv.getBoundingClientRect().height;
+    this.relFactor = 1;//(this.containerWidth - 10) / this.width;
+    //self.aspectRatio = self.containerWidth / containerWidth;
+    var transform = ["", "-webkit-", "-moz-", "-ms-", "-o-"].reduce(function (p, v) { return v + "transform" in document.body.style ? v : p; }) + "transform";
+
+    this.svg = d3.select("#overlay" + faksimile.ID).selectAll("svg")
+      //this.svg = d3.select(map.getOverlayContainer()).selectAll("svg")
+      .data(["transform", "flat"])
+      .enter().append("svg")
+      .attr("id", function (d) { return d; })
+      .attr("width", containerWidth)
+      .attr("height", containerHeight);
+
+
+  }
+
+  resetOverlaySVG(map: Map, faksimile: Faksimile) {
+    d3.select("#card-block" + faksimile.ID).selectAll("svg").remove();
+  }
+
+  mousePosition: MousePosition;
   generateMap(faksimile: Faksimile, num: number) {
     if (num == null)
       num = 1;
@@ -309,12 +594,12 @@ export class FileComponent {
     var containt: any = faksimile.pages[num - 1].actualcontain;
 
     var extent = [0, 0, containt.canvas.width, containt.canvas.height];
-    var projection = new Projection({
+    this.projection = new Projection({
       code: 'xkcd-image',
       units: 'pixels',
       extent: extent
     });
-
+    var projection = this.projection;
     containt.draw(containt.canvas);
 
     var url = containt.canvas.toDataURL();
@@ -328,13 +613,16 @@ export class FileComponent {
       for (var i = layers.getArray().length - 1; i >= 0; --i) {
         mapfk.map.removeLayer(layers.getArray()[i]);
       }
-
-      mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
+      //Es ist wichtig für die Lupefunktion
+     // mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
     }
     else {
 
+
+
       var map = new Map({
         target: 'card-block' + faksimile.ID,
+
         /*interactions: defaultInteractions().extend([
           new DragRotateAndZoom()
         ]),*/
@@ -384,6 +672,10 @@ export class FileComponent {
 
     map.addLayer(layer);
 
+   // var imgdiv: any = d3.select('#' + map.getTarget()).node();
+   // this.containerWidth = imgdiv.getBoundingClientRect().width;
+   // this.containerHeight = imgdiv.getBoundingClientRect().height;
+
     var source = new VectorSource({ wrapX: false });
 
     this.vector = new VectorLayer({
@@ -407,6 +699,15 @@ export class FileComponent {
 
 
     map.addLayer(this.vector);
+
+    this.mousePosition = new MousePosition({
+      coordinateFormat: createStringXY(2),
+      projection: projection,
+      target: document.getElementById('card-block' + faksimile.ID),
+      undefinedHTML: '&nbsp;'
+    });
+
+    map.addControl(this.mousePosition);
 
 
     var zoomslider = new ZoomSlider();
@@ -569,58 +870,68 @@ export class FileComponent {
       // insertVertexCondition: function(){ return false; }
     });
 
-    var ele = document.createElement('div');
-    var pos: OverlayPositioning = OverlayPositioning.TOP_LEFT;
-    let crop = new Overlay({
-      element: ele,
+    var self = this;
+
+
+    var overlay = new Overlay({
+      element: document.getElementById('overlay' + faksimile.ID),
     });
 
-    var ondrawend = function (e) {
-     // console.log(e.feature.getGeometry().getCoordinates());
-      var coord: [] = e.feature.getGeometry().getCoordinates()[0].slice(0, -1);
-      var elem = crop.getElement();
-      crop.setPosition(coord);
-      drawCrop(elem, coord);
-     
+    var element = overlay.getElement();
+    element.innerHTML = "";
+    overlay.setPosition([0, faksimile.size[1]]);
 
-      console.log(coord, crop.getPosition(), crop.getPositioning());
-    };
+    // and add it to the map
+    map.addOverlay(overlay);
 
-   /* var drawBox = new Toggle(
+ 
+    var drawBox = new Toggle(
       {
-        html: '<i class="fas fa-square"></i>',
-        title: 'Draw Box',
+        html: '<i class="fas fa-border-all"></i>',
+        title: 'Perspective Transformation',
         active: false,
         onToggle: function (active) {
           if (active) {
-            modify.setActive(false);
-            select.setActive(false);
-            remove.setActive(false);
+
+            mergeArea.setActive(false);
+
             map.removeInteraction(modify_interaction);
             map.removeInteraction(transform_interaction);
             map.removeInteraction(delete_interaction);
             map.removeInteraction(focusmap);
-            draw.on('drawend', ondrawend);
-            map.addInteraction(draw);
-          }
 
+
+          
+            self.resetOverlaySVG(map, faksimile);
+            self.buildOverlaySVG(map, faksimile);
+            self.activateSVGMode(faksimile, map);
+
+  
+          }
+    
+ 
           else {
-            map.removeInteraction(draw);
+            //self.resetOverlaySVG(map, faksimile);
+            //map.un("click", mapclick);
+            self.svg.on('click', null).on('mousemove', null);
           }
         }
       });
-    mainbartopright.addControl(drawBox);*/
+    mainbartopright.addControl(drawBox);
 
-   /* var select = new Toggle(
+  
+
+ 
+    var mergeArea = new Toggle(
       {
-        html: '<i class="fas fa-expand-arrows-alt"></i>',
+        html: '<i class="fas fa-link"></i>',
         title: 'Select Box',
         active: false,
         onToggle: function (active) {
           if (active) {
             drawBox.setActive(false);
-            modify.setActive(false);
-            remove.setActive(false);
+          
+            //remove.setActive(false);
             map.removeInteraction(draw);
             map.removeInteraction(modify_interaction);
             map.removeInteraction(delete_interaction);
@@ -635,163 +946,11 @@ export class FileComponent {
           }
         }
       });
-    mainbartopright.addControl(select);*/
+    mainbartopright.addControl(mergeArea);
 
-
-    function drawCrop(ele, coords) {
-
-      var margin = { top: 50, right: 280, bottom: 50, left: 280 },
-        width = 600,
-        height = 600;
-       
-     // var sourcePoints = [[0, 0], [width, 0], [width, height], [0, height]];
-      //var targetPoints = [[0, 0], [width, 0], [width, height], [0, height]];
-
-
-
-      var sourcePoints = coords;
-      var targetPoints = coords;
-
-      var svg = d3.select(ele).append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-      var line = svg.selectAll(".line")
-        .data(d3.range(0, width + 1, 40).map(function (x) { return [[x, 0], [x, height]]; })
-          .concat(d3.range(0, height + 1, 40).map(function (y) { return [[0, y], [width, y]]; })))
-        .enter().append("path")
-        .attr("class", "line line--x");
-
-      var handle = svg.selectAll(".handle")
-        .data(targetPoints)
-        .enter().append("circle")
-        .attr("class", "handle")
-        .attr("transform", function (d) { return "translate(" + d + ")"; })
-        .attr("r", 7)
-        .call(d3.drag()
-          .subject(function (d) { return { x: d[0], y: d[1] }; })
-          .on("drag", dragged));
-
-      d3.selectAll("button")
-        .datum(function (d) { return JSON.parse((this as any).getAttribute("data-targets")); })
-        .on("click", clicked)
-        .call(transformed);
-
-      function clicked(d) {
-        d3.transition()
-          .duration(750)
-          .tween("points", function () {
-            var i = d3.interpolate(targetPoints, d);
-            return function (t) {
-              handle.data(targetPoints = i(t)).attr("transform", function (d) { return "translate(" + d + ")"; });
-              transformed();
-            };
-          });
-      }
-
-      function dragged(d) {
-        d3.select(this).attr("transform", "translate(" + (d[0] = d3.event.x) + "," + (d[1] = d3.event.y) + ")");
-        transformed();
-      }
-
-      function transformed() {
-        for (var a = [], b = [], i = 0, n = sourcePoints.length; i < n; ++i) {
-          var s = sourcePoints[i], t = targetPoints[i];
-          a.push([s[0], s[1], 1, 0, 0, 0, -s[0] * t[0], -s[1] * t[0]]), b.push(t[0]);
-          a.push([0, 0, 0, s[0], s[1], 1, -s[0] * t[1], -s[1] * t[1]]), b.push(t[1]);
-        }
-
-        var X = solve(a, b, true), matrix = [
-          X[0], X[3], 0, X[6],
-          X[1], X[4], 0, X[7],
-          0, 0, 1, 0,
-          X[2], X[5], 0, 1
-        ].map(function (x) {
-          return x;
-        });
-
-        line.attr("d", function (d) {
-          return "M" + project(matrix, d[0]) + "L" + project(matrix, d[1]);
-        });
-      }
-
-      // Given a 4x4 perspective transformation matrix, and a 2D point (a 2x1 vector),
-      // applies the transformation matrix by converting the point to homogeneous
-      // coordinates at z=0, post-multiplying, and then applying a perspective divide.
-      function project(matrix, point) {
-        point = multiply(matrix, [point[0], point[1], 0, 1]);
-        return [point[0] / point[3], point[1] / point[3]];
-      }
-
-      // Post-multiply a 4x4 matrix in column-major order by a 4x1 column vector:
-      // [ m0 m4 m8  m12 ]   [ v0 ]   [ x ]
-      // [ m1 m5 m9  m13 ] * [ v1 ] = [ y ]
-      // [ m2 m6 m10 m14 ]   [ v2 ]   [ z ]
-      // [ m3 m7 m11 m15 ]   [ v3 ]   [ w ]
-      function multiply(matrix, vector) {
-        return [
-          matrix[0] * vector[0] + matrix[4] * vector[1] + matrix[8] * vector[2] + matrix[12] * vector[3],
-          matrix[1] * vector[0] + matrix[5] * vector[1] + matrix[9] * vector[2] + matrix[13] * vector[3],
-          matrix[2] * vector[0] + matrix[6] * vector[1] + matrix[10] * vector[2] + matrix[14] * vector[3],
-          matrix[3] * vector[0] + matrix[7] * vector[1] + matrix[11] * vector[2] + matrix[15] * vector[3]
-        ];
-      }
-
-    }
   
-
-
-   /* var select2 = new Toggle(
-      {
-        html: '<i class="fas fa-expand-arrows-alt"></i>',
-        title: 'Select 2 Box',
-        active: false,
-        onToggle: function (active) {
-
-          if (active) {
-            map.addOverlay(crop);
-            //drawCrop(ele);
-            //map.addInteraction(selectClick);
-
-            //map.addInteraction(draw);
-          }
-
-          else {
-         
-          }
-        }
-      });
-    mainbartopright.addControl(select2);*/
-
-
-
-  /*  var modify = new Toggle(
-      {
-        html: '<i class="fas fa-vector-square"></i>',
-        title: 'Modify',
-        active: false,
-        onToggle: function (active) {
-          if (active) {
-            drawBox.setActive(false);
-            select.setActive(false);
-            remove.setActive(false);
-            map.removeInteraction(draw);
-            map.removeInteraction(transform_interaction);
-            map.removeInteraction(delete_interaction);
-            map.removeInteraction(focusmap);
-            map.addInteraction(modify_interaction);          
-          }
-
-          else {
-            map.removeInteraction(modify_interaction);
-          }
-        }
-      });
-    mainbartopright.addControl(modify);*/
    
-    /*var remove = new Toggle(
+   /*var remove = new Toggle(
       {
         html: '<i class="fas fa-trash"></i>',
         title: 'Remove Box',
@@ -812,35 +971,13 @@ export class FileComponent {
 
           else {
             map.removeInteraction(delete_interaction);
+            
           }
         }
       });
     mainbartopright.addControl(remove);*/
 
-   /* var swipe = new Toggle(
-      {
-        html: '<i class="fas fa-sliders-h"></i>',
-        title: 'Swipe',
-        active: false,
-        onToggle: function (active) {
-          if (active) {
-            drawBox.setActive(false);
-            modify.setActive(false);
-            select.setActive(false);
-            map.removeInteraction(draw);
-            map.removeInteraction(modify);
-            map.removeInteraction(transform_interaction);
 
-            var ctrl = new Swipe();
-            map.addControl(ctrl);
-          }
-
-          else {
-           // map.removeInteraction(delete_interaction);
-          }
-        }
-      });
-    mainbartopright.addControl(swipe);*/
 
     var undo = new Button(
       {
@@ -997,7 +1134,17 @@ export class FileComponent {
 
     var currRotation = map.getView().getRotation();
     var currZoom = map.getView().getZoom();
+    map.on('postrender', function (e) {
+      map.set("frameState", e.frameState);
+     
+     
+      console.log("FrameState " + this.frameState);
+    });
+
+
     map.on('moveend', function (e) {
+      map.set("frameState", e.frameState);
+
       var newZoom = map.getView().getZoom();
       var newRotation = map.getView().getRotation();
       if (currZoom != newZoom) {
@@ -1165,9 +1312,11 @@ export class FileComponent {
           }
 
           var canvas_element = document.getElementsByName("canvas");
+
           canvas_element.forEach(function (element) {
             document.removeChild(element);
           });
+         
 
           self.pageRendering = false;
           if (self.renderQueue.length!= 0) {

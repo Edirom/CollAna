@@ -49,6 +49,7 @@
 }
 
 
+
 svg {
   position: absolute;
   top: 0;
@@ -68,19 +69,3 @@ svg {
   stroke-width: 2px;
   cursor: move;
 }
-
-#buttons {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 200;
-}
-
-button {
-  display: block;
-  width: 10em;
-}
-
-  button:focus {
-    outline: none;
-  }
