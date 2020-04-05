@@ -215,7 +215,7 @@ export class FileComponent {
     this.repaint(faksimile, faksimile.actualPage);
   }
 
-  setOpacity = function (faksimile: Faksimile, op: number) {
+  setOpacity = function (faksimile: Faksimile, op: number, repaint: boolean) {
     var imageProcessed = new MarvinImage();
     var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
     var pixel = imageData.data;
@@ -229,9 +229,32 @@ export class FileComponent {
 
     imageProcessed.imageData = imageData;
     // self.fileService.setActualContain(faksimile, self.imageProcessed);
-    this.repaint(faksimile, faksimile.actualPage);
+    if (repaint)
+      this.repaint(faksimile, faksimile.actualPage);
   }
 
+
+  remove_whitePixel = function (img) {
+    var imageProcessed = new MarvinImage();
+    imageProcessed.load(img, loaded);
+    var pixel;
+    function loaded() {
+      var imageData = imageProcessed.imageData;
+      var pixel = imageData.data;
+
+      var r = 0, g = 1, b = 2, a = 3;
+      for (var p = 0; p < pixel.length; p += 4) {
+
+        if (
+          pixel[p + r] == 255 &&
+          pixel[p + g] == 255 &&
+          pixel[p + b] == 255) // if white then change alpha to 0
+        { pixel[p + a] = 0; }
+      }
+      
+    }
+    return pixel;
+  }
   remove_background = function (faksimile: Faksimile) {
     var imageProcessed = new MarvinImage();
     var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
@@ -488,6 +511,7 @@ export class FileComponent {
       if (faksimile.actualPage == null)
         faksimile.actualPage = 1;
 
+      that.setOpacity(faksimile, 255, false);
       var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
       var cropImage = new MarvinImage();
 
@@ -930,7 +954,7 @@ export class FileComponent {
             map.removeInteraction(delete_interaction);
             map.removeInteraction(focusmap);
 
-            self.setOpacity(faksimile, 170);
+            self.setOpacity(faksimile, 170, true);
 
             self.resetOverlaySVG(map, faksimile);
             self.buildOverlaySVG(map, faksimile);
@@ -1022,7 +1046,7 @@ export class FileComponent {
       }
     }
 
-    function svgString2Image(svgString, width, height, format, callback) {
+    function svgString2Image(svgString, width, height, format, callback, map: Map) {
       var format = format ? format : 'png';
 
       var imgsrc = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString))); // Convert SVG string to data URL
@@ -1052,7 +1076,7 @@ export class FileComponent {
 
 
     function save(url) {
-      self.cropImageString(url, faksimile);
+      self.cropImageString(url, faksimile, map);
       //return url;
      // saveAs(dataBlob, 'D3 vis exported to PNG.png'); // FileSaver.js function
     }
@@ -1074,7 +1098,7 @@ export class FileComponent {
             map.addInteraction(focusmap);
             map.addInteraction(transform_interaction);
 
-            self.setOpacity(faksimile, 255);
+            self.setOpacity(faksimile, 255, true);
 
             self.svg.selectAll("circle").remove();
 
@@ -1087,23 +1111,8 @@ export class FileComponent {
            
             var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
 
-            var cropImageString = svgString2Image(svgString, containt.canvas.width , containt.canvas.height, 'png', save); // passes Blob and filesize String to the callback
+            var cropImageString = svgString2Image(svgString, containt.canvas.width , containt.canvas.height, 'png', save, map); // passes Blob and filesize String to the callback
 
-
-          //  var cropurl = self.cropImageString(cropImageString, faksimile);
-            
-            
-            // var cropImageString = svgString2Image(svgString, self.svg.attr("width"), faksimile.size[1], 'png', merge); // passes Blob and filesize String to the callback
-
- 
-           // cropImage.onload = checkload;
-
-          /* var mergedImage = mergeImages([
-           { src: faksimile.pages[faksimile.actualPage - 1].contain, x: 0, y: 0, },
-             { src: cropImage.src, x: 0, y: 0, opacity: 0.6 },]).then((img) => {
-                self.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], num, img);
-              console.log(img);
-            });*/
 
           }
 
@@ -1302,7 +1311,7 @@ export class FileComponent {
 
   }
 
- cropImageString(cropImageString, faksimile: Faksimile):any {
+ cropImageString(cropImageString, faksimile: Faksimile, map: Map):any {
         var cropImage1 = new MarvinImage();
         cropImage1.load(cropImageString, imageLoaded);
         var cropCoord = faksimile.pages[faksimile.actualPage - 1].cropCoord;
@@ -1313,8 +1322,8 @@ export class FileComponent {
 
           var cropWidth = cropCoord[3][0] - cropCoord[0][0];
           var cropHeight = cropCoord[1][1] - cropCoord[0][1];
-          //transformed();
-          var xyPosition: number[] = [];
+
+
           var minx = cropCoord[0][0];
           var miny = cropCoord[0][1];
           for (var i = 0; i < cropCoord.length; i++ )
@@ -1346,12 +1355,40 @@ export class FileComponent {
           var origImage: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
           var origImgUrl= origImage.canvas.toDataURL();
 
+          var blankImage: any = document.createElement("canvas");
+          var ctx = blankImage.getContext("2d");
+
+          var imgData = ctx.createImageData(cropWidth / map.getView().getResolution(), cropHeight / map.getView().getResolution());
+
+        /*  var counter;
+          for (counter = 0; counter < imgData.data.length; counter += 4) {
+            imgData.data[counter + 0] = 255;
+            imgData.data[counter + 1] = 255;
+            imgData.data[counter + 2] = 255;
+            imgData.data[counter + 3] = 255;
+          }
+          */
+          ctx.putImageData(imgData, 0, 0);
+          var blankURL = ctx.canvas.toDataURL();
 
           var mergedImage = mergeImages([
             { src: origImgUrl, x: 0, y: 0, },
+            { src: blankURL, x: minx, y: miny, },]).then((img) => {
+              //var arrayBuffer = self.remove_whitePixel(img);
+              //var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
+              
+              mergeImages([
+                { src: img, x: 0, y: 0, },
+                { src: url, x: minx, y: miny, },]).then((img2) => {
+                  self.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage, img2);
+                });          
+            });  
+
+         /* var mergedImage = mergeImages([
+            { src: origImgUrl, x: 0, y: 0, },
             { src: url, x: minx, y: miny, },]).then((img) => {
               self.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage, img);
-            });          
+            });  */        
    }
        return url;
 }
