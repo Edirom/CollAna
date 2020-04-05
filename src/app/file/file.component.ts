@@ -27,23 +27,16 @@ import { Vector as VectorSource } from 'ol/source';
 import FocusMap from 'ol-ext/interaction/FocusMap';
 import Transform from 'ol-ext/interaction/Transform';
 import Delete from 'ol-ext/interaction/Delete';
-import Swipe from 'ol-ext/control/Swipe';
 import { shiftKeyOnly } from 'ol/events/condition';
 import { createRectFromCoords, outlineRectangle, proveRectangle } from '../types/helpers';
 import MousePosition from 'ol/control/MousePosition';
 import { createStringXY } from 'ol/coordinate';
 
+import mergeImages from 'merge-images';
 
-import { ImageCanvas as ImageCanvasSource, Stamen } from 'ol/source.js';
-import { toStringHDMS } from 'ol/coordinate.js';
-import SourceState from 'ol/source/State';
-import { fromLonLat, toLonLat } from 'ol/proj';
 
-import { transform } from 'ol/proj'
 import { getWidth, getCenter } from 'ol/extent';
-import { Tile as TileLayer } from 'ol/layer';
 
-import { FrameState } from 'ol/PluggableMap';
 
 
 import { Stroke, Fill, Circle, Style } from 'ol/style';
@@ -51,7 +44,9 @@ import GeometryType from 'ol/geom/GeometryType';
 
 import * as d3 from "d3";
 
-import { Overlay, Feature } from 'ol';
+
+import { Overlay } from 'ol';
+
 
 
 
@@ -62,7 +57,6 @@ declare var solve: any;
 
 declare var pdfjsLib: any;
 
-//declare var d3: any;
 
 @Injectable({ providedIn: 'root' })
 
@@ -172,7 +166,6 @@ export class FileComponent {
     imageProcessed.imageData = imageData;
     // self.fileService.setActualContain(faksimile, self.imageProcessed);
     this.repaint(faksimile, faksimile.actualPage);
-    console.log("Blue and White");
 
   }
 
@@ -198,9 +191,6 @@ export class FileComponent {
     imageProcessed = this.imageOriginal.clone();
     imageProcessed.imageData = imageData;
     this.repaint(faksimile, faksimile.actualPage);
-    console.log("Red and White");
-
-
   }
 
   black_and_white = function (faksimile: Faksimile) {
@@ -212,7 +202,34 @@ export class FileComponent {
     // Marvin.colorChannel(self.imageOriginal, imageProcessed, 139,0,0);
     this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
     this.repaint(faksimile, faksimile.actualPage);
-    console.log("Black and White");
+  }
+
+  alphaBoundary = function (faksimile: Faksimile) {
+    var imageProcessed = new MarvinImage();
+    var radius = 30;
+    this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
+    imageProcessed = this.imageOriginal.clone();
+    Marvin.alphaBoundary(this.imageOriginal, imageProcessed, radius);
+    // Marvin.colorChannel(self.imageOriginal, imageProcessed, 139,0,0);
+    this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
+    this.repaint(faksimile, faksimile.actualPage);
+  }
+
+  setOpacity = function (faksimile: Faksimile, op: number) {
+    var imageProcessed = new MarvinImage();
+    var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
+    var pixel = imageData.data;
+
+    var  a = 3;
+    for (var p = 0; p < pixel.length; p += 4) {
+      pixel[p + a] = op;
+   
+    }
+    imageProcessed = this.imageOriginal.clone();
+
+    imageProcessed.imageData = imageData;
+    // self.fileService.setActualContain(faksimile, self.imageProcessed);
+    this.repaint(faksimile, faksimile.actualPage);
   }
 
   remove_background = function (faksimile: Faksimile) {
@@ -236,7 +253,6 @@ export class FileComponent {
     this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
 
     this.repaint(faksimile, faksimile.actualPage);
-    console.log("remove Background");
   }
 
   edge_detection = function (faksimile: Faksimile) {
@@ -260,6 +276,32 @@ export class FileComponent {
     return obj;
   }
 
+  setActualContain(faksimile: Faksimile, page: Pages, num, src) {
+    var self = this;
+    var imageOriginal = new MarvinImage();
+    var imageProcessed = new MarvinImage();
+
+    imageOriginal.load(src, imageLoaded);
+
+    function imageLoaded() {
+      imageProcessed = imageOriginal.clone();
+      self.fileService.setActualContain(faksimile, page, imageProcessed);
+      imageProcessed = faksimile.pages[num - 1].actualcontain;
+     /* if (faksimile.funqueueexecute) {
+        for (let a of faksimile.funqueue) {
+          (a)();
+        }
+      }
+
+      else {
+        while (faksimile.funqueue.length > 0) {
+          faksimile.funqueue.shift();
+        }
+      }*/
+      self.generateMap(faksimile, num);
+      self.generateMinPreview(faksimile);
+    }
+  }
 
   repaint(data: Faksimile, num: number) {
     this.generateMap(data, num);
@@ -297,7 +339,7 @@ export class FileComponent {
           fileName: file.name,
         });
 
-        faksimile = new Faksimile("image", file.name, null, 1, null, false, null);
+        faksimile = new Faksimile("image", file.name, null, 1, 1, false, null);
         self.fileService.addFaksimile(faksimile);
         var page: Pages = new Pages(1, faksimile.title, self.contain, imageProcessed);
         self.fileService.addPage(faksimile, page);
@@ -368,7 +410,6 @@ export class FileComponent {
       mousePosition = map.getEventCoordinate(event);
     });
     var that = this;
-    //console.log("Point:" + point);
 
     this.svg.on('click', drawingstarted).on('mousemove', drawpreview);
     var final: boolean = true;
@@ -376,19 +417,15 @@ export class FileComponent {
     var point2: number[] = [];
     var cutCoord1;
     var cutCoord2;
-    //this.svg.on('mousedown', drawingstarted).on('mouseup', drawingended).on('mousemove', drawpreview);
     var mouseDown: boolean = false;
     var that = this;
     var preview;
-    //var preview= that.svg.select('polygon.preview');
-    //console.log("Coordinate: " + point);
+
     that.g = that.svg.append('g');
-    //that.svg.select('#polygon').remove();
 
 
     function drawingstarted() {
       mouseDown = true;
-
 
       preview = d3.select("#flat").append('polygon')
         .classed('preview', true)
@@ -398,19 +435,15 @@ export class FileComponent {
         ;
 
       if (!final) {
-        final = true;
-
+        final = true; faksimile
         point2 = d3.mouse(this);
         cutCoord2 = mousePosition.map(x => parseInt(x));
         cutCoord2[1] = faksimile.size[1] - cutCoord2[1];
-
-        console.log("coord2: " + cutCoord2);
         if (point1 !== []) {
           var coord = createRectFromCoords(point1, point2);
           var cutCoord = createRectFromCoords(cutCoord1, cutCoord2);
-
-          console.log("cutCoord: " + cutCoord);
-
+          //Anpassen!!
+          faksimile.pages[faksimile.actualPage - 1].cropCoord = cutCoord;
           perspectiveTransformation(coord, faksimile, cutCoord);
           drawingended();
         }
@@ -418,20 +451,15 @@ export class FileComponent {
       }
       else {
         final = false;
-
-
         point1 = d3.mouse(this);
         cutCoord1 = mousePosition.map(x => parseInt(x));
         cutCoord1[1] = faksimile.size[1] - cutCoord1[1];
-
-        console.log("Point1: " + point1);
-        console.log("coord1: " + cutCoord1);
 
       }
     }
 
     function perspectiveTransformation(coord, faksimile: Faksimile, cutCoord) {
-
+     
       that.svg.selectAll("circle").remove();
       that.svg.selectAll("image").remove();
       that.svg.selectAll(".line--x").remove();
@@ -457,6 +485,9 @@ export class FileComponent {
 
       var svgFlat = d3.select("#flat");
 
+      if (faksimile.actualPage == null)
+        faksimile.actualPage = 1;
+
       var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
       var cropImage = new MarvinImage();
 
@@ -464,11 +495,9 @@ export class FileComponent {
       var cropHeight = cutCoord[1][1] - cutCoord[0][1];
       transformed();
 
+      //crop Image and show preview
       Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
-
       cropImage.draw(cropImage.canvas);
-
-
       var url = cropImage.canvas.toDataURL();
 
 
@@ -508,6 +537,7 @@ export class FileComponent {
 
       function dragged(d) {
         d3.select(this).attr("transform", "translate(" + (d[0] = d3.event.x) + "," + (d[1] = d3.event.y) + ")");
+        
         transformed();
       }
 
@@ -529,6 +559,7 @@ export class FileComponent {
 
 
         svgTransform.style(transform, "matrix3d(" + matrix + ")");
+       
 
       }
 
@@ -558,20 +589,22 @@ export class FileComponent {
 
   buildOverlaySVG(map: Map, faksimile: Faksimile) {
 
-    var imgdiv: any = d3.select('#' + map.getTarget()).node();
-    var containerWidth = imgdiv.getBoundingClientRect().width;
-    var containerHeight = imgdiv.getBoundingClientRect().height;
+    var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
+    d3.select("#overlay" + faksimile.ID).node()
+
     this.relFactor = 1;//(this.containerWidth - 10) / this.width;
     //self.aspectRatio = self.containerWidth / containerWidth;
     var transform = ["", "-webkit-", "-moz-", "-ms-", "-o-"].reduce(function (p, v) { return v + "transform" in document.body.style ? v : p; }) + "transform";
 
     this.svg = d3.select("#overlay" + faksimile.ID).selectAll("svg")
-      //this.svg = d3.select(map.getOverlayContainer()).selectAll("svg")
       .data(["transform", "flat"])
       .enter().append("svg")
       .attr("id", function (d) { return d; })
-      .attr("width", containerWidth)
-      .attr("height", containerHeight);
+      .attr('viewBox', '0 0 ' + containt.canvas.width / map.getView().getResolution() + ' ' + containt.canvas.height / map.getView().getResolution())
+      .attr('preserveAspectRatio', 'xMidYMid meet')
+      
+      .attr("width", containt.canvas.width / map.getView().getResolution())//* map.getView().getZoom()))
+      .attr("height", containt.canvas.height / map.getView().getResolution());// * map.getView().getZoom()));
 
 
   }
@@ -897,10 +930,12 @@ export class FileComponent {
             map.removeInteraction(delete_interaction);
             map.removeInteraction(focusmap);
 
-
+            self.setOpacity(faksimile, 170);
 
             self.resetOverlaySVG(map, faksimile);
             self.buildOverlaySVG(map, faksimile);
+            
+            
             self.activateSVGMode(faksimile, map);
 
 
@@ -916,18 +951,122 @@ export class FileComponent {
       });
     mainbartopright.addControl(drawBox);
 
+    function getSVGString(svgNode) {
+      svgNode.setAttribute('xlink', 'http://www.w3.org/2000/xlink');
+      var cssStyleText = getCSSStyles(svgNode);
+      appendCSS(cssStyleText, svgNode);
+
+      var serializer = new XMLSerializer();
+      var svgString = serializer.serializeToString(svgNode);
+      svgString = svgString.replace(/(\w+)?:?xlink=/g, 'xmlns:xlink='); // Fix root xlink without namespace
+      svgString = svgString.replace(/NS\d+:href/g, 'xlink:href'); // Safari NS namespace fix
+
+      return svgString;
+
+      function getCSSStyles(parentElement) {
+        var selectorTextArr = [];
+
+        // Add Parent element Id and Classes to the list
+        selectorTextArr.push('#' + parentElement.id);
+        for (var c = 0; c < parentElement.classList.length; c++)
+          if (!contains('.' + parentElement.classList[c], selectorTextArr))
+            selectorTextArr.push('.' + parentElement.classList[c]);
+
+        // Add Children element Ids and Classes to the list
+        var nodes = parentElement.getElementsByTagName("*");
+        for (var i = 0; i < nodes.length; i++) {
+          var id = nodes[i].id;
+          if (!contains('#' + id, selectorTextArr))
+            selectorTextArr.push('#' + id);
+
+          var classes = nodes[i].classList;
+          for (var c = 0; c < classes.length; c++)
+            if (!contains('.' + classes[c], selectorTextArr))
+              selectorTextArr.push('.' + classes[c]);
+        }
+
+        // Extract CSS Rules
+        var extractedCSSText = "";
+        for (var i = 0; i < document.styleSheets.length; i++) {
+          var s = <CSSStyleSheet>document.styleSheets[i];
+
+          try {
+            if (!s.cssRules) continue;
+          } catch (e) {
+            if (e.name !== 'SecurityError') throw e; // for Firefox
+            continue;
+          }
+
+          var cssRules = s.cssRules;
+          for (var r = 0; r < cssRules.length; r++) {
+          //  if (contains(cssRules[r].selectorText, selectorTextArr))
+              extractedCSSText += cssRules[r].cssText;
+          }
+        }
 
 
+        return extractedCSSText;
 
+        function contains(str, arr) {
+          return arr.indexOf(str) === -1 ? false : true;
+        }
+
+      }
+
+      function appendCSS(cssText, element) {
+        var styleElement = document.createElement("style");
+        styleElement.setAttribute("type", "text/css");
+        styleElement.innerHTML = cssText;
+        var refNode = element.hasChildNodes() ? element.children[0] : null;
+        element.insertBefore(styleElement, refNode);
+      }
+    }
+
+    function svgString2Image(svgString, width, height, format, callback) {
+      var format = format ? format : 'png';
+
+      var imgsrc = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString))); // Convert SVG string to data URL
+
+      var canvas = document.createElement("canvas");
+      var context = canvas.getContext("2d");
+
+      canvas.width = width;
+      canvas.height = height;
+
+      var image = new Image();
+      image.src = imgsrc;
+      var url;
+      image.onload = function () {
+        context.clearRect(0, 0, width, height);
+        context.drawImage(image, 0, 0, width, height);
+        url = context.canvas.toDataURL();
+        if (callback) callback(url);
+        //return url;
+       
+
+
+      };
+
+       //= imgsrc;
+    }
+
+
+    function save(url) {
+      self.cropImageString(url, faksimile);
+      //return url;
+     // saveAs(dataBlob, 'D3 vis exported to PNG.png'); // FileSaver.js function
+    }
+
+   
+ 
     var mergeArea = new Toggle(
       {
         html: '<i class="fas fa-link"></i>',
-        title: 'Select Box',
+        title: 'Merge Area',
         active: false,
         onToggle: function (active) {
           if (active) {
             drawBox.setActive(false);
-
             //remove.setActive(false);
             map.removeInteraction(draw);
             map.removeInteraction(modify_interaction);
@@ -935,7 +1074,37 @@ export class FileComponent {
             map.addInteraction(focusmap);
             map.addInteraction(transform_interaction);
 
-            //map.addInteraction(draw);
+            self.setOpacity(faksimile, 255);
+
+            self.svg.selectAll("circle").remove();
+
+            self.svg.selectAll(".line--x").remove();
+            self.svg.selectAll(".line--y").remove();
+
+
+            var svgString = getSVGString(self.svg.node());
+
+           
+            var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
+
+            var cropImageString = svgString2Image(svgString, containt.canvas.width , containt.canvas.height, 'png', save); // passes Blob and filesize String to the callback
+
+
+          //  var cropurl = self.cropImageString(cropImageString, faksimile);
+            
+            
+            // var cropImageString = svgString2Image(svgString, self.svg.attr("width"), faksimile.size[1], 'png', merge); // passes Blob and filesize String to the callback
+
+ 
+           // cropImage.onload = checkload;
+
+          /* var mergedImage = mergeImages([
+           { src: faksimile.pages[faksimile.actualPage - 1].contain, x: 0, y: 0, },
+             { src: cropImage.src, x: 0, y: 0, opacity: 0.6 },]).then((img) => {
+                self.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], num, img);
+              console.log(img);
+            });*/
+
           }
 
           else {
@@ -947,34 +1116,7 @@ export class FileComponent {
 
 
 
-    /*var remove = new Toggle(
-       {
-         html: '<i class="fas fa-trash"></i>',
-         title: 'Remove Box',
-         active: false,
-         onToggle: function (active) {
-           if (active) {
-             drawBox.setActive(false);
-             modify.setActive(false);
-             select.setActive(false);
-             map.removeInteraction(draw);
-             map.removeInteraction(modify);
-             map.removeInteraction(transform_interaction);
-             map.addInteraction(delete_interaction);
-             // map.addInteraction(transform);
- 
-             //map.addInteraction(draw);
-           }
- 
-           else {
-             map.removeInteraction(delete_interaction);
-             
-           }
-         }
-       });
-     mainbartopright.addControl(remove);*/
-
-
+   
 
     var undo = new Button(
       {
@@ -1133,9 +1275,6 @@ export class FileComponent {
     var currZoom = map.getView().getZoom();
     map.on('postrender', function (e) {
       map.set("frameState", e.frameState);
-
-
-      console.log("FrameState " + this.frameState);
     });
 
 
@@ -1144,16 +1283,14 @@ export class FileComponent {
 
       var newZoom = map.getView().getZoom();
       var newRotation = map.getView().getRotation();
-      if (currZoom != newZoom) {
-        console.log('zoom end, new zoom: ' + newZoom);
+      if (currZoom != newZoom) {      
         currZoom = newZoom;
         var zoomdiv: any = document.getElementById("zoom-div" + faksimile.ID);
         currZoom = Math.round(currZoom * 100) / 100;
         zoomdiv.value = currZoom;
 
       }
-      if (currRotation != newRotation) {
-        console.log('new Rotation: ' + newRotation);
+      if (currRotation != newRotation) {       
         currRotation = newRotation;
         var rotationdiv: any = document.getElementById("rotation-div" + faksimile.ID);
         var rotationDegree = currRotation * (180 / Math.PI);
@@ -1165,6 +1302,59 @@ export class FileComponent {
 
   }
 
+ cropImageString(cropImageString, faksimile: Faksimile):any {
+        var cropImage1 = new MarvinImage();
+        cropImage1.load(cropImageString, imageLoaded);
+        var cropCoord = faksimile.pages[faksimile.actualPage - 1].cropCoord;
+         var url;
+         var self = this;
+        function imageLoaded() {
+          var cropImage = new MarvinImage();
+
+          var cropWidth = cropCoord[3][0] - cropCoord[0][0];
+          var cropHeight = cropCoord[1][1] - cropCoord[0][1];
+          //transformed();
+          var xyPosition: number[] = [];
+          var minx = cropCoord[0][0];
+          var miny = cropCoord[0][1];
+          for (var i = 0; i < cropCoord.length; i++ )
+          {    
+            for (var j = 0; j < cropCoord[i].length; j++) {
+              
+              if (j == 0 && cropCoord[i][j] < minx)
+                minx = cropCoord[i][j];
+              if (j == 1 && cropCoord[i][j] < miny)
+                miny = cropCoord[i][j];
+
+             
+            }
+          
+          }
+          
+          console.log("minx: " + minx);
+          console.log("miny: " + miny);
+          console.log("cropCoord[0][0]: " + cropCoord[0][0]);
+          console.log("cropCoord[0][1]: " + cropCoord[0][1]);
+          Marvin.crop(cropImage1.clone(), cropImage, cropCoord[0][0], cropCoord[0][1], cropWidth, cropHeight);
+
+          cropImage.draw(cropImage.canvas);
+
+
+          url = cropImage.canvas.toDataURL();
+
+          
+          var origImage: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
+          var origImgUrl= origImage.canvas.toDataURL();
+
+
+          var mergedImage = mergeImages([
+            { src: origImgUrl, x: 0, y: 0, },
+            { src: url, x: minx, y: miny, },]).then((img) => {
+              self.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage, img);
+            });          
+   }
+       return url;
+}
 
   bindInputs(event: any, faksimile: Faksimile) {
     var idxInput = event.target;
@@ -1195,12 +1385,9 @@ export class FileComponent {
     // idxInput.value = 1;
     var self = this;
     idxInput.onchange = function () {
-      console.log(idxInput.value);
       if (idxInput.value > 0) {
         var view = self.getMap(faksimile.ID).map.getView();
         var zoom = view.setZoom(idxInput.value);
-        console.log("toom value: " + idxInput.value);
-        console.log("zoom: " + zoom);
       }
     };
   }
@@ -1211,7 +1398,6 @@ export class FileComponent {
     // idxInput.value = 1;
     var self = this;
     idxInput.onchange = function () {
-      console.log(idxInput.value);
       if (idxInput.value > -361 && idxInput.value < 361) {
         var view = self.getMap(faksimile.ID).map.getView();
         var rotation = view.setRotation(idxInput.value * (Math.PI / 180));
