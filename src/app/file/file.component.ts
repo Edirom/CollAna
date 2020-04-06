@@ -35,7 +35,7 @@ import { createStringXY } from 'ol/coordinate';
 import mergeImages from 'merge-images';
 
 
-import { getWidth, getCenter } from 'ol/extent';
+import { getCenter } from 'ol/extent';
 
 
 
@@ -95,14 +95,10 @@ export class FileComponent {
 
 
 
-  //this.svg.on('mousedown', drawingstarted).on('mouseup', drawingended).on('mousemove', drawpreview);
+  
   mouseDown: boolean;
   preview: any;
 
-  private containerWidth: any;
-  private containerHeight: any;
-  private aspectRatio: any;
-  private scaleFactor: any;
   private relFactor: any;
   overlay: Overlay;
 
@@ -767,9 +763,7 @@ export class FileComponent {
     var zoomslider = new ZoomSlider();
     map.addControl(zoomslider);
     faksimile.size = [containt.canvas.width, containt.canvas.height];
-    //  map.setSize([containt.canvas.width, containt.canvas.height]);
-    //map.updateSize();
-    // Main control bar
+
 
     var barbottomleft = new Bar();
     map.addControl(barbottomleft);
@@ -892,17 +886,7 @@ export class FileComponent {
       });
     mainbartopright.addControl(removebackground);
 
-    /* var movetofront = new Button(
-       {
-         html: '<i class="fa fa-clone"></i>',
-         title: 'Move To Front',
-         handleClick: function () {
-           var canvas: any = document.getElementById('card-div' + faksimile.ID);
-           canvas.style.zIndex = ++self.inc_index;
-         
-         }
-       });
-     mainbartopright.addControl(movetofront);*/
+    
     var geometryFunction = createBox();
     var value = 'Circle';
     var draw = new Draw({
@@ -1077,8 +1061,7 @@ export class FileComponent {
 
     function save(url) {
       self.cropImageString(url, faksimile, map);
-      //return url;
-     // saveAs(dataBlob, 'D3 vis exported to PNG.png'); // FileSaver.js function
+     
     }
 
    
@@ -1174,7 +1157,7 @@ export class FileComponent {
 
     var mainbarbuttom = new Bar();
     map.addControl(mainbarbuttom);
-    mainbarbuttom.setPosition("bottom");
+    mainbarbuttom.setPosition("top");
 
     // mainbar.addControl(new Magnify(faksimile, map));
 
