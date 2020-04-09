@@ -750,14 +750,14 @@ export class FileComponent {
 
     map.addLayer(this.vector);
 
-    this.mousePosition = new MousePosition({
+    /*this.mousePosition = new MousePosition({
       coordinateFormat: createStringXY(2),
       projection: projection,
       target: document.getElementById('card-block' + faksimile.ID),
       undefinedHTML: '&nbsp;'
     });
 
-    map.addControl(this.mousePosition);
+    map.addControl(this.mousePosition);*/
 
 
     var zoomslider = new ZoomSlider();
@@ -765,9 +765,9 @@ export class FileComponent {
     faksimile.size = [containt.canvas.width, containt.canvas.height];
 
 
-    var barbottomleft = new Bar();
-    map.addControl(barbottomleft);
-    barbottomleft.setPosition("bottom-left");
+    var bartop = new Bar();
+    map.addControl(bartop);
+    bartop.setPosition("top");
 
     var zoommfactor = new TextButton(
       {
@@ -778,7 +778,7 @@ export class FileComponent {
         }
 
       });
-    barbottomleft.addControl(zoommfactor);
+    bartop.addControl(zoommfactor);
 
     var rotation = new TextButton(
       {
@@ -789,7 +789,7 @@ export class FileComponent {
         }
 
       });
-    barbottomleft.addControl(rotation);
+    bartop.addControl(rotation);
 
     var mainbartopright = new Bar();
     map.addControl(mainbartopright);
@@ -1155,13 +1155,13 @@ export class FileComponent {
 
     mainbartopright.addControl(magnify);
 
-    var mainbarbuttom = new Bar();
-    map.addControl(mainbarbuttom);
-    mainbarbuttom.setPosition("top");
+   // var mainbarbuttom = new Bar();
+    //map.addControl(mainbarbuttom);
+    //mainbarbuttom.setPosition("top-right");
 
     // mainbar.addControl(new Magnify(faksimile, map));
 
-    mainbarbuttom.addControl(new FullScreen());
+    bartop.addControl(new FullScreen());
 
     if (faksimile.type == "pdf") {
 
@@ -1183,7 +1183,7 @@ export class FileComponent {
             }
           }
         });
-      mainbarbuttom.addControl(synchronous_previous);
+      bartop.addControl(synchronous_previous);
 
       var previous = new Button(
         {
@@ -1199,7 +1199,7 @@ export class FileComponent {
 
           }
         });
-      mainbarbuttom.addControl(previous);
+      bartop.addControl(previous);
 
 
       var pagenum = new TextButton(
@@ -1212,7 +1212,7 @@ export class FileComponent {
           }
 
         });
-      mainbarbuttom.addControl(pagenum);
+      bartop.addControl(pagenum);
 
       var next = new Button(
         {
@@ -1227,7 +1227,7 @@ export class FileComponent {
 
           }
         });
-      mainbarbuttom.addControl(next);
+      bartop.addControl(next);
 
       var synchronous_next = new Button(
         {
@@ -1247,7 +1247,7 @@ export class FileComponent {
 
           }
         });
-      mainbarbuttom.addControl(synchronous_next);
+      bartop.addControl(synchronous_next);
     }
 
 
@@ -1261,7 +1261,7 @@ export class FileComponent {
 
         }
       });
-    mainbarbuttom.addControl(close);
+    bartop.addControl(close);
 
     var currRotation = map.getView().getRotation();
     var currZoom = map.getView().getZoom();
