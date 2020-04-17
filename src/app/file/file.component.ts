@@ -274,6 +274,32 @@ export class FileComponent {
     this.repaint(faksimile, faksimile.actualPage);
   }
 
+  remove_background_crop = function (cropImage: any) {
+    var imageProcessed = new MarvinImage();
+    var imageData = cropImage.imageData;
+    var pixel = imageData.data;
+
+    var r = 0, g = 1, b = 2, a = 3;
+    for (var p = 0; p < pixel.length; p += 4) {
+
+      if (
+        pixel[p + r] == 255 &&
+        pixel[p + g] == 255 &&
+        pixel[p + b] == 255) // if white then change alpha to 0
+      { pixel[p + a] = 0; }
+    }
+    var canvas: any = document.createElement('canvas');
+    canvas.width = imageData.width;
+    canvas.height = imageData.height;
+    var ctx = canvas.getContext('2d');
+    ctx.putImageData(imageData, 0, 0);
+    imageProcessed.canvas = canvas;
+    imageProcessed.imageData = imageData;   
+   
+    return imageProcessed;
+  
+  }
+
   edge_detection = function (faksimile: Faksimile) {
     var imageProcessed = new MarvinImage();
     this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
@@ -421,7 +447,7 @@ export class FileComponent {
     });
   }
 
-
+  coord;
   private activateSVGMode(faksimile: Faksimile, map: Map) {
     var container = document.getElementById('card-block' + faksimile.ID);
     var mousePosition;
@@ -478,7 +504,7 @@ export class FileComponent {
     }
 
     function perspectiveTransformation(coord, faksimile: Faksimile, cutCoord) {
-     
+      that.coord = coord;
       that.svg.selectAll("circle").remove();
       that.svg.selectAll("image").remove();
       that.svg.selectAll(".line--x").remove();
@@ -518,7 +544,11 @@ export class FileComponent {
       //crop Image and show preview
       Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
       cropImage.draw(cropImage.canvas);
-      var url = cropImage.canvas.toDataURL();
+
+      var imageWithoutBackground = that.remove_background_crop(cropImage);
+
+  
+      var url = imageWithoutBackground.canvas.toDataURL();
 
 
       svgTransform.select("g").append("image")
@@ -631,6 +661,23 @@ export class FileComponent {
 
   resetOverlaySVG(map: Map, faksimile: Faksimile) {
     d3.select("#card-block" + faksimile.ID).selectAll("svg").remove();
+  }
+
+
+  repaintSVG(map: Map, faksimile: Faksimile) {
+    var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
+    var coord = this.coord;
+   
+    var transform = ["", "-webkit-", "-moz-", "-ms-", "-o-"].reduce(function (p, v) { return v + "transform" in document.body.style ? v : p; }) + "transform";
+
+
+    var svg = d3.select("#overlay" + faksimile.ID).selectAll("svg");
+      svg.call(move);
+    var self = this;
+    
+    function move() {
+    }
+
   }
 
   mousePosition: MousePosition;
@@ -1272,7 +1319,8 @@ export class FileComponent {
 
     map.on('moveend', function (e) {
       map.set("frameState", e.frameState);
-
+      //Repant SVG
+      self.repaintSVG(map, faksimile);
       var newZoom = map.getView().getZoom();
       var newRotation = map.getView().getRotation();
       if (currZoom != newZoom) {      
