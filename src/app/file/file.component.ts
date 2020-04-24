@@ -476,7 +476,7 @@ export class FileComponent {
           faksimile.pages[faksimile.actualPage - 1].cropCoord = cutCoord;
           faksimile.pages[faksimile.actualPage - 1].minx = cutCoord[0][0];
           faksimile.pages[faksimile.actualPage - 1].miny = cutCoord[0][1];
-          faksimile.pages[faksimile.actualPage - 1].maxx = cutCoord[3][0];
+          faksimile.pages[faksimile.actualPage - 1].maxx = cutCoord[1][0];
           faksimile.pages[faksimile.actualPage - 1].maxy = cutCoord[3][1];
           perspectiveTransformation(coord, faksimile, cutCoord);
           drawingended();
@@ -1168,11 +1168,9 @@ export class FileComponent {
 
             var svgString = getSVGString(self.svg.node(), containt.canvas.width / map.getView().getResolution(), containt.canvas.height / map.getView().getResolution());
 
-
-        
             var cropImageString = svgString2Image(svgString, containt.canvas.width, containt.canvas.height, 'png', save, map); // passes Blob and filesize String to the callback
 
-
+           
           }
 
           else {
@@ -1378,18 +1376,20 @@ export class FileComponent {
     var cropCoord = faksimile.pages[faksimile.actualPage - 1].cropCoord;
     var url;
     var self = this;
+
     function imageLoaded() {
       var cropImage = new MarvinImage();
 
-      var cropWidth = cropCoord[1][0] - cropCoord[0][0];
-      var cropHeight = cropCoord[3][1] - cropCoord[0][1];
+      //var cropWidth = cropCoord[1][0] - cropCoord[0][0];
+      //var cropHeight = cropCoord[3][1] - cropCoord[0][1];
 
 
       var minx = faksimile.pages[faksimile.actualPage - 1].minx;
       var miny = faksimile.pages[faksimile.actualPage - 1].miny;
       var maxx = faksimile.pages[faksimile.actualPage - 1].maxx;
       var maxy = faksimile.pages[faksimile.actualPage - 1].maxy;
-      
+      var cropWidth = maxx - minx;
+      var cropHeight = maxy - miny;
 
       console.log("minx: " + minx);
       console.log("miny: " + miny);
@@ -1397,7 +1397,7 @@ export class FileComponent {
       console.log("maxy: " + maxy);
       console.log("cropCoord[0][0]: " + cropCoord[0][0]);
       console.log("cropCoord[0][1]: " + cropCoord[0][1]);
-      Marvin.crop(cropImage1.clone(), cropImage, minx, miny, maxx-minx, maxy-miny);
+      Marvin.crop(cropImage1.clone(), cropImage, minx, miny, cropWidth, cropHeight);
 
       cropImage.draw(cropImage.canvas);
 
@@ -1408,42 +1408,64 @@ export class FileComponent {
       var origImage: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
       var origImgUrl = origImage.canvas.toDataURL();
 
-      var blankImage: any = document.createElement("canvas");
-      var ctx = blankImage.getContext("2d");
+    //  var blankImage: any = cropImage;
+    //  var ctx = blankImage.getContext("2d");
 
-      var imgData = ctx.createImageData(cropWidth / map.getView().getResolution(), cropHeight / map.getView().getResolution());
-     
+      //var imgData = ctx.createImageData(cropWidth / map.getView().getResolution(), cropHeight / map.getView().getResolution());
 
-      /*  var counter;
-        for (counter = 0; counter < imgData.data.length; counter += 4) {
-          imgData.data[counter + 0] = 255;
-          imgData.data[counter + 1] = 255;
-          imgData.data[counter + 2] = 255;
-          imgData.data[counter + 3] = 255;
-        }
-        */
-      ctx.putImageData(imgData, 0, 0);
-      var blankURL = ctx.canvas.toDataURL();
+     // var cropImageData = cropImage.imageData.data;
 
+      
+     // blankImage.draw(blankImage.canvas);
+
+      var canvas: any = document.createElement('canvas');
+
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
+      var ctx = canvas.getContext('2d');
+      ctx.beginPath();
+      ctx.rect(0, 0, cropCoord[1][0] - cropCoord[0][0], cropCoord[3][0]- cropCoord[0][1]);
+      ctx.fillStyle = "white";
+      ctx.fill();
+     /* var i;
+      for (i = 0; i < blankImage.imageData.data.length; i += 4) {
+        // if (blankImage.imageData.data[i + 0] != 0 || blankImage.imageData.data[i + 1] != 0 || blankImage.imageData.data[i + 2] != 0) {
+        blankImage.imageData.data[i + 0] = 255;
+        blankImage.imageData.data[i + 1] = 255;
+        blankImage.imageData.data[i + 2] = 255;
+        blankImage.imageData.data[i + 3] = 255;
+        //  }
+
+      }
+      ctx.putImageData(blankImage.imageData, 0, 0);*/
+       
+      //ctx.putImageData(imgData, 0, 0);
+      var blankURL = canvas.toDataURL();
+    
       var mergedImage = mergeImages([
         { src: origImgUrl, x: 0, y: 0, },
-        { src: blankURL, x: minx, y: miny, },]).then((img) => {
+        { src: blankURL, x: minx, y: cropCoord[0][1], },]).then((img) => {
+         
           //var arrayBuffer = self.remove_whitePixel(img);
           //var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
 
           mergeImages([
             { src: img, x: 0, y: 0, },
             { src: url, x: minx, y: miny, },]).then((img2) => {
+              faksimile.pages[faksimile.actualPage - 1].actualcontain = img2;
               self.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage, img2);
+              
             });
         });
-
+     
       /* var mergedImage = mergeImages([
          { src: origImgUrl, x: 0, y: 0, },
          { src: url, x: minx, y: miny, },]).then((img) => {
            self.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage, img);
          });  */
     }
+   
+    self.remove_background(faksimile);
     return url;
   }
 
