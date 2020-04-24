@@ -7,7 +7,11 @@ export class Pages {
   index: number;
   cropImage: string;
   cropCoord: any;
-  constructor(index: number, title: string, contain: string, actualcontain?: any, alpha?: number, cropImage?: string, cropCoord?: any) {
+  minx: any;
+  miny: any;
+  maxx: any;
+  maxy: any;
+  constructor(index: number, title: string, contain: string, actualcontain?: any, alpha?: number, cropImage?: string, cropCoord?: any, minx?: any, miny?: any, maxx?: any, maxy?: any) {
     this.index = index;
     this.title = title;
     this.contain = contain;
@@ -15,5 +19,9 @@ export class Pages {
     this.alpha = alpha;
     this.cropImage = cropImage;
     this.cropCoord = cropCoord;
+    this.minx = minx;
+    this.miny = miny;
+    this.maxx = maxx;
+    this.maxy = maxy;
   }
 }

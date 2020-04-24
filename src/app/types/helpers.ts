@@ -2,10 +2,10 @@ declare var _: any;
 declare var d3: any;
 
 export function createRectFromCoords(start: number[], end: number[]): [number, number][] {
-  return [[Math.min(start[0], end[0]), Math.min(start[1], end[1])],
-  [Math.min(start[0], end[0]), Math.max(start[1], end[1])],
-  [Math.max(start[0], end[0]), Math.max(start[1], end[1])],
-  [Math.max(start[0], end[0]), Math.min(start[1], end[1])]];
+  return [[Math.min(parseInt(start[0] + ""), parseInt(end[0] + "")), Math.min(parseInt(start[1] + ""),  parseInt(end[1]+""))],
+    [Math.max(parseInt(start[0] + ""), parseInt(end[0] + "")), Math.min(parseInt(start[1] + ""),  parseInt(end[1]+""))],
+    [Math.max(parseInt(start[0] + ""), parseInt(end[0] + "")), Math.max(parseInt(start[1] + ""),  parseInt(end[1]+""))],
+    [Math.min(parseInt(start[0] + ""), parseInt(end[0] + "")), Math.max(parseInt(start[1] + ""),  parseInt(end[1]+""))]];
 }
 
 export function outlineRectangle(polygon: [number, number][]): [number, number][] {
@@ -18,7 +18,7 @@ export function outlineRectangle(polygon: [number, number][]): [number, number][
   var maxX = Math.max.apply(null, xVals);
   var maxY = Math.max.apply(null, yVals);
 
-  return [[minX, minY], [minX, maxY], [maxX, maxY], [maxX, minY]];
+  return [[minX, minY], [maxX, minY], [maxX, maxY], [minX, maxY]];
 }
 
 export function proveRectangle(shape: [number, number][]): boolean {
