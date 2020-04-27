@@ -531,7 +531,7 @@ export class FileComponent {
       if (faksimile.actualPage == null)
         faksimile.actualPage = 1;
 
-      that.setOpacity(faksimile, 255, false);
+      that.setOpacity(faksimile, 170, false);
       var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
       var cropImage = new MarvinImage();
 
@@ -1008,7 +1008,7 @@ export class FileComponent {
             map.removeInteraction(delete_interaction);
             map.removeInteraction(focusmap);
 
-            self.setOpacity(faksimile, 170, true);
+            self.setOpacity(faksimile, 80, true);
 
             self.resetOverlaySVG(map, faksimile);
             self.buildOverlaySVG(map, faksimile);
@@ -1150,10 +1150,10 @@ export class FileComponent {
             map.removeInteraction(draw);
             map.removeInteraction(modify_interaction);
             map.removeInteraction(delete_interaction);
-            map.addInteraction(focusmap);
-            map.addInteraction(transform_interaction);
+            //map.addInteraction(focusmap);
+            //map.addInteraction(transform_interaction);
 
-            self.setOpacity(faksimile, 255, true);
+            self.setOpacity(faksimile, 170, true);
 
             self.svg.selectAll("circle").remove();
 
@@ -1416,12 +1416,12 @@ export class FileComponent {
      // blankImage.draw(blankImage.canvas);
 
       var canvas: any = document.createElement('canvas');
-
+      canvas.id = "blankcanvas";
       canvas.width = cropWidth;
       canvas.height = cropHeight;
       var ctx = canvas.getContext('2d');
       ctx.beginPath();
-      ctx.rect(0, 0, cropCoord[1][0] - cropCoord[0][0], cropCoord[3][0]- cropCoord[0][1]);
+      ctx.rect(0, 0, cropCoord[1][0] - cropCoord[0][0], cropCoord[3][1]- cropCoord[0][1]);
       ctx.fillStyle = "white";
       ctx.fill();
      /* var i;
@@ -1441,7 +1441,7 @@ export class FileComponent {
     
       var mergedImage = mergeImages([
         { src: origImgUrl, x: 0, y: 0, },
-        { src: blankURL, x: minx, y: cropCoord[0][1], },]).then((img) => {
+        { src: blankURL, x: cropCoord[0][0], y: cropCoord[0][1], },]).then((img) => {
          
           //var arrayBuffer = self.remove_whitePixel(img);
           //var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
@@ -1450,6 +1450,7 @@ export class FileComponent {
             { src: img, x: 0, y: 0, },
             { src: url, x: minx, y: miny, },]).then((img2) => {
               self.updateImg(faksimile, img2);
+             
                          
             });
         });
@@ -1472,7 +1473,8 @@ export class FileComponent {
     function imageLoaded() {
       self.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], image);
       self.remove_background(faksimile);
-      self.repaint(faksimile, faksimile.actualPage);
+      self.setOpacity(faksimile, 170, true);
+      //self.repaint(faksimile, faksimile.actualPage);
     }
     //faksimile.pages[faksimile.actualPage - 1].actualcontain = img;
     //this.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage, img);
