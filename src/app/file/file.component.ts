@@ -531,7 +531,7 @@ export class FileComponent {
       if (faksimile.actualPage == null)
         faksimile.actualPage = 1;
 
-      that.setOpacity(faksimile, 170, false);
+      that.setOpacity(faksimile, 255, false);
       var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
       var cropImage = new MarvinImage();
 
@@ -1471,9 +1471,9 @@ export class FileComponent {
     image.load(img, imageLoaded);
     var self = this;
     function imageLoaded() {
-      self.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], image);
-      self.remove_background(faksimile);
+      self.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], image);   
       self.setOpacity(faksimile, 170, true);
+      self.remove_background(faksimile);
       //self.repaint(faksimile, faksimile.actualPage);
     }
     //faksimile.pages[faksimile.actualPage - 1].actualcontain = img;
