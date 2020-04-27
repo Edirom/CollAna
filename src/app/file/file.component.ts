@@ -795,10 +795,7 @@ export class FileComponent {
 
     map.addLayer(layer);
 
-    // var imgdiv: any = d3.select('#' + map.getTarget()).node();
-    // this.containerWidth = imgdiv.getBoundingClientRect().width;
-    // this.containerHeight = imgdiv.getBoundingClientRect().height;
-
+  
     var source = new VectorSource({ wrapX: false });
 
     this.vector = new VectorLayer({
@@ -1452,9 +1449,8 @@ export class FileComponent {
           mergeImages([
             { src: img, x: 0, y: 0, },
             { src: url, x: minx, y: miny, },]).then((img2) => {
-              faksimile.pages[faksimile.actualPage - 1].actualcontain = img2;
-              self.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage, img2);
-              
+              self.updateImg(faksimile, img2);
+                         
             });
         });
      
@@ -1465,10 +1461,23 @@ export class FileComponent {
          });  */
     }
    
-    self.remove_background(faksimile);
+   
     return url;
   }
 
+  updateImg(faksimile, img) {
+    var image = new MarvinImage();
+    image.load(img, imageLoaded);
+    var self = this;
+    function imageLoaded() {
+      self.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], image);
+      self.remove_background(faksimile);
+      self.repaint(faksimile, faksimile.actualPage);
+    }
+    //faksimile.pages[faksimile.actualPage - 1].actualcontain = img;
+    //this.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage, img);
+   
+  }
   bindInputs(event: any, faksimile: Faksimile) {
     var idxInput = event.target;
     //var idxInput: any = document.getElementById(id + faksimile.ID);
