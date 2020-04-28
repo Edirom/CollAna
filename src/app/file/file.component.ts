@@ -1154,7 +1154,7 @@ export class FileComponent {
             //map.addInteraction(transform_interaction);
 
             self.setOpacity(faksimile, 170, true);
-
+            
             self.svg.selectAll("circle").remove();
 
             self.svg.selectAll(".line--x").remove();
@@ -1474,6 +1474,7 @@ export class FileComponent {
       self.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], image);   
       self.setOpacity(faksimile, 170, true);
       self.remove_background(faksimile);
+      self.svg.selectAll('g').remove();
       //self.repaint(faksimile, faksimile.actualPage);
     }
     //faksimile.pages[faksimile.actualPage - 1].actualcontain = img;
