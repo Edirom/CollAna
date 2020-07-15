@@ -490,21 +490,17 @@ export class FileComponent {
         cutCoord1[1] = faksimile.size[1] - cutCoord1[1];
 
       }
-    }
+    } 
 
+    
     function perspectiveTransformation(coord, faksimile: Faksimile, cutCoord) {
-      /* var mousePosition;
-       container.addEventListener('mousemove', function (event) {
-         mousePosition = map.getEventCoordinate(event);       
-       });*/
-      //that.coord = coord;
-      that.svg.selectAll("circle").remove();
-      
+    
+
       that.svg.selectAll("image").remove();
       that.svg.selectAll(".line--x").remove();
       that.svg.selectAll(".line--y").remove();
       that.svg.selectAll(".handle").remove();
-     
+      that.svg.selectAll(".draggable").remove();
 
 
       var width = coord[1][0] - coord[0][0],
@@ -513,8 +509,12 @@ export class FileComponent {
 
       var transform = ["", "-webkit-", "-moz-", "-ms-", "-o-"].reduce(function (p, v) { return v + "transform" in document.body.style ? v : p; }) + "transform";
 
-      var sourcePoints = [[0, 0], [width, 0], [width, height], [0, height]],
-        targetPoints = [[0, 0], [width, 0], [width, height], [0, height]];
+      var sourcePoints = [[0, 0], [width, 0], [width, height], [0, height]];
+
+     var targetPoints = [[0, 0], [width, 0], [width, height], [0, height]];
+
+
+     var center = [[(targetPoints[2][0] - targetPoints[0][0]) / 2, (targetPoints[2][1] - targetPoints[0][1]) / 2]];
 
       that.g
         .attr("transform", "translate(" + coord[0][0] + "," + coord[0][1] + ")");
@@ -525,9 +525,7 @@ export class FileComponent {
      
 
       var svgFlat = d3.select("#flat");
-
-  
-
+    
       if (faksimile.actualPage == null)
         faksimile.actualPage = 1;
 
@@ -550,11 +548,13 @@ export class FileComponent {
 
 
       transformed();
-
-      svgTransform.select("g").append("image")
+     
+      svgTransform.select("g")
+        .append("image")
         .attr("xlink:href", url)
         .attr("width", width)
         .attr("height", height);
+
 
       svgTransform.select("g").selectAll(".line--x")
         .data(d3.range(0, width + 1, 40))
@@ -574,10 +574,12 @@ export class FileComponent {
         .attr("y1", function (d) { return d; })
         .attr("y2", function (d) { return d; });
 
-      var handle = svgFlat.select("g").selectAll(".handle")
+     
+
+      svgFlat.select("g").selectAll(".handle")
         .data(targetPoints)
         .enter().append("circle")
-         .attr("id", function (d,i) { return "" +i; })
+        .attr("id", function (d, i) { return "" + i; })     
         .attr("class", "handle")
         .attr("transform", function (d) { return "translate(" + d + ")"; })
         .attr("r", 7)
@@ -585,6 +587,40 @@ export class FileComponent {
           .subject(function (d) { return { x: d[0], y: d[1] }; })
           .on("drag", dragged));
 
+      svgFlat.select("g").selectAll(".draggable")
+        .data(center)
+        .enter().append("circle")
+        .attr("id", function (d, i) { return "" + i; })
+        .attr("class", "draggable")
+        .attr("transform", function (d) { return "translate(" + d + ")"; })
+        .attr("r", 7)
+        .call(d3.drag()
+          .subject(function (d) { return { x: d[0], y: d[1] }; })
+          .on("drag", draggedcenter));
+
+      function draggedcenter(d) {
+        var xdistance = 0;
+        var ydistance = 0;
+        if (d[0] != d3.event.x)
+           xdistance = d[0] - d3.event.x;
+        if (d[1] != d3.event.y)
+           ydistance = d[1] - d3.event.y;
+        d3.select(this).attr("transform", "translate(" + (d[0] = d3.event.x) + "," + (d[1] = d3.event.y) + ")");
+        center = [[d[0], d[1]]]
+        movetargets(xdistance, ydistance);
+      }
+
+      function movetargets(xdis, ydis) {
+        // targetPoints = [[0, 0], [width, 0], [width, height], [0, height]];
+        
+        for (var i = 0, n = targetPoints.length; i < n; ++i) {
+          targetPoints[i][0] = targetPoints[i][0] - xdis;
+          targetPoints[i][1] = targetPoints[i][1] - ydis;
+          d3.select("[id = '" + i + "']").attr("transform", "translate(" + (targetPoints[i][0]) + "," + (targetPoints[i][1]) + ")");        
+        }
+       
+        transformed();
+     }
 
       function dragged(d) {
         d3.select(this).attr("transform", "translate(" + (d[0] = d3.event.x) + "," + (d[1] = d3.event.y) + ")");
@@ -656,8 +692,19 @@ export class FileComponent {
       cutCoord1 = null;
       cutCoord2 = null;
       that.svg.selectAll('polygon').remove();
+      that.svg.selectAll('g').select("#flat")
+        .attr("transform", function (d) { return "translate(" + d + ")"; })
+        .attr("r", 7)
+        .call(d3.drag()
+          .subject(function (d) { return { x: d[0], y: d[1] }; })
+          .on("drag", dragged));
       //that.g.select('polygon.preview').style('visibility', 'hidden');
     }
+    function dragged(d) {
+      d3.select(this).attr("transform", "translate(" + (d[0] = d3.event.x) + "," + (d[1] = d3.event.y) + ")");
+      
+    }
+
 
   }
 
@@ -913,9 +960,13 @@ export class FileComponent {
         html: '<i class="fa fa-adjust" style="color:#ffc0cb;"></i>',
         title: 'Red and White',
         handleClick: function () {
+          self.black_and_white(faksimile);
           self.red_and_white(faksimile);
+          self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
           self.fun_red_and_white = self.wrapFunction(self.red_and_white, self, [faksimile]);
+          faksimile.funqueue.push(self.fun_black_and_white);
           faksimile.funqueue.push(self.fun_red_and_white);
+
         }
       });
     mainbartopright.addControl(red_white);
@@ -925,8 +976,11 @@ export class FileComponent {
         html: '<i class="fa fa-adjust" style="color:#0000ff;"></i>',
         title: 'Blue and White',
         handleClick: function () {
+          self.black_and_white(faksimile);
           self.blue_and_white(faksimile);
+          self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
           self.fun_blue_and_white = self.wrapFunction(self.blue_and_white, self, [faksimile]);
+          faksimile.funqueue.push(self.fun_black_and_white);
           faksimile.funqueue.push(self.fun_blue_and_white);
         }
       });
@@ -1135,7 +1189,6 @@ export class FileComponent {
       self.cropImageString(url, faksimile, map);
 
     }
-
 
 
     var mergeArea = new Toggle(
@@ -1367,6 +1420,7 @@ export class FileComponent {
 
   }
 
+ 
   cropImageString(cropImageString, faksimile: Faksimile, map: Map): any {
     var cropImage1 = new MarvinImage();
     cropImage1.load(cropImageString, imageLoaded);

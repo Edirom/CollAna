@@ -69,3 +69,10 @@ svg {
   cursor: move;
 }
 
+.draggable {
+  fill: none;
+  pointer-events: all;
+  stroke: red;
+  stroke-width: 2px;
+  cursor: move;
+}
