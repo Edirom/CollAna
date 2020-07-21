@@ -513,6 +513,7 @@ export class FileComponent {
 
      var targetPoints = [[0, 0], [width, 0], [width, height], [0, height]];
 
+      
 
      var center = [[(targetPoints[2][0] - targetPoints[0][0]) / 2, (targetPoints[2][1] - targetPoints[0][1]) / 2]];
 
@@ -546,8 +547,9 @@ export class FileComponent {
 
       var url = imageWithoutBackground.canvas.toDataURL();
 
-
-      transformed();
+      
+      //transformed();
+     
      
       svgTransform.select("g")
         .append("image")
@@ -576,13 +578,13 @@ export class FileComponent {
 
      
 
-      svgFlat.select("g").selectAll(".handle")
+      var handle = svgFlat.select("g").selectAll(".handle")
         .data(targetPoints)
         .enter().append("circle")
         .attr("id", function (d, i) { return "" + i; })     
         .attr("class", "handle")
         .attr("transform", function (d) { return "translate(" + d + ")"; })
-        .attr("r", 7)
+        .attr("r", 10)
         .call(d3.drag()
           .subject(function (d) { return { x: d[0], y: d[1] }; })
           .on("drag", dragged));
@@ -593,10 +595,22 @@ export class FileComponent {
         .attr("id", function (d, i) { return "" + i; })
         .attr("class", "draggable")
         .attr("transform", function (d) { return "translate(" + d + ")"; })
-        .attr("r", 7)
+        .attr("r", 10)
         .call(d3.drag()
           .subject(function (d) { return { x: d[0], y: d[1] }; })
           .on("drag", draggedcenter));
+
+     
+      //transformed();
+     /* d3.transition()
+        .duration(750)
+        .tween("points", function () {
+          var i = d3.interpolate(targetPoints, d);
+          return function (t) {
+            handle.data(targetPoints = i(t)).attr("transform", function (d) { return "translate(" + d + ")"; });
+            transformed();
+          };
+        });*/
 
       function draggedcenter(d) {
         var xdistance = 0;
@@ -926,8 +940,7 @@ export class FileComponent {
 
           if (active) {
             // Remove and execute all items in the array
-            faksimile.funqueueexecute = true;
-            console.log("aktiv");
+            faksimile.funqueueexecute = true;          
           }
 
           else {
@@ -936,7 +949,7 @@ export class FileComponent {
             while (faksimile.funqueue.length > 0) {
               faksimile.funqueue.shift();
             }
-            console.log("nicht aktiv");
+           
           }
         }
       });
@@ -1046,7 +1059,7 @@ export class FileComponent {
     // and add it to the map
     map.addOverlay(overlay);
 
-
+   
     var drawBox = new Toggle(
       {
         html: '<i class="fas fa-border-all"></i>',
@@ -1054,13 +1067,13 @@ export class FileComponent {
         active: false,
         onToggle: function (active) {
           if (active) {
-
+           
             mergeArea.setActive(false);
 
-            map.removeInteraction(modify_interaction);
-            map.removeInteraction(transform_interaction);
-            map.removeInteraction(delete_interaction);
-            map.removeInteraction(focusmap);
+           // map.removeInteraction(modify_interaction);
+            //map.removeInteraction(transform_interaction);
+            //map.removeInteraction(delete_interaction);
+            //map.removeInteraction(focusmap);
 
             self.setOpacity(faksimile, 80, true);
 
@@ -1070,11 +1083,12 @@ export class FileComponent {
 
             self.activateSVGMode(faksimile, map);
 
-
+           // active = false;
           }
 
 
           else {
+           
             //self.resetOverlaySVG(map, faksimile);
             //map.un("click", mapclick);
             self.svg.on('click', null).on('mousemove', null);
@@ -1082,6 +1096,10 @@ export class FileComponent {
         }
       });
     mainbartopright.addControl(drawBox);
+
+    drawBox.on("change:disable", function (e) {
+      console.log("Edition is " + (e.disable ? "disabled" : "enabled"));
+    });
 
     function getSVGString(svgNode, width, height ) {
       svgNode.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
@@ -1272,7 +1290,9 @@ export class FileComponent {
 
           else {
             ov.stopEvent = true;
-            map.removeOverlay(map.getOverlays().getArray()[0]);
+            map.removeOverlay(ov);
+            map.getOverlays().getArray().forEach(function (element) { if (element.getElement().classList.contains("ol-magnify")) map.removeOverlay(element); })
+            //map.removeOverlay(map.getOverlays().getArray()[0]);
           }
         }
       });
