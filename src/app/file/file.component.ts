@@ -59,10 +59,10 @@ declare var pdfjsLib: any;
 
 
 @Injectable({ providedIn: 'root' })
-
+  //routerLink="/import"
 @Component({
   selector: 'fileservice',
-  template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > Import </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
+    template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > Import </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
   styleUrls: ['./file.component.css']
 })
 
@@ -367,6 +367,8 @@ export class FileComponent {
   }
 
   onSelectFile(event: any) {
+    //this.fileService.getFaksimiles().forEach(a => this.generateMap(a, a.actualPage));
+
     var self = this;
     var file: File = event.target.files[0];
     var faksimile;
@@ -792,7 +794,7 @@ export class FileComponent {
     if (mapfk != null) {
       var map = mapfk.map;
       var layers = mapfk.map.getLayers();
-      // mapfk.map.removeLayer(layers.getArray()[0]);
+      
 
       for (var i = layers.getArray().length - 1; i >= 0; --i) {
         mapfk.map.removeLayer(layers.getArray()[i]);
@@ -1083,7 +1085,7 @@ export class FileComponent {
 
             self.activateSVGMode(faksimile, map);
 
-           // active = false;
+           
           }
 
 

@@ -1,37 +1,20 @@
-<!--replace everything in this file with the code below.-->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="#">
+  <a class="navbar-brand" routerLink="/overview" routerLinkActive="active">
     eHinman
   </a>
-  <div>
-    <fileservice (complete)="import($event)"> </fileservice>
+  <div fxLayout="row" fxLayoutGap="10px">
+    <div>
+      <div routerLink="/collation" class="btn btn-file btn-outline-primary"> <i class="fas fa-window-restore"></i> <span class="hidden-xs-down"> Collation </span></div>
+    </div>
+  </div>
+  <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="10px" fxFlex>
+    <div>
+      <div routerLink="/publishing" class="btn btn-file btn-outline-primary"> <i class="fas fa-book fa-lg"></i> <span class="hidden-xs-down"> Publishing </span></div>
+    </div>
+    <div>
+      <div routerLink="/help" class="btn btn-file btn-outline-primary"> <i class="fas fa-question fa-lg"></i> <span class="hidden-xs-down"> Help </span></div>
+    </div>
   </div>
 </nav>
-<div>
-  <div class="container" *ngIf="!faksimiles || faksimiles?.length === 0">
-    <div [innerHTML]="data">
-    </div>
-    </div>
-  <div class="container-fluid" *ngIf="faksimiles?.length > 0" fxLayoutAlign="space-between">
-    <div fxFlex="93%" fxLayoutGap="5px" fxLayout="column">
-      <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;">
-        <!--[ngStyle]="{'height': a.size[1]+'px'}" -->
-        <!--cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)"-->
-        <div class="ol-boxnew" id="{{ 'card-block' + a.ID}}" cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)" [style.border-color]="a.Color">
-        </div>
-        <div id="{{ 'overlay' + a.ID}}"></div>
-      </div>
-     
-    </div>
-      <div class="faksimile-mini-boundary">
-        <div fxFlex="5%" fxLayoutGap="5px" fxLayout="column">
-          <div *ngFor="let a of faksimiles; trackBy:trackByIndex">
-            <div class="faksimile-box text " cdkDragBoundary=".faksimile-mini-boundary" cdkDragLockAxis="y" cdkDrag (cdkDragMoved)="drag_mini_block_Moved($event, a)" (cdkDragStarted)="drag_mini_block_Started($event, a)" (cdkDragEnded)="drag_mini_block_Ended($event, a)" id="{{ 'mini-card-canvas' + a.ID}}">  </div>
 
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-<!--<ngx-extended-pdf-viewer [src]="src"  useBrowserLocale="true" height="80vh"></ngx-extended-pdf-viewer>-->
 <h2><router-outlet></router-outlet> </h2>
