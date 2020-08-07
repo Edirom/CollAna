@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Http } from '@angular/http';
 
 @Component({
-  selector: 'publishing/eHinman',
+  selector: 'publishing/Kollationsvorgang_mit_eHinman',
   template: `
     <h1><em>eHinman &ndash; Kollationstool für Musikdrucke </em></h1>
   `,

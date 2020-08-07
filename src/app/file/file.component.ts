@@ -62,7 +62,7 @@ declare var pdfjsLib: any;
   //routerLink="/import"
 @Component({
   selector: 'fileservice',
-    template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > Import </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
+    template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Import"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
   styleUrls: ['./file.component.css']
 })
 
@@ -356,8 +356,6 @@ export class FileComponent {
 
 
   generateMinPreview(faksimile: Faksimile) {
-
-
 
     var element: any = document.getElementById("mini-card-canvas" + faksimile.ID);
 
@@ -1638,6 +1636,7 @@ export class FileComponent {
 
       // Using promise to fetch the page
       pdfDoc.getPage(num).then(function (page) {
+        self.imageOriginal = new MarvinImage();
         console.log('Page loaded');
 
         var viewport = page.getViewport({ scale: self.scale });

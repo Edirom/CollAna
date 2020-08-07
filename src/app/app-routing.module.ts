@@ -13,7 +13,7 @@ const routes: Routes = [
   { path: 'import', component: ImportComponent },
   { path: 'help', component: HelpComponent },
   { path: 'publishing', component: PublishingComponent },
-  { path: 'publishing/eHinman', component: PublicationEHinmanComponent },
+  { path: 'publishing/Kollationsvorgang_mit_eHinman', component: PublicationEHinmanComponent },
   { path: 'overview', component: OverviewComponent },
   { path: '**', redirectTo: 'overview' }
 ];

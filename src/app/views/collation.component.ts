@@ -15,7 +15,7 @@ import { FileComponent } from '../file/file.component';
       <fileservice (complete)="import($event)"> </fileservice>
     </div>
     <div>
-      <div class="btn btn-file btn-outline-primary"> <i class="fa fa-download fa-lg"> </i> <span class="hidden-xs-down"> Export </span></div>
+      <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Export"> <i class="fa fa-download fa-lg"> </i> <span class="hidden-xs-down"> </span></div>
     </div>
   </div>
 </nav>
@@ -45,27 +45,27 @@ import { FileComponent } from '../file/file.component';
 export class CollationComponent implements AfterViewInit {
   faksimiles: Faksimile[];
   ngAfterViewInit() {
-    this.removeMaps();
+    this.faksimiles = this.fileService.getFaksimiles();
+    // this.removeMaps();
+    this.mapService.removeAllMaps();
     this.generateMap();
-   
-    console.log("INIT****************");
+    
+
   }
 
-  removeMaps() {
-    this.mapService.getMaps().forEach(a => this.mapService.removeMap(a));
-  }
 
   generateMap() {
     this.faksimiles = this.fileService.getFaksimiles();
     this.faksimiles.forEach(a => this.fileComponent.generateMap(a, a.actualPage));
+    this.faksimiles.forEach(a => this.fileComponent.generateMinPreview(a));
   }
 
   constructor(
     private fileService: FileService, private fileComponent: FileComponent, private mapService: MapService) {
     this.faksimiles = this.fileService.getFaksimiles();
-    //this.faksimiles.forEach(a => this.fileComponent.generateMap(a, a.actualPage));
-    
+    //this.faksimiles.forEach(a => this.fileComponent.generateMap(a, a.actualPage)); 
   }
+
 
 
   inc_index = 100;
@@ -82,9 +82,9 @@ export class CollationComponent implements AfterViewInit {
     return index;
   }
 
-  /*import(data: any): void {
+  import(data: any): void {
     this.faksimiles = this.fileService.getFaksimiles();
-  }*/
+  }
 
 
 

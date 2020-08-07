@@ -5,7 +5,7 @@ import { Component } from '@angular/core';
   selector: 'publishing',
   template: `
     <h1>Catalog</h1>
-    <a href="/publishing/eHinman">eHinman</a>.
+    <a href="/publishing/Kollationsvorgang_mit_eHinman">eHinman</a>.
    
   `,
 })
