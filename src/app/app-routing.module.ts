@@ -5,7 +5,7 @@ import { OverviewComponent } from './views/overview.component';
 import { PublishingComponent } from './views/publishing.component';
 import { ImportComponent } from './views/import.component';
 import { CollationComponent } from './views/collation.component';
-import { PublicationEHinmanComponent } from './views/publicationEHinman..component';
+import { PublicationEHinmanComponent } from './views/publicationEHinman.component';
 
 
 const routes: Routes = [
