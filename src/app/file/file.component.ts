@@ -11,7 +11,8 @@ import { Image as ImageLayer } from 'ol/layer.js';
 import Static from 'ol/source/ImageStatic.js'
 import { MapFaksimile } from '../types/mapfaksimile';
 import { ZoomSlider } from 'ol/control';
-import { defaults as defaultControls, FullScreen, Rotate } from 'ol/control.js';
+import { Attribution, defaults as defaultControls } from 'ol/control';
+import { FullScreen, Rotate } from 'ol/control.js';
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction.js';
 import Bar from 'ol-ext/control/Bar';
 import Legend from 'ol-ext/control/Legend';
@@ -46,6 +47,7 @@ import * as d3 from "d3";
 
 
 import { Overlay } from 'ol';
+import { AttributionLike } from 'ol/source/Source';
 
 
 
@@ -353,14 +355,33 @@ export class FileComponent {
   }
 
 
-
+  updateMinPreview() {
+    var self = this;
+    this.fileService.getFaksimiles().forEach(function (a) {
+      self.generateMinPreview(a);
+     // var element: any = document.getElementById("mini-card-canvas" + a.ID);
+      //element.style.color = a.Color;
+    })
+  }
 
   generateMinPreview(faksimile: Faksimile) {
+
 
     var element: any = document.getElementById("mini-card-canvas" + faksimile.ID);
 
     element.innerText = faksimile.index + 1;
     element.style.color = faksimile.Color;
+
+    var element_ol_box: any = document.getElementsByClassName("ol-unselectable ol-control ol-bar ol-top");
+    var elem_array = Array.prototype.slice.call(element_ol_box);
+    elem_array.forEach(function (a) {
+      if (a.offsetParent.offsetParent.id == "card-block" + faksimile.ID) {
+        a.style.color = faksimile.Color;
+      }
+    });
+   // elem_array.forEach(a => a.style.color = faksimile.Color);
+    //element_ol_box.style.border = faksimile.Color;
+
 
   }
 
@@ -803,13 +824,15 @@ export class FileComponent {
     else {
 
 
+      var zoomFactorDelta = 100;
+
 
       var map = new Map({
         target: 'card-block' + faksimile.ID,
-
         /*interactions: defaultInteractions().extend([
           new DragRotateAndZoom()
         ]),*/
+     
         interactions: defaultInteractions({
           doubleClickZoom: false,
           dragPan: true,
@@ -819,28 +842,29 @@ export class FileComponent {
         view: new View({
           projection: projection,
           center: getCenter(extent),
-          zoom: 3,
+          zoomFactor: Math.pow(2, 1 / zoomFactorDelta),
+          zoom: 300,
 
         })
       });
 
       var legend = new Legend({
         title: faksimile.title,
-        collapsed: true
+        collapsed: false
       });
 
 
-      var barbottomright = new Bar();
+
+      /*var barbottomright = new Bar();
       map.addControl(barbottomright);
       barbottomright.setPosition("bottom-right");
 
-      barbottomright.addControl(legend);
+      barbottomright.addControl(legend);*/
 
       var mapf = new MapFaksimile(map, faksimile);
       this.mapService.addMap(mapf);
 
     }
-
 
 
 
@@ -855,8 +879,7 @@ export class FileComponent {
       });
 
     map.addLayer(layer);
-
-  
+    
     var source = new VectorSource({ wrapX: false });
 
     this.vector = new VectorLayer({
@@ -896,13 +919,15 @@ export class FileComponent {
     faksimile.size = [containt.canvas.width, containt.canvas.height];
 
 
+
     var bartop = new Bar();
     map.addControl(bartop);
     bartop.setPosition("top");
-
+   
+    bartop.addControl(legend);
     var zoommfactor = new TextButton(
       {
-        html: ' Zoom: <input id="zoom-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="1" max="30" step="0.01" type="number" value="' + map.getView().getZoom() + '"> ',
+        html: ' Zoom: <input id="zoom-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="1" max="3000" step="1" type="number" value="' + map.getView().getZoom() + '"> ',
         title: "Zoom factor",
         handleClick: function (event: any) {
           self.bindZoomInputs(event, faksimile);
@@ -925,12 +950,14 @@ export class FileComponent {
     var mainbartopright = new Bar();
     map.addControl(mainbartopright);
     mainbartopright.setPosition("top-right");
+    mainbartopright.set("id", "bar " + faksimile.ID);
 
     // Control
 
 
     var self = this;
 
+   
     var hold = new Toggle(
       {
         html: '<i class="fa fa-check-circle"></i>',
@@ -1402,6 +1429,8 @@ export class FileComponent {
         handleClick: function () {
           self.fileService.removeFaksimile(faksimile);
           self.faksimiles = self.fileService.getFaksimiles();
+          self.updateMinPreview();
+          
 
         }
       });
@@ -1437,7 +1466,7 @@ export class FileComponent {
       }
     });
 
-
+   
   }
 
  

@@ -50,6 +50,7 @@ export class CollationComponent implements AfterViewInit {
     this.mapService.removeAllMaps();
     this.generateMap();
     
+    
 
   }
 
@@ -95,7 +96,7 @@ export class CollationComponent implements AfterViewInit {
 
     let drag_element = document.getElementById('mini-card-canvas' + faksimile.ID);
 
-    console.log("boundingClientRect.y" + boundingClientRect.y);
+    //console.log("boundingClientRect.y" + boundingClientRect.y);
 
     var newPos = ((boundingClientRect.y * 100) / boundingClientRect.height);
     if (newPos < 0)
@@ -104,7 +105,7 @@ export class CollationComponent implements AfterViewInit {
     this.inc_index = ++this.inc_index
     drag_element.style.zIndex = this.inc_index.toString();
 
-    console.log("Moved" + parentPosition.top)
+   // console.log("Moved" + parentPosition.top)
   }
 
 
