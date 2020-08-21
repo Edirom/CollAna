@@ -849,11 +849,7 @@ export class FileComponent {
         })
       });
 
-      var legend = new Legend({
-        title: faksimile.title,
-        collapsed: false
-      });
-
+  
 
 
       /*var barbottomright = new Bar();
@@ -924,7 +920,13 @@ export class FileComponent {
     var bartop = new Bar();
     map.addControl(bartop);
     bartop.setPosition("top");
-   
+
+    var legend = new Legend({
+      title: faksimile.title,
+      collapsed: false
+    });
+
+
     bartop.addControl(legend);
     var zoommfactor = new TextButton(
       {
