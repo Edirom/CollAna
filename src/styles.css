@@ -12,8 +12,8 @@
 
 
 .ol-bar {
-  outline: dotted;
-  border: 1px solid;
+  /* outline: dotted;*/
+  border: 2px solid;
 }
 
 .faksimile-box {

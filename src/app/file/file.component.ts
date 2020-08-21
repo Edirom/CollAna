@@ -357,6 +357,7 @@ export class FileComponent {
 
   updateMinPreview() {
     var self = this;
+   
     this.fileService.getFaksimiles().forEach(function (a) {
       self.generateMinPreview(a);
      // var element: any = document.getElementById("mini-card-canvas" + a.ID);
@@ -370,13 +371,13 @@ export class FileComponent {
     var element: any = document.getElementById("mini-card-canvas" + faksimile.ID);
 
     element.innerText = faksimile.index + 1;
-    element.style.color = faksimile.Color;
+   // element.style.color = faksimile.Color;
 
     var element_ol_box: any = document.getElementsByClassName("ol-unselectable ol-control ol-bar ol-top");
     var elem_array = Array.prototype.slice.call(element_ol_box);
     elem_array.forEach(function (a) {
       if (a.offsetParent.offsetParent.id == "card-block" + faksimile.ID) {
-        a.style.color = faksimile.Color;
+        a.style.borderColor = faksimile.Color;
       }
     });
    // elem_array.forEach(a => a.style.color = faksimile.Color);

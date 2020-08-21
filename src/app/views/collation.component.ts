@@ -32,7 +32,7 @@ import { FileComponent } from '../file/file.component';
     <div class="faksimile-mini-boundary">
       <div fxFlex="5%" fxLayoutGap="5px" fxLayout="column">
         <div *ngFor="let a of faksimiles; trackBy:trackByIndex">
-          <div class="faksimile-box text " cdkDragBoundary=".faksimile-mini-boundary" cdkDragLockAxis="y" cdkDrag (cdkDragMoved)="drag_mini_block_Moved($event, a)" (cdkDragStarted)="drag_mini_block_Started($event, a)" (cdkDragEnded)="drag_mini_block_Ended($event, a)" id="{{ 'mini-card-canvas' + a.ID}}">  </div>
+          <div class="faksimile-box text " cdkDragBoundary=".faksimile-mini-boundary" cdkDragLockAxis="y" cdkDrag (cdkDragMoved)="drag_mini_block_Moved($event, a)" [style.border-color]="a.Color" [style.color]="a.Color" (cdkDragStarted)="drag_mini_block_Started($event, a)" (cdkDragEnded)="drag_mini_block_Ended($event, a)" id="{{ 'mini-card-canvas' + a.ID}}">  </div>
 
         </div>
       </div>
