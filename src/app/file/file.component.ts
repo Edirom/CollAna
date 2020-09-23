@@ -31,7 +31,7 @@ import Delete from 'ol-ext/interaction/Delete';
 import { shiftKeyOnly } from 'ol/events/condition';
 import { createRectFromCoords } from '../types/helpers';
 import MousePosition from 'ol/control/MousePosition';
-
+import { saveAs } from 'file-saver';
 
 import mergeImages from 'merge-images';
 
@@ -64,7 +64,7 @@ declare var pdfjsLib: any;
   //routerLink="/import"
 @Component({
   selector: 'fileservice',
-    template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Import"><i class= "fa fa-upload fa-lg" > </i><span class= "hidden-xs-down" > </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
+    template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Import"><i class= "fa fa-download fa-lg" > </i><span class= "hidden-xs-down" > </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
   styleUrls: ['./file.component.css']
 })
 
@@ -352,6 +352,25 @@ export class FileComponent {
 
   repaint(data: Faksimile, num: number) {
     this.generateMap(data, num);
+  }
+
+  exportPNG(map: Map, faksimile: Faksimile) {
+    let downloadLink = document.createElement('a');
+    downloadLink.setAttribute('download', 'CanvasAsImage.png');
+    var children = document.getElementById('card-block' + faksimile.ID).children;
+    var canvas = <HTMLCanvasElement>children.item(0).children.item(0);
+
+    var input = faksimile.title;
+    var output = input.substr(0, input.lastIndexOf('.')) || input;
+
+      canvas.toBlob(function (blob) {
+        saveAs(blob, output + ".png");
+    });
+    /*canvas.toBlob(function (blob) {
+      let url = URL.createObjectURL(blob);
+      downloadLink.setAttribute('href', url);
+      downloadLink.click();
+    });*/
   }
 
 
@@ -851,13 +870,6 @@ export class FileComponent {
 
   
 
-
-      /*var barbottomright = new Bar();
-      map.addControl(barbottomright);
-      barbottomright.setPosition("bottom-right");
-
-      barbottomright.addControl(legend);*/
-
       var mapf = new MapFaksimile(map, faksimile);
       this.mapService.addMap(mapf);
 
@@ -869,7 +881,7 @@ export class FileComponent {
       new ImageLayer({
         source: new Static({
           url: url,
-          // imageSize: [containt.canvas.width, containt.canvas.height],
+          //imageSize: [containt.canvas.width, containt.canvas.height],
           projection: projection,
           imageExtent: extent
         })
@@ -901,15 +913,7 @@ export class FileComponent {
 
     map.addLayer(this.vector);
 
-    /*this.mousePosition = new MousePosition({
-      coordinateFormat: createStringXY(2),
-      projection: projection,
-      target: document.getElementById('card-block' + faksimile.ID),
-      undefinedHTML: '&nbsp;'
-    });
-
-    map.addControl(this.mousePosition);*/
-
+ 
 
     var zoomslider = new ZoomSlider();
     map.addControl(zoomslider);
@@ -1375,10 +1379,12 @@ export class FileComponent {
         });
       bartop.addControl(previous);
 
-
+      //[value] = "username" (input) = "username = $event.target.value"
       var pagenum = new TextButton(
         {
-          html: '<input class= "fa fa-lg" style="width: 2.5em;" type="number" value="' + faksimile.actualPage + '"> / ' + faksimile.numPages + '',
+          html: '<input class= "fa fa-lg" style="width: 2.5em;" type="number"  value = ' + faksimile.actualPage + ' (input) = "faksimile.actualPage  = event.target.value" > / ' + faksimile.numPages + '',
+
+         // html: '<input class= "fa fa-lg" style="width: 2.5em;" type="number" value="' + faksimile.actualPage + '"> / ' + faksimile.numPages + '',
           // html: '<input [value]="pagenr" (input)="pagenr = $event.target.value" type="number" min = "1">',
           title: "Page number",
           handleClick: function (event: any) {
@@ -1438,6 +1444,19 @@ export class FileComponent {
         }
       });
     bartop.addControl(close);
+
+   
+    var download = new Button(
+      {
+        html: '<i class="fa fa-upload"></i>',
+        title: "Export PNG",
+        handleClick: function () {
+
+          self.exportPNG(map, faksimile);
+
+        }
+      });
+    bartop.addControl(download);
 
     var currRotation = map.getView().getRotation();
     var currZoom = map.getView().getZoom();
@@ -1589,6 +1608,20 @@ export class FileComponent {
   }
   bindInputs(event: any, faksimile: Faksimile) {
     var idxInput = event.target;
+
+  /*  if (idxInput.value > faksimile.numPages) {
+      idxInput.value = faksimile.actualPage;
+      return;
+    }
+    if (idxInput.value <= 0) {
+      idxInput.value = faksimile.actualPage;
+      return;
+    }
+    if (idxInput.value != faksimile.actualPage) {
+      faksimile.actualPage = Number(idxInput.value);
+      this.queueRenderPage(faksimile, faksimile.actualPage, faksimile.title, faksimile.numPages);
+    }*/
+
     //var idxInput: any = document.getElementById(id + faksimile.ID);
     // idxInput.value = 1;
     var self = this;

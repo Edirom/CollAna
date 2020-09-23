@@ -15,7 +15,7 @@ import { FileComponent } from '../file/file.component';
       <fileservice (complete)="import($event)"> </fileservice>
     </div>
     <div>
-      <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Export"> <i class="fa fa-download fa-lg"> </i> <span class="hidden-xs-down"> </span></div>
+      <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Export"> <i class="fa fa-upload fa-lg"> </i> <span class="hidden-xs-down"> </span></div>
     </div>
   </div>
 </nav>
