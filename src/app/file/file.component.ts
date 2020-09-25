@@ -46,8 +46,9 @@ import GeometryType from 'ol/geom/GeometryType';
 import * as d3 from "d3";
 
 
+
 import { Overlay } from 'ol';
-import { AttributionLike } from 'ol/source/Source';
+
 
 
 
@@ -106,7 +107,7 @@ export class FileComponent {
 
   htmlElement: HTMLElement;
 
-  projection: any;
+  //projection: any;
 
 
   constructor(private fileService: FileService, private mapService: MapService) {
@@ -358,19 +359,14 @@ export class FileComponent {
     let downloadLink = document.createElement('a');
     downloadLink.setAttribute('download', 'CanvasAsImage.png');
     var children = document.getElementById('card-block' + faksimile.ID).children;
+    //Einen schöneren Weg finden!!!
     var canvas = <HTMLCanvasElement>children.item(0).children.item(0);
 
     var input = faksimile.title;
     var output = input.substr(0, input.lastIndexOf('.')) || input;
-
       canvas.toBlob(function (blob) {
         saveAs(blob, output + ".png");
     });
-    /*canvas.toBlob(function (blob) {
-      let url = URL.createObjectURL(blob);
-      downloadLink.setAttribute('href', url);
-      downloadLink.click();
-    });*/
   }
 
 
@@ -819,12 +815,12 @@ export class FileComponent {
     var containt: any = faksimile.pages[num - 1].actualcontain;
 
     var extent = [0, 0, containt.canvas.width, containt.canvas.height];
-    this.projection = new Projection({
+    var projection = new Projection({
       code: 'xkcd-image',
       units: 'pixels',
       extent: extent
     });
-    var projection = this.projection;
+  //  var projection = this.projection;
     containt.draw(containt.canvas);
 
     var url = containt.canvas.toDataURL();
@@ -849,6 +845,7 @@ export class FileComponent {
 
       var map = new Map({
         target: 'card-block' + faksimile.ID,
+        
         /*interactions: defaultInteractions().extend([
           new DragRotateAndZoom()
         ]),*/
@@ -857,13 +854,17 @@ export class FileComponent {
           doubleClickZoom: false,
           dragPan: true,
           mouseWheelZoom: false,
+          constrainResolution: true,
         }),
         keyboardEventTarget: document,
         view: new View({
+          resolution: 1,        // important for 100% image size!
+          //maxResolution: 300, 
           projection: projection,
           center: getCenter(extent),
+          
           zoomFactor: Math.pow(2, 1 / zoomFactorDelta),
-          zoom: 300,
+          zoom:300,
 
         })
       });

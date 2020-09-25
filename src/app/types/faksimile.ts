@@ -24,11 +24,8 @@ export class Faksimile {
 
     
     var Color = function () {
-      var hue = Math.floor(Math.random() * 360);
+      var hue = Math.floor(Math.random() * 360) + 1;//Math.floor(Math.random() * 360);
       return 'hsl(' + hue + ', 100%, 87.5%)';
-     /* return "hsla(" + ~~(360 * Math.random()) + "," +
-        "70%," +
-        "80%,1)";*/
     }
 
     this.Color = Color();

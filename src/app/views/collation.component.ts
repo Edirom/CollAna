@@ -4,6 +4,10 @@ import { MapService } from '../services/map.service';
 import { Faksimile } from '../types/faksimile';
 import { CdkDragEnd, CdkDragMove } from "@angular/cdk/drag-drop";
 import { FileComponent } from '../file/file.component';
+
+import { saveAs } from 'file-saver';
+
+declare let html2canvas: any;
 //import { Http } from '@angular/http';
 
 @Component({
@@ -15,13 +19,13 @@ import { FileComponent } from '../file/file.component';
       <fileservice (complete)="import($event)"> </fileservice>
     </div>
     <div>
-      <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Export"> <i class="fa fa-upload fa-lg"> </i> <span class="hidden-xs-down"> </span></div>
+      <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" (click)="export()" title="Export Overlap"> <i class="fa fa-upload fa-lg"> </i> <span class="hidden-xs-down"> </span></div>
     </div>
   </div>
 </nav>
 <div style="font-size:20px">
   <div class="container-fluid"  *ngIf="faksimiles?.length > 0" fxLayoutAlign="space-between">
-    <div fxFlex="93%" fxLayoutGap="5px" fxLayout="column">
+    <div fxFlex="93%" fxLayoutGap="5px" fxLayout="column"  id="capture" >
       <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;">
         <div class="ol-boxnew" id="{{ 'card-block' + a.ID}}" cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)" [style.border-color]="a.Color">
         </div>
@@ -87,6 +91,23 @@ export class CollationComponent implements AfterViewInit {
     this.faksimiles = this.fileService.getFaksimiles();
   }
 
+  export() {
+    if (this.faksimiles.length == 0) {
+      window.alert("No Data to export!");
+      return;
+    }
+    var input = "";
+    var output = "";
+    this.faksimiles.forEach(function (faksimile) {
+      input = faksimile.title;
+      output = output + input.substr(0, input.lastIndexOf('.')) + "_";
+    });
+    html2canvas(document.querySelector("#capture")).then(canvas => {
+      canvas.toBlob(function (blob) {
+        saveAs(blob, output + ".png");
+      });
+    });
+  }
 
 
   drag_maxi_block_Moved(event: CdkDragMove, faksimile: Faksimile) {
