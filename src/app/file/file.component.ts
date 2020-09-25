@@ -365,7 +365,7 @@ export class FileComponent {
     var input = faksimile.title;
     var output = input.substr(0, input.lastIndexOf('.')) || input;
       canvas.toBlob(function (blob) {
-        saveAs(blob, output + ".png");
+        saveAs(blob, output + "_" + "Page" + faksimile.actualPage + ".png");
     });
   }
 

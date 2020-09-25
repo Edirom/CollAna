@@ -100,7 +100,7 @@ export class CollationComponent implements AfterViewInit {
     var output = "";
     this.faksimiles.forEach(function (faksimile) {
       input = faksimile.title;
-      output = output + input.substr(0, input.lastIndexOf('.')) + "_";
+      output = output + input.substr(0, input.lastIndexOf('.')) + "_" + "Page" + faksimile.actualPage + "_";
     });
     html2canvas(document.querySelector("#capture")).then(canvas => {
       canvas.toBlob(function (blob) {
