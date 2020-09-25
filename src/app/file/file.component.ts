@@ -1446,11 +1446,12 @@ export class FileComponent {
       });
     bartop.addControl(close);
 
-   
+
+    //< i class="fa fa-upload" > </i>
     var download = new Button(
       {
-        html: '<i class="fa fa-upload"></i>',
-        title: "Export PNG",
+        html: '<i class="far fa-file-image"></i>',
+        title: "Export current Page",
         handleClick: function () {
 
           self.exportPNG(map, faksimile);

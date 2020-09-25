@@ -83,4 +83,10 @@ svg {
   cursor: move;
 }
 
+.fa-stack {
+  font-size: 0.5em;
+}
 
+i {
+  vertical-align: middle;
+}
