@@ -356,8 +356,8 @@ export class FileComponent {
   }
 
   exportPNG(map: Map, faksimile: Faksimile) {
-    let downloadLink = document.createElement('a');
-    downloadLink.setAttribute('download', 'CanvasAsImage.png');
+    //let downloadLink = document.createElement('a');
+   // downloadLink.setAttribute('download', 'CanvasAsImage.png');
     var children = document.getElementById('card-block' + faksimile.ID).children;
     //Einen schöneren Weg finden!!!
     var canvas = <HTMLCanvasElement>children.item(0).children.item(0);
