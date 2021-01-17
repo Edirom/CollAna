@@ -475,7 +475,8 @@ export class FileComponent {
       mousePosition = map.getEventCoordinate(event);
     });
     var that = this;
-
+   
+    this.svg.selectAll("g").remove();
     this.svg.on('click', drawingstarted).on('mousemove', drawpreview);
     //this.svg.append("g");
     var final: boolean = true;
@@ -486,12 +487,18 @@ export class FileComponent {
     var mouseDown: boolean = false;
     var that = this;
     var preview;
-
-    that.g = that.svg.append('g');
+  
+    this.g = this.svg.append('g');
 
 
     function drawingstarted() {
-     
+
+      that.svg.selectAll("image").remove();
+      that.svg.selectAll(".line--x").remove();
+      that.svg.selectAll(".line--y").remove();
+      that.svg.selectAll(".handle").remove();
+      that.svg.selectAll(".draggable").remove();
+
       mouseDown = true;
 
       preview = d3.select("#flat").append('polygon')
@@ -531,7 +538,7 @@ export class FileComponent {
 
     
     function perspectiveTransformation(coord, faksimile: Faksimile, cutCoord) {
-    
+
 
       that.svg.selectAll("image").remove();
       that.svg.selectAll(".line--x").remove();
@@ -543,16 +550,16 @@ export class FileComponent {
       var width = coord[1][0] - coord[0][0],
         height = coord[3][1] - coord[0][1];
 
-
+     
       var transform = ["", "-webkit-", "-moz-", "-ms-", "-o-"].reduce(function (p, v) { return v + "transform" in document.body.style ? v : p; }) + "transform";
 
       var sourcePoints = [[0, 0], [width, 0], [width, height], [0, height]];
 
-     var targetPoints = [[0, 0], [width, 0], [width, height], [0, height]];
+      var targetPoints = [[0, 0], [width, 0], [width, height], [0, height]];
 
-      
 
-     var center = [[(targetPoints[2][0] - targetPoints[0][0]) / 2, (targetPoints[2][1] - targetPoints[0][1]) / 2]];
+
+      var center = [[(targetPoints[2][0] - targetPoints[0][0]) / 2, (targetPoints[2][1] - targetPoints[0][1]) / 2]];
 
       that.g
         .attr("transform", "translate(" + coord[0][0] + "," + coord[0][1] + ")");
@@ -560,37 +567,44 @@ export class FileComponent {
       var svgTransform = d3.select("#transform")
         .style(transform + "-origin", coord[0][0] + "px " + coord[0][1] + "px 0");
 
-     
+      svgTransform.style(transform, "matrix(1, 0, 0, 1, 0, 0)");
 
       var svgFlat = d3.select("#flat");
-    
+
       if (faksimile.actualPage == null)
         faksimile.actualPage = 1;
 
       that.setOpacity(faksimile, 255, false);
       var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
-      var cropImage = new MarvinImage();
+      //var cropImage = new MarvinImage();
 
       var cropWidth = cutCoord[1][0] - cutCoord[0][0];
       var cropHeight = cutCoord[3][1] - cutCoord[0][1];
 
 
-      //crop Image and show preview
-      Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
+      var cropImage = containt.clone();
+      Marvin.crop(containt, cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
+      cropImage.canvas.getContext("2d").clearRect(0, 0, cropWidth, cropHeight);
       cropImage.draw(cropImage.canvas);
+
+      //crop Image and show preview
+      //Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
+      //cropImage.draw(cropImage.canvas);
 
       var imageWithoutBackground = that.remove_background_crop(cropImage);
 
 
       var url = imageWithoutBackground.canvas.toDataURL();
 
-      
+
       //transformed();
-     
-     
+
+
       svgTransform.select("g")
         .append("image")
         .attr("xlink:href", url)
+        .attr("x", "0")
+        .attr("y", "0")
         .attr("width", width)
         .attr("height", height);
 
@@ -613,18 +627,44 @@ export class FileComponent {
         .attr("y1", function (d) { return d; })
         .attr("y2", function (d) { return d; });
 
+
+
      
+      var xPoint = [d3.range(0, width + 1, 80)];
+      var yPoint = [d3.range(0, height + 1, 80)];
+
+      var targetPointsMiddle = new Array((xPoint[0].length-1) * (yPoint[0].length-1));
+
+      for (var i = 0; i < targetPointsMiddle.length; i++) {
+        targetPointsMiddle[i] = new Array(2);
+      }
+
+      for (var i = 0; i < targetPointsMiddle.length; i++) {
+        for (var x = 1; x < xPoint[0].length; x++) {
+          for (var y = 1; y < yPoint[0].length; y++) {
+            targetPointsMiddle[i][0] = xPoint[0][x];
+            targetPointsMiddle[i][1] = yPoint[0][y];
+            i++;
+          }
+         
+        }
+      
+      }
+      console.log(targetPointsMiddle);
+      var targetpoint2 = targetPoints.concat(targetPointsMiddle);
 
       var handle = svgFlat.select("g").selectAll(".handle")
-        .data(targetPoints)
+        .data(targetpoint2)
         .enter().append("circle")
-        .attr("id", function (d, i) { return "" + i; })     
+        .attr("id", function (d, i) { return "" + i; })
         .attr("class", "handle")
         .attr("transform", function (d) { return "translate(" + d + ")"; })
         .attr("r", 10)
         .call(d3.drag()
           .subject(function (d) { return { x: d[0], y: d[1] }; })
           .on("drag", dragged));
+
+ 
 
       svgFlat.select("g").selectAll(".draggable")
         .data(center)
@@ -664,10 +704,10 @@ export class FileComponent {
       function movetargets(xdis, ydis) {
         // targetPoints = [[0, 0], [width, 0], [width, height], [0, height]];
         
-        for (var i = 0, n = targetPoints.length; i < n; ++i) {
-          targetPoints[i][0] = targetPoints[i][0] - xdis;
-          targetPoints[i][1] = targetPoints[i][1] - ydis;
-          d3.select("[id = '" + i + "']").attr("transform", "translate(" + (targetPoints[i][0]) + "," + (targetPoints[i][1]) + ")");        
+        for (var i = 0, n = targetpoint2.length; i < n; ++i) {
+          targetpoint2[i][0] = targetpoint2[i][0] - xdis;
+          targetpoint2[i][1] = targetpoint2[i][1] - ydis;
+          d3.select("[id = '" + i + "']").attr("transform", "translate(" + (targetpoint2[i][0]) + "," + (targetpoint2[i][1]) + ")");        
         }
        
         transformed();
@@ -767,8 +807,8 @@ export class FileComponent {
 
     //this.relFactor = 1;//(this.containerWidth - 10) / this.width;
     //self.aspectRatio = self.containerWidth / containerWidth;
-   // var transform = ["", "-webkit-", "-moz-", "-ms-", "-o-"].reduce(function (p, v) { return v + "transform" in document.body.style ? v : p; }) + "transform";
-
+    // var transform = ["", "-webkit-", "-moz-", "-ms-", "-o-"].reduce(function (p, v) { return v + "transform" in document.body.style ? v : p; }) + "transform";
+    d3.select("#overlay" + faksimile.ID).selectAll("svg").remove();
     this.svg = d3.select("#overlay" + faksimile.ID).selectAll("svg")
       .data(["transform", "flat"])
       .enter()
@@ -788,21 +828,7 @@ export class FileComponent {
   }
 
 
-  repaintSVG(map: Map, faksimile: Faksimile) {
-    var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
-   // var coord = this.coord;
 
-    var transform = ["", "-webkit-", "-moz-", "-ms-", "-o-"].reduce(function (p, v) { return v + "transform" in document.body.style ? v : p; }) + "transform";
-
-
-    var svg = d3.select("#overlay" + faksimile.ID).selectAll("svg");
-    svg.call(move);
-    var self = this;
-
-    function move() {
-    }
-
-  }
 
   mousePosition: MousePosition;
   generateMap(faksimile: Faksimile, num: number) {
@@ -1272,7 +1298,9 @@ export class FileComponent {
             var svgString = getSVGString(self.svg.node(), containt.canvas.width / map.getView().getResolution(), containt.canvas.height / map.getView().getResolution());
 
             var cropImageString = svgString2Image(svgString, containt.canvas.width, containt.canvas.height, 'png', save, map); // passes Blob and filesize String to the callback
-
+            
+            
+            self.svg = null;
            
           }
 
@@ -1469,8 +1497,7 @@ export class FileComponent {
 
     map.on('moveend', function (e) {
       map.set("frameState", e.frameState);
-      //Repant SVG
-      //self.repaintSVG(map, faksimile);
+      
       var newZoom = map.getView().getZoom();
       var newRotation = map.getView().getRotation();
       if (currZoom != newZoom) {
