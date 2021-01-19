@@ -75,6 +75,14 @@ svg {
   cursor: move;
 }
 
+.handlemiddle {
+  fill: none;
+  pointer-events: all;
+  stroke: green;
+  stroke-width: 2px;
+  cursor: move;
+}
+
 .draggable {
   fill: none;
   pointer-events: all;

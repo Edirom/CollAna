@@ -469,6 +469,8 @@ export class FileComponent {
 
 
   private activateSVGMode(faksimile: Faksimile, map: Map) {
+    this.resetOverlaySVG(map, faksimile);
+    this.buildOverlaySVG(map, faksimile);
     var container = document.getElementById('card-block' + faksimile.ID);
     var mousePosition;
     container.addEventListener('mousemove', function (event) {
@@ -497,6 +499,7 @@ export class FileComponent {
       that.svg.selectAll(".line--x").remove();
       that.svg.selectAll(".line--y").remove();
       that.svg.selectAll(".handle").remove();
+      that.svg.selectAll(".handlemiddle").remove();
       that.svg.selectAll(".draggable").remove();
 
       mouseDown = true;
@@ -545,6 +548,7 @@ export class FileComponent {
       that.svg.selectAll(".line--y").remove();
       that.svg.selectAll(".handle").remove();
       that.svg.selectAll(".draggable").remove();
+      that.svg.selectAll(".handlemiddle").remove();
 
 
       var width = coord[1][0] - coord[0][0],
@@ -582,10 +586,13 @@ export class FileComponent {
       var cropHeight = cutCoord[3][1] - cutCoord[0][1];
 
 
-      var cropImage = containt.clone();
-      Marvin.crop(containt, cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
+     // var cropImage = containt.clone();
+      var cropImage = new MarvinImage();
+      Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
       cropImage.canvas.getContext("2d").clearRect(0, 0, cropWidth, cropHeight);
       cropImage.draw(cropImage.canvas);
+
+     
 
       //crop Image and show preview
       //Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
@@ -595,6 +602,8 @@ export class FileComponent {
 
 
       var url = imageWithoutBackground.canvas.toDataURL();
+
+     
 
 
       //transformed();
@@ -654,17 +663,55 @@ export class FileComponent {
       var targetpoint2 = targetPoints.concat(targetPointsMiddle);
 
       var handle = svgFlat.select("g").selectAll(".handle")
-        .data(targetpoint2)
+        .data(targetPoints)
         .enter().append("circle")
         .attr("id", function (d, i) { return "" + i; })
         .attr("class", "handle")
         .attr("transform", function (d) { return "translate(" + d + ")"; })
-        .attr("r", 10)
+        .attr("r", 5)
+        .on('mouseover', function (d, i) {
+          // make the mouseover'd element
+          d3.select(this)
+            .transition()
+            .duration(100)
+            .attr('r', 20);
+        })
+        .on('mouseout', function (d, i) {
+          // return the mouseover'd element
+          d3.select(this)
+            .transition()
+            .duration(100)
+            .attr('r', 5);
+        })
         .call(d3.drag()
           .subject(function (d) { return { x: d[0], y: d[1] }; })
           .on("drag", dragged));
 
- 
+      var handleMiddlePoints = svgTransform.select("g").selectAll(".handlemiddle")
+        .data(targetPointsMiddle)
+        .enter().append("circle")
+        .attr("id", function (d, i) { return "" + i; })
+        .attr("class", "handlemiddle")
+        .attr("transform", function (d) { return "translate(" + d + ")"; })
+        .attr("r", 5)
+        .on('mouseover', function (d, i) {
+          // make the mouseover'd element
+          d3.select(this)
+            .transition()
+            .duration(100)
+            .attr('r', 20);
+        })
+        .on('mouseout', function (d, i) {
+          // return the mouseover'd element
+          d3.select(this)
+            .transition()
+            .duration(100)
+            .attr('r', 5);
+        })
+        .call(d3.drag()
+          .subject(function (d) { return { x: d[0], y: d[1] }; })
+          .on("drag", draggedMiddlePoints));
+
 
       svgFlat.select("g").selectAll(".draggable")
         .data(center)
@@ -672,7 +719,21 @@ export class FileComponent {
         .attr("id", function (d, i) { return "" + i; })
         .attr("class", "draggable")
         .attr("transform", function (d) { return "translate(" + d + ")"; })
-        .attr("r", 10)
+        .attr("r", 5)
+        .on('mouseover', function (d, i) {
+          // make the mouseover'd element
+          d3.select(this)
+            .transition()
+            .duration(100)
+            .attr('r', 20);
+        })
+        .on('mouseout', function (d, i) {
+          // return the mouseover'd element
+          d3.select(this)
+            .transition()
+            .duration(100)
+            .attr('r', 5);
+        })
         .call(d3.drag()
           .subject(function (d) { return { x: d[0], y: d[1] }; })
           .on("drag", draggedcenter));
@@ -703,13 +764,22 @@ export class FileComponent {
 
       function movetargets(xdis, ydis) {
         // targetPoints = [[0, 0], [width, 0], [width, height], [0, height]];
-        
-        for (var i = 0, n = targetpoint2.length; i < n; ++i) {
-          targetpoint2[i][0] = targetpoint2[i][0] - xdis;
-          targetpoint2[i][1] = targetpoint2[i][1] - ydis;
-          d3.select("[id = '" + i + "']").attr("transform", "translate(" + (targetpoint2[i][0]) + "," + (targetpoint2[i][1]) + ")");        
+
+        for (var i = 0, n = targetPoints.length; i < n; ++i) {
+          targetPoints[i][0] = targetPoints[i][0] - xdis;
+          targetPoints[i][1] = targetPoints[i][1] - ydis;
+          //d3.select("[id = '" + i + "']").attr("transform", "translate(" + (targetpoint2[i][0]) + "," + (targetpoint2[i][1]) + ")");
+          d3.select(".handle[id = '" + i + "']").attr("transform", "translate(" + (targetPoints[i][0]) + "," + (targetPoints[i][1]) + ")");
+         
         }
        
+
+       /* for (var i = 0, n = targetPointsMiddle.length; i < n; ++i) {
+          targetPointsMiddle[i][0] = targetPointsMiddle[i][0] - xdis;
+          targetPointsMiddle[i][1] = targetPointsMiddle[i][1] - ydis;
+          //d3.select("[id = '" + i + "']").attr("transform", "translate(" + (targetpoint2[i][0]) + "," + (targetpoint2[i][1]) + ")");
+          d3.select(".handlemiddle[id = '" + i + "']").attr("transform", "translate(" + (targetPointsMiddle[i][0]) + "," + (targetPointsMiddle[i][1]) + ")");     
+        }*/
         transformed();
      }
 
@@ -742,6 +812,34 @@ export class FileComponent {
         
       }
 
+      function draggedMiddlePoints(d) {
+        d3.select(this).attr("transform", "translate(" + (d[0] = d3.event.x) + "," + (d[1] = d3.event.y) + ")");
+        console.log("this: " + this.id);
+        var id = this.id;
+        var mousePosition;
+        var self = this;
+        container.addEventListener('pointerup', function (event) {
+          mousePosition = map.getEventCoordinate(event);
+          if (faksimile.pages[faksimile.actualPage - 1].minx > parseInt(mousePosition[0]))
+            faksimile.pages[faksimile.actualPage - 1].minx = parseInt(mousePosition[0]);
+          if (faksimile.pages[faksimile.actualPage - 1].miny > (faksimile.size[1] - parseInt(mousePosition[1])))
+            faksimile.pages[faksimile.actualPage - 1].miny = faksimile.size[1] - parseInt(mousePosition[1]);
+          if (faksimile.pages[faksimile.actualPage - 1].maxx < parseInt(mousePosition[0]))
+            faksimile.pages[faksimile.actualPage - 1].maxx = parseInt(mousePosition[0]);
+          if (faksimile.pages[faksimile.actualPage - 1].maxy < (faksimile.size[1] - parseInt(mousePosition[1])))
+            faksimile.pages[faksimile.actualPage - 1].maxy = faksimile.size[1] - parseInt(mousePosition[1]);
+          //faksimile.pages[faksimile.actualPage - 1].cropCoord[id][0] = parseInt(mousePosition[0]);
+          //faksimile.pages[faksimile.actualPage - 1].cropCoord[id][1] = faksimile.size[1]-parseInt(mousePosition[1]);
+          // cutCoord[self.id] = mousePosition;
+          console.log("cutCoord, mousePosition: " + id + " " + cutCoord + " ");
+          container.removeEventListener('pointerup', function (event) { });
+
+        });
+        transformed();
+        // faksimile.pages[faksimile.actualPage - 1].cropCoord = cutCoord;
+
+
+      }
       function transformed() {
         container.removeEventListener('pointerup', function (event) {  });
         for (var a = [], b = [], i = 0, n = sourcePoints.length; i < n; ++i) {
@@ -1138,8 +1236,8 @@ export class FileComponent {
 
             self.setOpacity(faksimile, 80, true);
 
-            self.resetOverlaySVG(map, faksimile);
-            self.buildOverlaySVG(map, faksimile);
+            //self.resetOverlaySVG(map, faksimile);
+            //self.buildOverlaySVG(map, faksimile);
 
 
             self.activateSVGMode(faksimile, map);
