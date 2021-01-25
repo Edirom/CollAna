@@ -28,6 +28,21 @@ export class FileService {
       return faksimile.pages[0].actualcontain;
   }
 
+  setPreviosContain(faksimile: Faksimile, page: Pages, contain: any) {
+    if (typeof page !== "undefined")
+      faksimile.pages[page.index - 1].previouscontain = contain;
+    else
+      faksimile.pages[0].previouscontain = contain;
+  }
+
+  getPreviosContain(faksimile: Faksimile, page: Pages): any {
+
+    if (typeof page !== "undefined")
+      return faksimile.pages[page.index - 1].previouscontain;
+    else
+      return faksimile.pages[0].previouscontain;
+  }
+
   getFaksimiles(): Faksimile[] {
     return this.faksimiles;
   }

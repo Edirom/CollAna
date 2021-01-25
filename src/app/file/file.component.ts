@@ -165,7 +165,8 @@ export class FileComponent {
     imageProcessed = this.imageOriginal.clone();
 
     imageProcessed.imageData = imageData;
-    // self.fileService.setActualContain(faksimile, self.imageProcessed);
+
+    this.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage - 1,  imageProcessed);
     this.repaint(faksimile, faksimile.actualPage);
 
   }
@@ -191,7 +192,7 @@ export class FileComponent {
     imageProcessed = this.imageOriginal.clone();
 
     imageProcessed.imageData = imageData;
-    // self.fileService.setActualContain(faksimile, self.imageProcessed);
+    this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
     this.repaint(faksimile, faksimile.actualPage);
 
   }
@@ -217,14 +218,16 @@ export class FileComponent {
     imageProcessed = this.imageOriginal.clone();
 
     imageProcessed.imageData = imageData;
-    // self.fileService.setActualContain(faksimile, self.imageProcessed);
+    this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
     this.repaint(faksimile, faksimile.actualPage);
 
   }
 
   red_and_white = function (faksimile: Faksimile) {
     var imageProcessed = new MarvinImage();
-    var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
+    var actualcontain = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
+    var imageData = actualcontain.imageData;
+  
     var pixel = imageData.data;
 
     var r = 0, g = 1, b = 2, a = 3;
@@ -240,15 +243,21 @@ export class FileComponent {
         pixel[p + a] = 200;
       }
     }
+   
     imageProcessed = this.imageOriginal.clone();
+
     imageProcessed.imageData = imageData;
+    this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
+
     this.repaint(faksimile, faksimile.actualPage);
+
   }
 
   black_and_white = function (faksimile: Faksimile) {
     var imageProcessed = new MarvinImage();
     var level = 30;
     this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
+    this.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], this.imageOriginal);
     imageProcessed = this.imageOriginal.clone();
     Marvin.blackAndWhite(this.imageOriginal, imageProcessed, level);
     // Marvin.colorChannel(self.imageOriginal, imageProcessed, 139,0,0);
@@ -260,6 +269,7 @@ export class FileComponent {
     var imageProcessed = new MarvinImage();
     var radius = 30;
     this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
+    this.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], this.imageOriginal);
     imageProcessed = this.imageOriginal.clone();
     Marvin.alphaBoundary(this.imageOriginal, imageProcessed, radius);
     // Marvin.colorChannel(self.imageOriginal, imageProcessed, 139,0,0);
@@ -359,6 +369,7 @@ export class FileComponent {
   edge_detection = function (faksimile: Faksimile) {
     var imageProcessed = new MarvinImage();
     this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
+    this.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], this.imageOriginal);
     imageProcessed = this.imageOriginal.clone();
     imageProcessed.clear(0xFF000000);
 
@@ -482,6 +493,7 @@ export class FileComponent {
 
         function imageLoaded() {
           imageProcessed = self.imageOriginal.clone();
+          self.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
           self.fileService.setActualContain(faksimile, page, imageProcessed);
 
           //self.imageProcessed = faksimile.actualcontain;
@@ -1493,26 +1505,38 @@ export class FileComponent {
     mainbartopright.addControl(mergeArea);
 
 
-
-
-
     var undo = new Button(
       {
-        html: '<i class="fa fa-undo"></i>',
+        html: '<i class="fa fa-reply"></i>',
         title: 'Undo',
+        handleClick: function () {
+          map.removeInteraction(draw);
+          self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], faksimile.pages[num - 1].previouscontain);
+          self.repaint(faksimile, num);
+
+        }
+      });
+    mainbartopright.addControl(undo);
+
+
+    var reset = new Button(
+      {
+        html: '<i class="fa fa-reply-all"></i>',
+        title: 'Reset',
         handleClick: function () {
           map.removeInteraction(draw);
           self.imageOriginal.load(faksimile.pages[num - 1].contain, imageLoaded);
 
           function imageLoaded() {
             imageProcessed = self.imageOriginal.clone();
+            self.fileService.setPreviosContain(faksimile, faksimile.pages[num - 1], imageProcessed);
             self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], imageProcessed);
             self.repaint(faksimile, num);
           }
 
         }
       });
-    mainbartopright.addControl(undo);
+    mainbartopright.addControl(reset);
 
     var magnify = new Toggle(
       {
@@ -1818,22 +1842,6 @@ export class FileComponent {
   }
   bindInputs(event: any, faksimile: Faksimile) {
     var idxInput = event.target;
-
-  /*  if (idxInput.value > faksimile.numPages) {
-      idxInput.value = faksimile.actualPage;
-      return;
-    }
-    if (idxInput.value <= 0) {
-      idxInput.value = faksimile.actualPage;
-      return;
-    }
-    if (idxInput.value != faksimile.actualPage) {
-      faksimile.actualPage = Number(idxInput.value);
-      this.queueRenderPage(faksimile, faksimile.actualPage, faksimile.title, faksimile.numPages);
-    }*/
-
-    //var idxInput: any = document.getElementById(id + faksimile.ID);
-    // idxInput.value = 1;
     var self = this;
     idxInput.onchange = function () {
       console.log(idxInput.value);
