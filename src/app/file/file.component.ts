@@ -136,6 +136,8 @@ export class FileComponent {
   }
 
   fun_blue_and_white;
+  fun_green_and_white;
+  fun_beige_and_white;
   fun_red_and_white;
   fun_black_and_white;
   fun_edge_detection;
@@ -168,6 +170,57 @@ export class FileComponent {
 
   }
 
+  beige_and_white = function (faksimile: Faksimile) {
+    var imageProcessed = new MarvinImage();
+    var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
+    var pixel = imageData.data;
+
+    var r = 0, g = 1, b = 2, a = 3;
+    for (var p = 0; p < pixel.length; p += 4) {
+
+      if (
+        pixel[p + r] != 255 ||
+        pixel[p + g] != 255 ||
+        pixel[p + b] != 255) {
+        pixel[p + r] = 232;
+        pixel[p + g] = 189;
+        pixel[p + b] = 130;
+        pixel[p + a] = 170;
+      }
+    }
+    imageProcessed = this.imageOriginal.clone();
+
+    imageProcessed.imageData = imageData;
+    // self.fileService.setActualContain(faksimile, self.imageProcessed);
+    this.repaint(faksimile, faksimile.actualPage);
+
+  }
+
+  green_and_white = function (faksimile: Faksimile) {
+    var imageProcessed = new MarvinImage();
+    var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
+    var pixel = imageData.data;
+
+    var r = 0, g = 1, b = 2, a = 3;
+    for (var p = 0; p < pixel.length; p += 4) {
+
+      if (
+        pixel[p + r] != 255 ||
+        pixel[p + g] != 255 ||
+        pixel[p + b] != 255) {
+        pixel[p + r] = 118;
+        pixel[p + g] = 167;
+        pixel[p + b] = 56;
+        pixel[p + a] = 170;
+      }
+    }
+    imageProcessed = this.imageOriginal.clone();
+
+    imageProcessed.imageData = imageData;
+    // self.fileService.setActualContain(faksimile, self.imageProcessed);
+    this.repaint(faksimile, faksimile.actualPage);
+
+  }
 
   red_and_white = function (faksimile: Faksimile) {
     var imageProcessed = new MarvinImage();
@@ -1157,6 +1210,36 @@ export class FileComponent {
         }
       });
     mainbartopright.addControl(blue_white);
+
+    var green_white = new Button(
+      {
+        html: '<i class="fa fa-adjust" style="color:#a9da42;"></i>',
+        title: 'Green and White',
+        handleClick: function () {
+          self.black_and_white(faksimile);
+          self.green_and_white(faksimile);
+          self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
+          self.fun_green_and_white = self.wrapFunction(self.green_and_white, self, [faksimile]);
+          faksimile.funqueue.push(self.fun_black_and_white);
+          faksimile.funqueue.push(self.fun_green_and_white);
+        }
+      });
+    mainbartopright.addControl(green_white);
+
+    var beige_white = new Button(
+      {
+        html: '<i class="fa fa-adjust" style="color:#e8bd82;"></i>',
+        title: 'Beige and White',
+        handleClick: function () {
+          self.black_and_white(faksimile);
+          self.beige_and_white(faksimile);
+          self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
+          self.fun_beige_and_white = self.wrapFunction(self.beige_and_white, self, [faksimile]);
+          faksimile.funqueue.push(self.fun_black_and_white);
+          faksimile.funqueue.push(self.fun_beige_and_white);
+        }
+      });
+    mainbartopright.addControl(beige_white);
 
     var edgedetection = new Button(
       {
