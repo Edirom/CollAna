@@ -1024,7 +1024,8 @@ export class FileComponent {
         mapfk.map.removeLayer(layers.getArray()[i]);
       }
       //Es ist wichtig für die Lupefunktion
-      // mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
+    
+     // mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
     }
     else {
 
@@ -1334,7 +1335,7 @@ export class FileComponent {
             //self.resetOverlaySVG(map, faksimile);
             //self.buildOverlaySVG(map, faksimile);
 
-
+            self.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.pages[faksimile.actualPage - 1].actualcontain);
             self.activateSVGMode(faksimile, map);
 
            
@@ -1538,7 +1539,7 @@ export class FileComponent {
       });
     mainbartopright.addControl(reset);
 
-    var magnify = new Toggle(
+   /* var magnify = new Toggle(
       {
         html: '<i class="fa fa-search"></i>',
         title: "Magnify",
@@ -1560,12 +1561,12 @@ export class FileComponent {
             ov.stopEvent = true;
             map.removeOverlay(ov);
             map.getOverlays().getArray().forEach(function (element) { if (element.getElement().classList.contains("ol-magnify")) map.removeOverlay(element); })
-            //map.removeOverlay(map.getOverlays().getArray()[0]);
+           
           }
         }
       });
 
-    mainbartopright.addControl(magnify);
+    mainbartopright.addControl(magnify);*/
 
     // var mainbarbuttom = new Bar();
     //map.addControl(mainbarbuttom);

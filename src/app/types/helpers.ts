@@ -1,5 +1,4 @@
 declare var _: any;
-declare var d3: any;
 
 export function createRectFromCoords(start: number[], end: number[]): [number, number][] {
   return [[Math.min(parseInt(start[0] + ""), parseInt(end[0] + "")), Math.min(parseInt(start[1] + ""),  parseInt(end[1]+""))],
