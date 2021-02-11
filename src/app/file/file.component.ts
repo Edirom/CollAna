@@ -58,8 +58,10 @@ declare var Marvin: any;
 
 declare var solve: any;
 
-declare var pdfjsLib: any;
-
+import * as pdfjsLib from 'pdfjs-dist/es5/build/pdf';
+import { pdfjsworker } from 'pdfjs-dist/es5/build/pdf.worker.entry';
+//declare var pdfjsLib: any;
+//import * as pdfjslib from "pdfjs-dist";
 
 @Injectable({ providedIn: 'root' })
   //routerLink="/import"
