@@ -1138,7 +1138,7 @@ export class FileComponent {
 
     var rotation = new TextButton(
       {
-        html: ' Rotation: <input id= "rotation-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="-360" max="360" step="1.0" type="number" value="' + map.getView().getRotation() * 180 / Math.PI + '"> ',
+        html: ' Rotation: <input id= "rotation-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="-360" max="360" step="1.0" type="number" value="' + map.getView().getRotation()+ '"> ',// * 180 / Math.PI + '"> ',
         title: "Rotation",
         handleClick: function (event: any) {
           self.bindRotationInputs(event, faksimile);
@@ -1719,7 +1719,7 @@ export class FileComponent {
       if (currRotation != newRotation) {
         currRotation = newRotation;
         var rotationdiv: any = document.getElementById("rotation-div" + faksimile.ID);
-        var rotationDegree = currRotation * (180 / Math.PI);
+        var rotationDegree = currRotation; //* (180 / Math.PI);
         rotationdiv.value = rotationDegree;
 
       }
@@ -1883,9 +1883,10 @@ export class FileComponent {
     // idxInput.value = 1;
     var self = this;
     idxInput.onchange = function () {
-      if (idxInput.value > -361 && idxInput.value < 361) {
+      if (parseInt(idxInput.value) > -361 && parseInt(idxInput.value) < 361) {
         var view = self.getMap(faksimile.ID).map.getView();
-        var rotation = view.setRotation(idxInput.value * (Math.PI / 180));
+        //var rotation = view.setRotation(idxInput.value * (Math.PI / 180));
+        var rotation = view.setRotation(parseInt(idxInput.value));
       }
     };
 
@@ -1941,7 +1942,7 @@ export class FileComponent {
         };
         var renderTask = page.render(renderContext);
         renderTask.promise.then(function () {
-          self.imageOriginal = new MarvinImage();
+          
           var src = canvas.toDataURL();
 
           if (faksimile == null) {
@@ -1959,7 +1960,7 @@ export class FileComponent {
               self.fileService.addPage(faksimile, page);
             }
           }
-
+          self.imageOriginal = new MarvinImage();
           self.imageOriginal.load(src, imageLoaded);
 
           function imageLoaded() {
