@@ -1922,7 +1922,7 @@ export class FileComponent {
 
       // Using promise to fetch the page
       pdfDoc.getPage(num).then(function (page) {
-        self.imageOriginal = new MarvinImage();
+       
         console.log('Page loaded');
 
         var viewport = page.getViewport({ scale: self.scale });
@@ -1941,6 +1941,7 @@ export class FileComponent {
         };
         var renderTask = page.render(renderContext);
         renderTask.promise.then(function () {
+          self.imageOriginal = new MarvinImage();
           var src = canvas.toDataURL();
 
           if (faksimile == null) {
