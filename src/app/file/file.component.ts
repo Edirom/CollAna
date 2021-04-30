@@ -1138,7 +1138,7 @@ export class FileComponent {
 
     var rotation = new TextButton(
       {
-        html: ' Rotation: <input id= "rotation-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="-360" max="360" step="1.0" type="number" value="' + map.getView().getRotation()+ '"> ',// * 180 / Math.PI + '"> ',
+        html: ' Rotation: <input id= "rotation-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="-360" max="360" step="1.0" type="number" value="' + map.getView().getRotation() * (180 / Math.PI) + '"> ',// * 180 / Math.PI + '"> ',
         title: "Rotation",
         handleClick: function (event: any) {
           self.bindRotationInputs(event, faksimile);
@@ -1719,8 +1719,8 @@ export class FileComponent {
       if (currRotation != newRotation) {
         currRotation = newRotation;
         var rotationdiv: any = document.getElementById("rotation-div" + faksimile.ID);
-        var rotationDegree = currRotation; //* (180 / Math.PI);
-        rotationdiv.value = rotationDegree;
+        var rotationDegree = currRotation * (180 / Math.PI);
+        rotationdiv.value = Math.round(rotationDegree);
 
       }
     });
@@ -1885,8 +1885,8 @@ export class FileComponent {
     idxInput.onchange = function () {
       if (parseInt(idxInput.value) > -361 && parseInt(idxInput.value) < 361) {
         var view = self.getMap(faksimile.ID).map.getView();
-        //var rotation = view.setRotation(idxInput.value * (Math.PI / 180));
-        var rotation = view.setRotation(parseInt(idxInput.value));
+        var rotation = view.setRotation(Math.round(((idxInput.value * Math.PI) / 180)*100)/100);
+        //var rotation = view.setRotation(parseInt(idxInput.value));
       }
     };
 
