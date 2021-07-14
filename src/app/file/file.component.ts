@@ -426,13 +426,30 @@ export class FileComponent {
    // downloadLink.setAttribute('download', 'CanvasAsImage.png');
     var children = document.getElementById('card-block' + faksimile.ID).children;
     //Einen schöneren Weg finden!!!
-    var canvas = <HTMLCanvasElement>children.item(0).children.item(0);
+   // var canvas = <HTMLCanvasElement>children.item(1).children.item(0).children.item(0).children.item(0);
+
+    const mapCanvas = document.createElement('canvas');
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.ol-layer canvas'),
+      function (canvas) {
+        if (canvas.width > 0) {
+
+          console.log(canvas, mapCanvas);
+          var input = faksimile.title;
+          var output = input.substr(0, input.lastIndexOf('.')) || input;
+          canvas.toBlob(function (blob) {
+            saveAs(blob, output + "_" + "Page" + faksimile.actualPage + ".png");
+         });
+        }
+      }
+    );
+
 
     var input = faksimile.title;
     var output = input.substr(0, input.lastIndexOf('.')) || input;
-      canvas.toBlob(function (blob) {
-        saveAs(blob, output + "_" + "Page" + faksimile.actualPage + ".png");
-    });
+     // canvas.toBlob(function (blob) {
+     //   saveAs(blob, output + "_" + "Page" + faksimile.actualPage + ".png");
+  //  });
   }
 
 
