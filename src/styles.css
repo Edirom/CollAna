@@ -11,11 +11,6 @@
 }
 
 
-.ol-bar {
-  /* outline: dotted;*/
-  border: 2px solid;
-}
-
 .example-handle {
   position: absolute;
   top: 10px;

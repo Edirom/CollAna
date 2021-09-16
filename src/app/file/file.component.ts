@@ -53,6 +53,7 @@ import { Overlay } from 'ol';
 
 
 
+
 declare var MarvinImage: any;
 declare var Marvin: any;
 
@@ -414,42 +415,28 @@ export class FileComponent {
        }*/
       self.generateMap(faksimile, num);
       self.generateMinPreview(faksimile);
+      /*const parent = document.getElementById('card-block' + faksimile.ID);
+      var barRighth: any = parent.children[1].children[2].lastElementChild;
+      var barTop: any = parent.children[1].children[2].children[5];
+      barRighth.style.borderColor = faksimile.Color;
+      barTop.style.borderColor = faksimile.Color;*/
     }
   }
 
   repaint(data: Faksimile, num: number) {
-    this.generateMap(data, num);
+    this.generateMap(data, num); 
   }
 
   exportPNG(map: Map, faksimile: Faksimile) {
-    //let downloadLink = document.createElement('a');
-   // downloadLink.setAttribute('download', 'CanvasAsImage.png');
-    var children = document.getElementById('card-block' + faksimile.ID).children;
-    //Einen schöneren Weg finden!!!
-   // var canvas = <HTMLCanvasElement>children.item(1).children.item(0).children.item(0).children.item(0);
-
-    const mapCanvas = document.createElement('canvas');
-    Array.prototype.forEach.call(
-      document.querySelectorAll('.ol-layer canvas'),
-      function (canvas) {
-        if (canvas.width > 0) {
-
-          console.log(canvas, mapCanvas);
-          var input = faksimile.title;
-          var output = input.substr(0, input.lastIndexOf('.')) || input;
-          canvas.toBlob(function (blob) {
-            saveAs(blob, output + "_" + "Page" + faksimile.actualPage + ".png");
-         });
-        }
-      }
-    );
-
-
+    
+    var canvas: any = faksimile.pages[faksimile.actualPage - 1].actualcontain.canvas;
+    // draw to canvas...
     var input = faksimile.title;
     var output = input.substr(0, input.lastIndexOf('.')) || input;
-     // canvas.toBlob(function (blob) {
-     //   saveAs(blob, output + "_" + "Page" + faksimile.actualPage + ".png");
-  //  });
+    canvas.toBlob(function (blob) {
+      saveAs(blob, output + "_" + "Page" + faksimile.actualPage + ".png");
+    });
+ 
   }
 
 
@@ -469,17 +456,20 @@ export class FileComponent {
     var element: any = document.getElementById("mini-card-canvas" + faksimile.ID);
 
     element.innerText = faksimile.index + 1;
+
+   
+    
    // element.style.color = faksimile.Color;
 
-    var element_ol_box: any = document.getElementsByClassName("ol-unselectable ol-control ol-bar ol-top");
-    var elem_array = Array.prototype.slice.call(element_ol_box);
-    elem_array.forEach(function (a) {
+   // var element_ol_box: any = document.getElementsByClassName("ol-unselectable ol-control ol-bar ol-top");
+    //var elem_array = Array.prototype.slice.call(element_ol_box);
+   /* elem_array.forEach(function (a) {
       if (a.offsetParent.offsetParent.id == "card-block" + faksimile.ID) {
         a.style.borderColor = faksimile.Color;
       }
-    });
-   // elem_array.forEach(a => a.style.color = faksimile.Color);
-    //element_ol_box.style.border = faksimile.Color;
+    });*/
+    //elem_array.forEach(a => a.style.color = faksimile.Color);
+   // element_ol_box.style.border = faksimile.Color;
 
 
   }
@@ -519,6 +509,11 @@ export class FileComponent {
 
           self.generateMap(faksimile, 1);
           self.generateMinPreview(faksimile);
+         /* const parent = document.getElementById('card-block' + faksimile.ID);
+          var barRighth: any = parent.children[1].children[2].lastElementChild;
+          var barTop: any = parent.children[1].children[2].children[5];
+          barRighth.style.borderColor = faksimile.Color;
+          barTop.style.borderColor = faksimile.Color;*/
         }
 
       };
@@ -672,21 +667,31 @@ export class FileComponent {
 
      // var cropImage = containt.clone();
       var cropImage = new MarvinImage();
-      Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
+      var cloneContaint = containt.clone();
+      Marvin.crop(cloneContaint, cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
       cropImage.canvas.getContext("2d").clearRect(0, 0, cropWidth, cropHeight);
+     // cropImage.canvas.getContext("2d").drawImage(cloneContaint.canvas, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight, cropWidth, cropHeight);
       cropImage.draw(cropImage.canvas);
 
-     
 
-      //crop Image and show preview
-      //Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
-      //cropImage.draw(cropImage.canvas);
 
       var imageWithoutBackground = that.remove_background_crop(cropImage);
 
 
       var url = imageWithoutBackground.canvas.toDataURL();
+     
+      // Clear canvas
+      //var canvas = document.getElementById("canvasExampleFilters");
+      //canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
 
+      //imageExampleFiltersOut.draw(document.getElementById("canvasExampleFilters"), 250, 35);
+      //imageExampleFiltersOut.setDimension(imageExampleFilters.getWidth(), imageExampleFilters.getHeight());
+
+      //crop Image and show preview
+      //Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
+      //cropImage.draw(cropImage.canvas);
+
+      
      
 
 
@@ -744,7 +749,7 @@ export class FileComponent {
       
       }
       console.log(targetPointsMiddle);
-      var targetpoint2 = targetPoints.concat(targetPointsMiddle);
+      //var targetpoint2 = targetPoints.concat(targetPointsMiddle);
 
       var handle = svgFlat.select("g").selectAll(".handle")
         .data(targetPoints)
@@ -771,7 +776,7 @@ export class FileComponent {
           .subject(function (d) { return { x: d[0], y: d[1] }; })
           .on("drag", dragged));
 
-      var handleMiddlePoints = svgTransform.select("g").selectAll(".handlemiddle")
+      /*var handleMiddlePoints = svgTransform.select("g").selectAll(".handlemiddle")
         .data(targetPointsMiddle)
         .enter().append("circle")
         .attr("id", function (d, i) { return "" + i; })
@@ -794,7 +799,7 @@ export class FileComponent {
         })
         .call(d3.drag()
           .subject(function (d) { return { x: d[0], y: d[1] }; })
-          .on("drag", draggedMiddlePoints));
+          .on("drag", draggedMiddlePoints));*/
 
 
       svgFlat.select("g").selectAll(".draggable")
@@ -1123,16 +1128,17 @@ export class FileComponent {
 
     map.addLayer(this.vector);
 
- 
 
     var zoomslider = new ZoomSlider();
     map.addControl(zoomslider);
     faksimile.size = [containt.canvas.width, containt.canvas.height];
 
-
+    
 
     var bartop = new Bar();
+   
     map.addControl(bartop);
+    
     bartop.setPosition("top");
 
     var legend = new Legend({
@@ -1275,7 +1281,7 @@ export class FileComponent {
 
     var edgedetection = new Button(
       {
-        html: '<i class="fa fa-music"></i>',
+        html: '<i class="fa fa-music"  style="color:'+ faksimile.Color+'" ></i>',
         title: 'Edge Detection',
         handleClick: function () {
           self.edge_detection(faksimile);
@@ -1287,7 +1293,7 @@ export class FileComponent {
 
     var removebackground = new Button(
       {
-        html: '<i class="fa fa-eraser"></i>',
+        html: '<i class="fa fa-eraser" style="color:' + faksimile.Color +'"></i>',
         title: 'Remove Background',
         handleClick: function () {
           self.remove_background(faksimile);
@@ -1336,7 +1342,7 @@ export class FileComponent {
    
     var drawBox = new Toggle(
       {
-        html: '<i class="fas fa-border-all"></i>',
+        html: '<i class="fas fa-border-all" style="color:' + faksimile.Color +'"></i>',
         title: 'Perspective Transformation',
         active: false,
         onToggle: function (active) {
@@ -1485,7 +1491,7 @@ export class FileComponent {
 
     var mergeArea = new Toggle(
       {
-        html: '<i class="fas fa-link"></i>',
+        html: '<i class="fas fa-link" style="color:' + faksimile.Color +'"></i>',
         title: 'Merge Area',
         active: false,
         onToggle: function (active) {
@@ -1527,7 +1533,7 @@ export class FileComponent {
 
     var undo = new Button(
       {
-        html: '<i class="fa fa-reply"></i>',
+        html: '<i class="fa fa-reply" style="color:' + faksimile.Color +'"></i>',
         title: 'Undo',
         handleClick: function () {
           map.removeInteraction(draw);
@@ -1541,7 +1547,7 @@ export class FileComponent {
 
     var reset = new Button(
       {
-        html: '<i class="fa fa-reply-all"></i>',
+        html: '<i class="fa fa-reply-all" style="color:' + faksimile.Color +'"></i>',
         title: 'Reset',
         handleClick: function () {
           map.removeInteraction(draw);
@@ -1599,7 +1605,7 @@ export class FileComponent {
 
       var synchronous_previous = new Button(
         {
-          html: '<i class="fa fa-backward"></i>',
+          html: '<i class="fa fa-backward" style="color:' + faksimile.Color +'"></i>',
           title: "Previous",
           handleClick: function () {
 
@@ -1619,7 +1625,7 @@ export class FileComponent {
 
       var previous = new Button(
         {
-          html: '<i class="fa fa-arrow-left"></i>',
+          html: '<i class="fa fa-arrow-left" style="color:' + faksimile.Color +'"></i>',
           title: "Previous",
           handleClick: function () {
             if (faksimile.actualPage <= 1) {
@@ -1643,6 +1649,11 @@ export class FileComponent {
           title: "Page number",
           handleClick: function (event: any) {
             self.bindInputs(event, faksimile);
+            const parent = document.getElementById('card-block' + faksimile.ID);
+            var barRighth: any = parent.children[1].children[2].lastElementChild;
+            var barTop: any = parent.children[1].children[2].children[5];
+            barRighth.style.borderColor = faksimile.Color;
+            barTop.style.borderColor = faksimile.Color;
           }
 
         });
@@ -1650,7 +1661,7 @@ export class FileComponent {
 
       var next = new Button(
         {
-          html: '<i class="fa fa-arrow-right"></i>',
+          html: '<i class="fa fa-arrow-right" style="color:' + faksimile.Color +'"></i>',
           title: "Next",
           handleClick: function () {
             if (faksimile.actualPage >= faksimile.numPages) {
@@ -1665,7 +1676,7 @@ export class FileComponent {
 
       var synchronous_next = new Button(
         {
-          html: '<i class="fa fa-forward"></i>',
+          html: '<i class="fa fa-forward" style="color:' + faksimile.Color +'"></i>',
           title: "Synchronous Next",
           handleClick: function () {
             var faksimiles: Faksimile[] = self.fileService.getFaksimiles();
@@ -1687,7 +1698,7 @@ export class FileComponent {
 
     var close = new Button(
       {
-        html: '<i class="fa fa-times-circle"></i>',
+        html: '<i class="fa fa-times-circle" style="color:' + faksimile.Color +'"></i>',
         title: "Close",
         handleClick: function () {
           self.fileService.removeFaksimile(faksimile);
@@ -1703,7 +1714,7 @@ export class FileComponent {
     //< i class="fa fa-upload" > </i>
     var download = new Button(
       {
-        html: '<i class="far fa-file-image"></i>',
+        html: '<i class="far fa-file-image" style="color:' + faksimile.Color +'"></i>',
         title: "Export current Page",
         handleClick: function () {
 
@@ -1741,6 +1752,7 @@ export class FileComponent {
 
       }
     });
+
 
    
   }
@@ -1852,8 +1864,9 @@ export class FileComponent {
     function imageLoaded() {
       self.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], image);   
       self.setOpacity(faksimile, 170, true);
-      self.remove_background(faksimile);
-      self.svg.selectAll('g').remove();
+     // self.remove_background(faksimile);
+      if (self.svg != null)
+        self.svg.selectAll('g').remove();
       //self.repaint(faksimile, faksimile.actualPage);
     }
     //faksimile.pages[faksimile.actualPage - 1].actualcontain = img;
@@ -1997,6 +2010,11 @@ export class FileComponent {
             }
             self.generateMap(faksimile, num);
             self.generateMinPreview(faksimile);
+           /* const parent = document.getElementById('card-block' + faksimile.ID);
+            var barRighth: any = parent.children[1].children[2].lastElementChild;
+            var barTop: any = parent.children[1].children[2].children[5];
+            barRighth.style.borderColor = faksimile.Color;
+            barTop.style.borderColor = faksimile.Color;*/
           }
 
           var canvas_element = document.getElementsByName("canvas");
@@ -2021,7 +2039,17 @@ export class FileComponent {
     else {
       this.generateMap(faksimile, num);
       this.generateMinPreview(faksimile);
+     /* const parent = document.getElementById('card-block' + faksimile.ID);
+      var barRighth: any = parent.children[1].children[2].lastElementChild;
+      var barTop: any = parent.children[1].children[2].children[5];
+      barRighth.style.borderColor = faksimile.Color;
+      barTop.style.borderColor = faksimile.Color;*/
     }
+
+   
+    // Do anything next //When you want
+
+
 
     /* else {
         if (faksimile.funqueueexecute) {
