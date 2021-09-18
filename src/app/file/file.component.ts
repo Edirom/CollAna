@@ -428,8 +428,8 @@ export class FileComponent {
   }
 
   exportPNG(map: Map, faksimile: Faksimile) {
-    
-    var canvas: any = faksimile.pages[faksimile.actualPage - 1].actualcontain.canvas;
+    var actualContaint:any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
+    var canvas: any = actualContaint.canvas;
     // draw to canvas...
     var input = faksimile.title;
     var output = input.substr(0, input.lastIndexOf('.')) || input;
