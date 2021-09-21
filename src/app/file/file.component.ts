@@ -343,7 +343,7 @@ export class FileComponent {
     this.repaint(faksimile, faksimile.actualPage);
   }
 
-  remove_background_crop = function (cropImage: any) {
+  remove_background_crop = function (cropImage: any, map: Map) {
     var imageProcessed = new MarvinImage();
     var imageData = cropImage.imageData;
     var pixel = imageData.data;
@@ -361,7 +361,20 @@ export class FileComponent {
     canvas.width = imageData.width;
     canvas.height = imageData.height;
     var ctx = canvas.getContext('2d');
+   
+   
     ctx.putImageData(imageData, 0, 0);
+   
+    
+    //ctx.save();
+    // prep canvas for rotation
+    //ctx.translate(map.getView().getCenter()[0], map.getView().getCenter()[1]);                   // translate to canvas center
+    //ctx.rotate(map.getView().getRotation()*180 / Math.PI);                 // add rotation transform
+    //ctx.globalCompositeOperation = "copy";   // set comp. mode to "copy"
+   // ctx.drawImage(ctx.canvas, 0, 0, canvas.width, canvas.height, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+    //ctx.restore();
+
+   
     imageProcessed.canvas = canvas;
     imageProcessed.imageData = imageData;
 
@@ -670,12 +683,13 @@ export class FileComponent {
       var cloneContaint = containt.clone();
       Marvin.crop(cloneContaint, cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
       cropImage.canvas.getContext("2d").clearRect(0, 0, cropWidth, cropHeight);
+     
      // cropImage.canvas.getContext("2d").drawImage(cloneContaint.canvas, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight, cropWidth, cropHeight);
       cropImage.draw(cropImage.canvas);
+      //cropImage.canvas.getContext("2d").rotate(map.getView().getRotation() * 180 / Math.PI);
 
 
-
-      var imageWithoutBackground = that.remove_background_crop(cropImage);
+      var imageWithoutBackground = that.remove_background_crop(cropImage, map);
 
 
       var url = imageWithoutBackground.canvas.toDataURL();
@@ -1047,6 +1061,10 @@ export class FileComponent {
       for (var i = layers.getArray().length - 1; i >= 0; --i) {
         mapfk.map.removeLayer(layers.getArray()[i]);
       }
+
+      var controls = map.getControls();
+      controls.forEach(element => map.removeControl(element));
+     
       //Es ist wichtig für die Lupefunktion
     
      // mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
@@ -1076,7 +1094,8 @@ export class FileComponent {
           //maxResolution: 300, 
           projection: projection,
           center: getCenter(extent),
-          
+          constrainRotation: false,
+         // rotation: Math.PI / 6,
           zoomFactor: Math.pow(2, 1 / zoomFactorDelta),
           zoom:300,
 
@@ -1084,13 +1103,12 @@ export class FileComponent {
       });
 
   
-
-      var mapf = new MapFaksimile(map, faksimile);
-      this.mapService.addMap(mapf);
-
-    }
-
-
+        var mapf = new MapFaksimile(map, faksimile);
+        this.mapService.addMap(mapf);
+       
+   }
+   
+   
 
     var layer: any =
       new ImageLayer({
@@ -1134,6 +1152,7 @@ export class FileComponent {
     faksimile.size = [containt.canvas.width, containt.canvas.height];
 
     
+   
 
     var bartop = new Bar();
    
@@ -1161,7 +1180,7 @@ export class FileComponent {
 
     var rotation = new TextButton(
       {
-        html: ' Rotation: <input id= "rotation-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="-360" max="360" step="1.0" type="number" value="' + map.getView().getRotation() * (180 / Math.PI) + '"> ',// * 180 / Math.PI + '"> ',
+        html: ' Rotation: <input id= "rotation-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="-360" max="360" step="1.0" type="number" value="' + map.getView().getRotation() * 180 / Math.PI + '"> ',// * 180 / Math.PI + '"> ',
         title: "Rotation",
         handleClick: function (event: any) {
           self.bindRotationInputs(event, faksimile);
@@ -1748,7 +1767,8 @@ export class FileComponent {
         currRotation = newRotation;
         var rotationdiv: any = document.getElementById("rotation-div" + faksimile.ID);
         var rotationDegree = currRotation * (180 / Math.PI);
-        rotationdiv.value = Math.round(rotationDegree);
+        rotationdiv.value = rotationDegree;
+        //rotationdiv.value = Math.round(rotationDegree);
 
       }
     });
@@ -1915,7 +1935,8 @@ export class FileComponent {
     idxInput.onchange = function () {
       if (parseInt(idxInput.value) > -361 && parseInt(idxInput.value) < 361) {
         var view = self.getMap(faksimile.ID).map.getView();
-        var rotation = view.setRotation(Math.round(((idxInput.value * Math.PI) / 180)*100)/100);
+        var rotation = view.setRotation((idxInput.value * Math.PI) / 180);
+       // var rotation = view.setRotation(Math.round(((idxInput.value * Math.PI) / 180)*100)/100);
         //var rotation = view.setRotation(parseInt(idxInput.value));
       }
     };
