@@ -1,9 +1,7 @@
 # eHINMAN
 
-[![Build Status](https://travis-ci.com/edirom/ehinman.svg?branch=develop)](https://travis-ci.com/Edirom/eHinman)
 [![GitHub](https://img.shields.io/github/license/edirom/ehinman.svg)](https://github.com/Edirom/eHinman/blob/dev/LICENSE)
-[![Docker Automated build](https://img.shields.io/docker/cloud/automated/edirom/ehinman.svg)](https://hub.docker.com/r/edirom/ehinman)
-[![Docker Build Status](https://img.shields.io/docker/cloud/build/edirom/ehinman.svg)](https://hub.docker.com/r/edirom/ehinman)
+[![Docker](https://github.com/Edirom/eHinman/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Edirom/eHinman/actions/workflows/docker-publish.yml)
 
 Im Rahmen des Projekts ZenMEM wird ein Werkzeug entwickelt, das sich sowohl für Korrekturen im Notenneusatz nutzen als auch im Bereich historischer Drucke für den Vergleich der Abzüge von identischen oder variierenden Druckplatten einsetzen lässt. Der nach dem Vorbild des analogen Hinman-Collators benannte eHINMAN erlaubt dem Nutzer, Digitalisate unterschiedlicher Abzüge oder einzelner Notenseiten so übereinanderzulegen, dass die oft mühsam festzustellenden kleinen Abweichungen zwischen den Versionen (z.B. unterschiedliche Tonhöhen,  abweichende Bögen, Artikulations- oder Dynamikzeichen) durch Farbunterschiede sofort erkannt werden können.
 
