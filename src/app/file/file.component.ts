@@ -1062,8 +1062,8 @@ export class FileComponent {
         mapfk.map.removeLayer(layers.getArray()[i]);
       }
 
-      var controls = map.getControls();
-      controls.forEach(element => map.removeControl(element));
+   //   var controls = map.getControls();
+    //  controls.forEach(element => map.removeControl(element));
      
       //Es ist wichtig für die Lupefunktion
     
@@ -1230,6 +1230,8 @@ export class FileComponent {
         html: '<i class="fa fa-adjust"></i>',
         title: 'Black and White',
         handleClick: function () {
+         /* var controls = map.getControls();
+          controls.forEach(element => map.removeControl(element));*/
           self.black_and_white(faksimile);
           self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
           faksimile.funqueue.push(self.fun_black_and_white);
@@ -1242,6 +1244,8 @@ export class FileComponent {
         html: '<i class="fa fa-adjust" style="color:#ffc0cb;"></i>',
         title: 'Red and White',
         handleClick: function () {
+          /*var controls = map.getControls();
+          controls.forEach(element => map.removeControl(element));*/
           self.black_and_white(faksimile);
           self.red_and_white(faksimile);
           self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
@@ -1258,6 +1262,8 @@ export class FileComponent {
         html: '<i class="fa fa-adjust" style="color:#0000ff;"></i>',
         title: 'Blue and White',
         handleClick: function () {
+         /* var controls = map.getControls();
+          controls.forEach(element => map.removeControl(element));*/
           self.black_and_white(faksimile);
           self.blue_and_white(faksimile);
           self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
@@ -1273,6 +1279,8 @@ export class FileComponent {
         html: '<i class="fa fa-adjust" style="color:#a9da42;"></i>',
         title: 'Green and White',
         handleClick: function () {
+         /* var controls = map.getControls();
+          controls.forEach(element => map.removeControl(element));*/
           self.black_and_white(faksimile);
           self.green_and_white(faksimile);
           self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
@@ -1288,6 +1296,8 @@ export class FileComponent {
         html: '<i class="fa fa-adjust" style="color:#e8bd82;"></i>',
         title: 'Beige and White',
         handleClick: function () {
+         /* var controls = map.getControls();
+          controls.forEach(element => map.removeControl(element));*/
           self.black_and_white(faksimile);
           self.beige_and_white(faksimile);
           self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
@@ -1303,6 +1313,8 @@ export class FileComponent {
         html: '<i class="fa fa-music"  style="color:'+ faksimile.Color+'" ></i>',
         title: 'Edge Detection',
         handleClick: function () {
+         /* var controls = map.getControls();
+          controls.forEach(element => map.removeControl(element));*/
           self.edge_detection(faksimile);
           self.fun_edge_detection = self.wrapFunction(self.edge_detection, self, [faksimile]);
           faksimile.funqueue.push(self.fun_edge_detection);
@@ -1315,6 +1327,8 @@ export class FileComponent {
         html: '<i class="fa fa-eraser" style="color:' + faksimile.Color +'"></i>',
         title: 'Remove Background',
         handleClick: function () {
+         /* var controls = map.getControls();
+          controls.forEach(element => map.removeControl(element));*/
           self.remove_background(faksimile);
           self.fun_remove_background = self.wrapFunction(self.remove_background, self, [faksimile]);
           faksimile.funqueue.push(self.fun_remove_background);
@@ -1373,14 +1387,16 @@ export class FileComponent {
             //map.removeInteraction(transform_interaction);
             //map.removeInteraction(delete_interaction);
             //map.removeInteraction(focusmap);
-
+            /*var controls = map.getControls();
+            controls.forEach(element => map.removeControl(element));*/
             self.setOpacity(faksimile, 80, true);
 
             //self.resetOverlaySVG(map, faksimile);
             //self.buildOverlaySVG(map, faksimile);
-
+            
             self.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.pages[faksimile.actualPage - 1].actualcontain);
             self.activateSVGMode(faksimile, map);
+
 
            
           }
@@ -1517,6 +1533,8 @@ export class FileComponent {
           if (active) {
             drawBox.setActive(false);
             //remove.setActive(false);
+           /* var controls = map.getControls();
+            controls.forEach(element => map.removeControl(element));*/
             map.removeInteraction(draw);
             map.removeInteraction(modify_interaction);
             map.removeInteraction(delete_interaction);
@@ -1555,6 +1573,8 @@ export class FileComponent {
         html: '<i class="fa fa-reply" style="color:' + faksimile.Color +'"></i>',
         title: 'Undo',
         handleClick: function () {
+         /* var controls = map.getControls();
+          controls.forEach(element => map.removeControl(element));*/
           map.removeInteraction(draw);
           self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], faksimile.pages[num - 1].previouscontain);
           self.repaint(faksimile, num);
@@ -1569,6 +1589,8 @@ export class FileComponent {
         html: '<i class="fa fa-reply-all" style="color:' + faksimile.Color +'"></i>',
         title: 'Reset',
         handleClick: function () {
+          /*var controls = map.getControls();
+          controls.forEach(element => map.removeControl(element));*/
           map.removeInteraction(draw);
           self.imageOriginal.load(faksimile.pages[num - 1].contain, imageLoaded);
 
