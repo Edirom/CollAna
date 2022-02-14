@@ -1077,11 +1077,11 @@ export class FileComponent {
 
       var map = new Map({
         target: 'card-block' + faksimile.ID,
-        
+
         /*interactions: defaultInteractions().extend([
           new DragRotateAndZoom()
         ]),*/
-     
+        controls: [],
         interactions: defaultInteractions({
           doubleClickZoom: false,
           dragPan: true,
@@ -1102,7 +1102,7 @@ export class FileComponent {
         })
       });
 
-  
+      
         var mapf = new MapFaksimile(map, faksimile);
         this.mapService.addMap(mapf);
        
@@ -1146,13 +1146,12 @@ export class FileComponent {
 
     map.addLayer(this.vector);
 
+   
 
-    var zoomslider = new ZoomSlider();
-    map.addControl(zoomslider);
+   /* var zoomslider = new ZoomSlider();
+    map.addControl(zoomslider);*/
     faksimile.size = [containt.canvas.width, containt.canvas.height];
 
-    
-   
 
     var bartop = new Bar();
    
@@ -1166,7 +1165,7 @@ export class FileComponent {
     });
 
 
-    bartop.addControl(legend);
+   // bartop.addControl(legend);
     var zoommfactor = new TextButton(
       {
         html: ' Zoom: <input id="zoom-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="1" max="3000" step="1" type="number" value="' + map.getView().getZoom() + '"> ',
@@ -1194,7 +1193,7 @@ export class FileComponent {
     mainbartopright.setPosition("top-right");
     mainbartopright.set("id", "bar " + faksimile.ID);
 
-    // Control
+   
 
 
     var self = this;
