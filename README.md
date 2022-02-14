@@ -3,11 +3,11 @@
 [![GitHub](https://img.shields.io/github/license/edirom/ehinman.svg)](https://github.com/Edirom/eHinman/blob/dev/LICENSE)
 [![Docker](https://github.com/Edirom/eHinman/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Edirom/eHinman/actions/workflows/docker-publish.yml)
 
-Im Rahmen des Projekts ZenMEM wird ein Werkzeug entwickelt, das sich sowohl für Korrekturen im Notenneusatz nutzen als auch im Bereich historischer Drucke für den Vergleich der Abzüge von identischen oder variierenden Druckplatten einsetzen lässt. Der nach dem Vorbild des analogen Hinman-Collators benannte eHINMAN erlaubt dem Nutzer, Digitalisate unterschiedlicher Abzüge oder einzelner Notenseiten so übereinanderzulegen, dass die oft mühsam festzustellenden kleinen Abweichungen zwischen den Versionen (z.B. unterschiedliche Tonhöhen,  abweichende Bögen, Artikulations- oder Dynamikzeichen) durch Farbunterschiede sofort erkannt werden können.
+Im Rahmen des Projekts ZenMEM wird ein Werkzeug entwickelt, das sich sowohl für Korrekturen im Notenneusatz nutzen als auch im Bereich historischer Drucke für den Vergleich der Abzüge von identischen oder variierenden Druckplatten einsetzen lässt. CollAna erlaubt dem Nutzer, Digitalisate unterschiedlicher Abzüge oder einzelner Notenseiten so übereinanderzulegen, dass die oft mühsam festzustellenden kleinen Abweichungen zwischen den Versionen (z.B. unterschiedliche Tonhöhen,  abweichende Bögen, Artikulations- oder Dynamikzeichen) durch Farbunterschiede sofort erkannt werden können.
 
 Im Hinblick auf den historischen Notenstich sind auch Vergleiche von Schlüsselformen, Balkensteigungen, Notenabständen usw. leicht durchführbar. Feingranulares Skalieren und Drehen sowie horizontale oder vertikale perspektivische Dehnung sollen die Arbeit ebenso erleichtern wie die Nutzung einer Lupenfunktion zur Betrachtung von Details. Eine direkte Anbindung an das IIIF-Format ist geplant.
 
-Der eHINMAN soll im Rahmen des vom ZenMEM kontinuierlich erweiterten Baukastens an Edirom-Werkzeugen dazu beitragen, die bislang sehr aufwendige manuelle Prozedur des Kollationierens zu erleichtern.
+CollAna soll im Rahmen des vom ZenMEM kontinuierlich erweiterten Baukastens an Edirom-Werkzeugen dazu beitragen, die bislang sehr aufwendige manuelle Prozedur des Kollationierens zu erleichtern.
 
 ## Development server
 
