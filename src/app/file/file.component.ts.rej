@@ -1,0 +1,13 @@
+diff a/src/app/file/file.component.ts b/src/app/file/file.component.ts	(rejected hunks)
+@@ -1,9 +0,10 @@
+-import { Output, Component, EventEmitter, Injectable, Input } from '@angular/core';
++import { Output, Component, EventEmitter, Injectable, Input, ElementRef } from '@angular/core';
+ import { FileService } from '../services/file.services';
+ import { MapService } from '../services/map.service';
+ import { Faksimile } from '../types/faksimile';
+ 
+ 
++
+ import Map from 'ol/Map.js';
+ import View from 'ol/View.js';
+ import Projection from 'ol/proj/Projection.js';

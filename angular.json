@@ -33,8 +33,10 @@
             ],
             "scripts": [
               "src/assets/library/marvinj-1.0.js",
+			  "src/assets/library/numeric-solve.min.js",
 			  "node_modules/pdfjs-dist/build/pdf.js",
-			  "node_modules/pdfjs-dist/build/pdf.worker.js"
+			  "node_modules/pdfjs-dist/build/pdf.worker.js",
+			  "node_modules/html2canvas/dist/html2canvas.js"
             ],
             "es5BrowserSupport": true
           },

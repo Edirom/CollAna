@@ -19,13 +19,26 @@ export class MapService{
 
   }
 
+  removeAllMaps() {
+    this.maps = [];
+    //maps.forEach(a => a.map ="undefined");
+  }
  
-  removeMap(map: MapFaksimile){
-    const index = this.maps.indexOf(map, 0);
+  removeMap(map: MapFaksimile) {
+
+    var i = 0;
+    while (i < this.maps.length) {
+      if (this.maps[i] === map) {
+        this.maps.splice(i, 1);
+      } else {
+        ++i;
+      }
+    }   
+    /*const index = this.maps.indexOf(map, 0);
     if (index > -1) {
       this.maps.splice(index, 1);
     }
-    this.map.next(this.maps);
+    this.map.next(this.maps);*/
      
   }
 
