@@ -6,7 +6,7 @@ import { Faksimile } from '../types/faksimile';
 
 import Map from 'ol/Map.js';
 import View from 'ol/View.js';
-import Projection from 'ol/proj/Projection.js';
+import Projection from 'ol/proj/Projection';
 import { Image as ImageLayer } from 'ol/layer.js';
 import Static from 'ol/source/ImageStatic.js'
 import { MapFaksimile } from '../types/mapfaksimile';
@@ -1041,12 +1041,18 @@ export class FileComponent {
       return;
     var containt: any = faksimile.pages[num - 1].actualcontain;
 
-    var extent = [0, 0, containt.canvas.width, containt.canvas.height];
+    var extent: [number, number, number, number]  = [0, 0, containt.canvas.width, containt.canvas.height];
     var projection = new Projection({
       code: 'xkcd-image',
       units: 'pixels',
-      extent: extent
+      extent: extent,
     });
+
+    const attribution = new Attribution({
+      collapsible: false,
+    });
+   
+
   //  var projection = this.projection;
     containt.draw(containt.canvas);
 
@@ -1062,8 +1068,7 @@ export class FileComponent {
         mapfk.map.removeLayer(layers.getArray()[i]);
       }
 
-   //   var controls = map.getControls();
-    //  controls.forEach(element => map.removeControl(element));
+     
      
       //Es ist wichtig für die Lupefunktion
     
@@ -1074,19 +1079,20 @@ export class FileComponent {
 
       var zoomFactorDelta = 100;
 
-
+    
+    
       var map = new Map({
         target: 'card-block' + faksimile.ID,
 
         /*interactions: defaultInteractions().extend([
           new DragRotateAndZoom()
         ]),*/
-        controls: [],
+        controls: [attribution],
         interactions: defaultInteractions({
           doubleClickZoom: false,
           dragPan: true,
           mouseWheelZoom: false,
-          constrainResolution: true,
+          
         }),
         keyboardEventTarget: document,
         view: new View({
@@ -1095,11 +1101,13 @@ export class FileComponent {
           projection: projection,
           center: getCenter(extent),
           constrainRotation: false,
+          constrainResolution: true,
          // rotation: Math.PI / 6,
           zoomFactor: Math.pow(2, 1 / zoomFactorDelta),
           zoom:300,
 
         })
+      
       });
 
       
@@ -1108,7 +1116,7 @@ export class FileComponent {
        
    }
    
-   
+    map.addControl(attribution);
 
     var layer: any =
       new ImageLayer({
@@ -1116,12 +1124,15 @@ export class FileComponent {
           url: url,
           //imageSize: [containt.canvas.width, containt.canvas.height],
           projection: projection,
-          imageExtent: extent
+          imageExtent: extent,
+          attributions: [
+            faksimile.title
+          ]
         })
       });
 
     map.addLayer(layer);
-    
+   
     var source = new VectorSource({ wrapX: false });
 
     this.vector = new VectorLayer({
@@ -1147,7 +1158,6 @@ export class FileComponent {
     map.addLayer(this.vector);
 
    
-
    /* var zoomslider = new ZoomSlider();
     map.addControl(zoomslider);*/
     faksimile.size = [containt.canvas.width, containt.canvas.height];
@@ -1159,10 +1169,10 @@ export class FileComponent {
     
     bartop.setPosition("top");
 
-    var legend = new Legend({
+    /*var legend = new Legend({
       title: faksimile.title,
       collapsed: false
-    });
+    });*/
 
 
    // bartop.addControl(legend);
