@@ -8,14 +8,12 @@ import Map from 'ol/Map.js';
 import View from 'ol/View.js';
 import Projection from 'ol/proj/Projection';
 import { Image as ImageLayer } from 'ol/layer.js';
-import Static from 'ol/source/ImageStatic.js'
+import Static from 'ol/source/ImageStatic.js';
 import { MapFaksimile } from '../types/mapfaksimile';
-import { ZoomSlider } from 'ol/control';
 import { Attribution, defaults as defaultControls } from 'ol/control';
 import { FullScreen, Rotate } from 'ol/control.js';
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction.js';
 import Bar from 'ol-ext/control/Bar';
-import Legend from 'ol-ext/control/Legend';
 import Toggle from 'ol-ext/control/Toggle';
 import Button from 'ol-ext/control/Button';
 import TextButton from 'ol-ext/control/TextButton';
@@ -43,7 +41,7 @@ import { getCenter } from 'ol/extent';
 import { Stroke, Fill, Circle, Style } from 'ol/style';
 import GeometryType from 'ol/geom/GeometryType';
 
-import * as d3 from "d3";
+import * as d3 from 'd3';
 
 
 
@@ -84,7 +82,6 @@ export class FileComponent {
   faksimile: Faksimile;
   contain = '';
 
-  inc_index = 100;
 
   imageOriginal;
   imageDisplay = new MarvinImage();
@@ -230,7 +227,7 @@ export class FileComponent {
     var imageProcessed = new MarvinImage();
     var actualcontain = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
     var imageData = actualcontain.imageData;
-  
+
     var pixel = imageData.data;
 
     var r = 0, g = 1, b = 2, a = 3;
@@ -246,7 +243,7 @@ export class FileComponent {
         pixel[p + a] = 200;
       }
     }
-   
+
     imageProcessed = this.imageOriginal.clone();
 
     imageProcessed.imageData = imageData;
@@ -361,11 +358,11 @@ export class FileComponent {
     canvas.width = imageData.width;
     canvas.height = imageData.height;
     var ctx = canvas.getContext('2d');
-   
-   
+
+
     ctx.putImageData(imageData, 0, 0);
-   
-    
+
+
     //ctx.save();
     // prep canvas for rotation
     //ctx.translate(map.getView().getCenter()[0], map.getView().getCenter()[1]);                   // translate to canvas center
@@ -374,7 +371,7 @@ export class FileComponent {
    // ctx.drawImage(ctx.canvas, 0, 0, canvas.width, canvas.height, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
     //ctx.restore();
 
-   
+
     imageProcessed.canvas = canvas;
     imageProcessed.imageData = imageData;
 
@@ -420,7 +417,7 @@ export class FileComponent {
            (a)();
          }
        }
- 
+
        else {
          while (faksimile.funqueue.length > 0) {
            faksimile.funqueue.shift();
@@ -437,7 +434,7 @@ export class FileComponent {
   }
 
   repaint(data: Faksimile, num: number) {
-    this.generateMap(data, num); 
+    this.generateMap(data, num);
   }
 
   exportPNG(map: Map, faksimile: Faksimile) {
@@ -449,13 +446,13 @@ export class FileComponent {
     canvas.toBlob(function (blob) {
       saveAs(blob, output + "_" + "Page" + faksimile.actualPage + ".png");
     });
- 
+
   }
 
 
   updateMinPreview() {
     var self = this;
-   
+
     this.fileService.getFaksimiles().forEach(function (a) {
       self.generateMinPreview(a);
      // var element: any = document.getElementById("mini-card-canvas" + a.ID);
@@ -470,8 +467,8 @@ export class FileComponent {
 
     element.innerText = faksimile.index + 1;
 
-   
-    
+
+
    // element.style.color = faksimile.Color;
 
    // var element_ol_box: any = document.getElementsByClassName("ol-unselectable ol-control ol-bar ol-top");
@@ -569,7 +566,7 @@ export class FileComponent {
       mousePosition = map.getEventCoordinate(event);
     });
     var that = this;
-   
+
     this.svg.selectAll("g").remove();
     this.svg.on('click', drawingstarted).on('mousemove', drawpreview);
     //this.svg.append("g");
@@ -581,7 +578,7 @@ export class FileComponent {
     var mouseDown: boolean = false;
     var that = this;
     var preview;
-  
+
     this.g = this.svg.append('g');
 
 
@@ -629,9 +626,9 @@ export class FileComponent {
         cutCoord1[1] = faksimile.size[1] - cutCoord1[1];
 
       }
-    } 
+    }
 
-    
+
     function perspectiveTransformation(coord, faksimile: Faksimile, cutCoord) {
 
 
@@ -646,7 +643,7 @@ export class FileComponent {
       var width = coord[1][0] - coord[0][0],
         height = coord[3][1] - coord[0][1];
 
-     
+
       var transform = ["", "-webkit-", "-moz-", "-ms-", "-o-"].reduce(function (p, v) { return v + "transform" in document.body.style ? v : p; }) + "transform";
 
       var sourcePoints = [[0, 0], [width, 0], [width, height], [0, height]];
@@ -683,7 +680,7 @@ export class FileComponent {
       var cloneContaint = containt.clone();
       Marvin.crop(cloneContaint, cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
       cropImage.canvas.getContext("2d").clearRect(0, 0, cropWidth, cropHeight);
-     
+
      // cropImage.canvas.getContext("2d").drawImage(cloneContaint.canvas, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight, cropWidth, cropHeight);
       cropImage.draw(cropImage.canvas);
       //cropImage.canvas.getContext("2d").rotate(map.getView().getRotation() * 180 / Math.PI);
@@ -693,7 +690,7 @@ export class FileComponent {
 
 
       var url = imageWithoutBackground.canvas.toDataURL();
-     
+
       // Clear canvas
       //var canvas = document.getElementById("canvasExampleFilters");
       //canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
@@ -705,8 +702,8 @@ export class FileComponent {
       //Marvin.crop(containt.clone(), cropImage, cutCoord[0][0], cutCoord[0][1], cropWidth, cropHeight);
       //cropImage.draw(cropImage.canvas);
 
-      
-     
+
+
 
 
       //transformed();
@@ -741,7 +738,7 @@ export class FileComponent {
 
 
 
-     
+
       var xPoint = [d3.range(0, width + 1, 80)];
       var yPoint = [d3.range(0, height + 1, 80)];
 
@@ -758,9 +755,9 @@ export class FileComponent {
             targetPointsMiddle[i][1] = yPoint[0][y];
             i++;
           }
-         
+
         }
-      
+
       }
       console.log(targetPointsMiddle);
       //var targetpoint2 = targetPoints.concat(targetPointsMiddle);
@@ -841,7 +838,7 @@ export class FileComponent {
           .subject(function (d) { return { x: d[0], y: d[1] }; })
           .on("drag", draggedcenter));
 
-     
+
       //transformed();
      /* d3.transition()
         .duration(750)
@@ -873,15 +870,15 @@ export class FileComponent {
           targetPoints[i][1] = targetPoints[i][1] - ydis;
           //d3.select("[id = '" + i + "']").attr("transform", "translate(" + (targetpoint2[i][0]) + "," + (targetpoint2[i][1]) + ")");
           d3.select(".handle[id = '" + i + "']").attr("transform", "translate(" + (targetPoints[i][0]) + "," + (targetPoints[i][1]) + ")");
-         
+
         }
-       
+
 
        /* for (var i = 0, n = targetPointsMiddle.length; i < n; ++i) {
           targetPointsMiddle[i][0] = targetPointsMiddle[i][0] - xdis;
           targetPointsMiddle[i][1] = targetPointsMiddle[i][1] - ydis;
           //d3.select("[id = '" + i + "']").attr("transform", "translate(" + (targetpoint2[i][0]) + "," + (targetpoint2[i][1]) + ")");
-          d3.select(".handlemiddle[id = '" + i + "']").attr("transform", "translate(" + (targetPointsMiddle[i][0]) + "," + (targetPointsMiddle[i][1]) + ")");     
+          d3.select(".handlemiddle[id = '" + i + "']").attr("transform", "translate(" + (targetPointsMiddle[i][0]) + "," + (targetPointsMiddle[i][1]) + ")");
         }*/
         transformed();
      }
@@ -907,12 +904,12 @@ export class FileComponent {
          // cutCoord[self.id] = mousePosition;
           console.log("cutCoord, mousePosition: " + id + " "+ cutCoord +  " ");
           container.removeEventListener('pointerup', function (event) { });
-          
+
         });
         transformed();
         // faksimile.pages[faksimile.actualPage - 1].cropCoord = cutCoord;
-       
-        
+
+
       }
 
       function draggedMiddlePoints(d) {
@@ -994,7 +991,7 @@ export class FileComponent {
     }
     function dragged(d) {
       d3.select(this).attr("transform", "translate(" + (d[0] = d3.event.x) + "," + (d[1] = d3.event.y) + ")");
-      
+
     }
 
 
@@ -1051,7 +1048,7 @@ export class FileComponent {
     const attribution = new Attribution({
       collapsible: false,
     });
-   
+
 
   //  var projection = this.projection;
     containt.draw(containt.canvas);
@@ -1062,16 +1059,16 @@ export class FileComponent {
     if (mapfk != null) {
       var map = mapfk.map;
       var layers = mapfk.map.getLayers();
-      
+
 
       for (var i = layers.getArray().length - 1; i >= 0; --i) {
         mapfk.map.removeLayer(layers.getArray()[i]);
       }
 
-     
-     
+
+
       //Es ist wichtig für die Lupefunktion
-    
+
      // mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
     }
     else {
@@ -1079,8 +1076,8 @@ export class FileComponent {
 
       var zoomFactorDelta = 100;
 
-    
-    
+
+
       var map = new Map({
         target: 'card-block' + faksimile.ID,
 
@@ -1092,12 +1089,12 @@ export class FileComponent {
           doubleClickZoom: false,
           dragPan: true,
           mouseWheelZoom: false,
-          
+
         }),
         keyboardEventTarget: document,
         view: new View({
           resolution: 1,        // important for 100% image size!
-          //maxResolution: 300, 
+          //maxResolution: 300,
           projection: projection,
           center: getCenter(extent),
           constrainRotation: false,
@@ -1107,15 +1104,15 @@ export class FileComponent {
           zoom:300,
 
         })
-      
+
       });
 
-      
+
         var mapf = new MapFaksimile(map, faksimile);
         this.mapService.addMap(mapf);
-       
+
    }
-   
+
     map.addControl(attribution);
 
     var layer: any =
@@ -1132,7 +1129,7 @@ export class FileComponent {
       });
 
     map.addLayer(layer);
-   
+
     var source = new VectorSource({ wrapX: false });
 
     this.vector = new VectorLayer({
@@ -1157,16 +1154,16 @@ export class FileComponent {
 
     map.addLayer(this.vector);
 
-   
+
    /* var zoomslider = new ZoomSlider();
     map.addControl(zoomslider);*/
     faksimile.size = [containt.canvas.width, containt.canvas.height];
 
 
     var bartop = new Bar();
-   
+
     map.addControl(bartop);
-    
+
     bartop.setPosition("top");
 
     /*var legend = new Legend({
@@ -1203,12 +1200,12 @@ export class FileComponent {
     mainbartopright.setPosition("top-right");
     mainbartopright.set("id", "bar " + faksimile.ID);
 
-   
+
 
 
     var self = this;
 
-   
+
     var hold = new Toggle(
       {
         html: '<i class="fa fa-check-circle"></i>',
@@ -1218,7 +1215,7 @@ export class FileComponent {
 
           if (active) {
             // Remove and execute all items in the array
-            faksimile.funqueueexecute = true;          
+            faksimile.funqueueexecute = true;
           }
 
           else {
@@ -1227,7 +1224,7 @@ export class FileComponent {
             while (faksimile.funqueue.length > 0) {
               faksimile.funqueue.shift();
             }
-           
+
           }
         }
       });
@@ -1381,7 +1378,7 @@ export class FileComponent {
     // and add it to the map
     map.addOverlay(overlay);
 
-   
+
     var drawBox = new Toggle(
       {
         html: '<i class="fas fa-border-all" style="color:' + faksimile.Color +'"></i>',
@@ -1389,7 +1386,7 @@ export class FileComponent {
         active: false,
         onToggle: function (active) {
           if (active) {
-           
+
             mergeArea.setActive(false);
 
            // map.removeInteraction(modify_interaction);
@@ -1402,17 +1399,17 @@ export class FileComponent {
 
             //self.resetOverlaySVG(map, faksimile);
             //self.buildOverlaySVG(map, faksimile);
-            
+
             self.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.pages[faksimile.actualPage - 1].actualcontain);
             self.activateSVGMode(faksimile, map);
 
 
-           
+
           }
 
 
           else {
-           
+
             //self.resetOverlaySVG(map, faksimile);
             //map.un("click", mapclick);
             self.svg.on('click', null).on('mousemove', null);
@@ -1551,7 +1548,7 @@ export class FileComponent {
             //map.addInteraction(transform_interaction);
 
             self.setOpacity(faksimile, 170, true);
-            
+
             self.svg.selectAll("circle").remove();
 
             self.svg.selectAll(".line--x").remove();
@@ -1563,10 +1560,10 @@ export class FileComponent {
             var svgString = getSVGString(self.svg.node(), containt.canvas.width / map.getView().getResolution(), containt.canvas.height / map.getView().getResolution());
 
             var cropImageString = svgString2Image(svgString, containt.canvas.width, containt.canvas.height, 'png', save, map); // passes Blob and filesize String to the callback
-            
-            
+
+
             self.svg = null;
-           
+
           }
 
           else {
@@ -1636,7 +1633,7 @@ export class FileComponent {
             ov.stopEvent = true;
             map.removeOverlay(ov);
             map.getOverlays().getArray().forEach(function (element) { if (element.getElement().classList.contains("ol-magnify")) map.removeOverlay(element); })
-           
+
           }
         }
       });
@@ -1754,7 +1751,7 @@ export class FileComponent {
           self.fileService.removeFaksimile(faksimile);
           self.faksimiles = self.fileService.getFaksimiles();
           self.updateMinPreview();
-          
+
 
         }
       });
@@ -1783,7 +1780,7 @@ export class FileComponent {
 
     map.on('moveend', function (e) {
       map.set("frameState", e.frameState);
-      
+
       var newZoom = map.getView().getZoom();
       var newRotation = map.getView().getRotation();
       if (currZoom != newZoom) {
@@ -1791,7 +1788,7 @@ export class FileComponent {
         var zoomdiv: any = document.getElementById("zoom-div" + faksimile.ID);
         currZoom = Math.round(currZoom * 100) / 100;
         zoomdiv.value = currZoom;
-        
+
 
       }
       if (currRotation != newRotation) {
@@ -1805,10 +1802,10 @@ export class FileComponent {
     });
 
 
-   
+
   }
 
- 
+
   cropImageString(cropImageString, faksimile: Faksimile, map: Map): any {
     var cropImage1 = new MarvinImage();
     cropImage1.load(cropImageString, imageLoaded);
@@ -1854,7 +1851,7 @@ export class FileComponent {
 
      // var cropImageData = cropImage.imageData.data;
 
-      
+
      // blankImage.draw(blankImage.canvas);
 
       var canvas: any = document.createElement('canvas');
@@ -1877,14 +1874,14 @@ export class FileComponent {
 
       }
       ctx.putImageData(blankImage.imageData, 0, 0);*/
-       
+
       //ctx.putImageData(imgData, 0, 0);
       var blankURL = canvas.toDataURL();
-    
+
       var mergedImage = mergeImages([
         { src: origImgUrl, x: 0, y: 0, },
         { src: blankURL, x: cropCoord[0][0], y: cropCoord[0][1], },]).then((img) => {
-         
+
           //var arrayBuffer = self.remove_whitePixel(img);
           //var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer)));
 
@@ -1892,19 +1889,19 @@ export class FileComponent {
             { src: img, x: 0, y: 0, },
             { src: url, x: minx, y: miny, },]).then((img2) => {
               self.updateImg(faksimile, img2);
-             
-                         
+
+
             });
         });
-     
+
       /* var mergedImage = mergeImages([
          { src: origImgUrl, x: 0, y: 0, },
          { src: url, x: minx, y: miny, },]).then((img) => {
            self.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage, img);
          });  */
     }
-   
-   
+
+
     return url;
   }
 
@@ -1913,7 +1910,7 @@ export class FileComponent {
     image.load(img, imageLoaded);
     var self = this;
     function imageLoaded() {
-      self.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], image);   
+      self.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], image);
       self.setOpacity(faksimile, 170, true);
      // self.remove_background(faksimile);
       if (self.svg != null)
@@ -1922,7 +1919,7 @@ export class FileComponent {
     }
     //faksimile.pages[faksimile.actualPage - 1].actualcontain = img;
     //this.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage, img);
-   
+
   }
   bindInputs(event: any, faksimile: Faksimile) {
     var idxInput = event.target;
@@ -2005,7 +2002,7 @@ export class FileComponent {
 
       // Using promise to fetch the page
       pdfDoc.getPage(num).then(function (page) {
-       
+
         console.log('Page loaded');
 
         var viewport = page.getViewport({ scale: self.scale });
@@ -2024,7 +2021,7 @@ export class FileComponent {
         };
         var renderTask = page.render(renderContext);
         renderTask.promise.then(function () {
-          
+
           var src = canvas.toDataURL();
 
           if (faksimile == null) {
@@ -2098,7 +2095,7 @@ export class FileComponent {
       barTop.style.borderColor = faksimile.Color;*/
     }
 
-   
+
     // Do anything next //When you want
 
 
@@ -2113,7 +2110,7 @@ export class FileComponent {
           while (faksimile.funqueue.length > 0) {
             faksimile.funqueue.shift();
           }
-          
+
         }
         this.generateMap(faksimile, num);
         this.generateMinPreview(faksimile);
