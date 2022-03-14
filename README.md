@@ -1,4 +1,4 @@
-# eHINMAN
+# CollAna
 
 [![GitHub](https://img.shields.io/github/license/edirom/ehinman.svg)](https://github.com/Edirom/eHinman/blob/dev/LICENSE)
 [![Docker](https://github.com/Edirom/eHinman/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Edirom/eHinman/actions/workflows/docker-publish.yml)

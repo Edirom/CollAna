@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Router } from "@angular/router";
 
@@ -10,7 +10,7 @@ import { Router } from "@angular/router";
   styleUrls: ['./app.component.css']
 })
 export class AppComponent{
- 
+
 
   constructor(
     protected Sanitizer: DomSanitizer, private router: Router) {
@@ -21,6 +21,6 @@ export class AppComponent{
     return this.router.url == routePath;
   }
 
- 
-  title = 'eHinman';
+
+  title = 'CollAna';
 }
