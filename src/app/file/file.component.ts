@@ -1089,7 +1089,7 @@ export class FileComponent {
           doubleClickZoom: false,
           dragPan: true,
           mouseWheelZoom: false,
-
+          zoomDelta: 0.01,
         }),
         keyboardEventTarget: document,
         view: new View({
@@ -1098,9 +1098,9 @@ export class FileComponent {
           projection: projection,
           center: getCenter(extent),
           constrainRotation: false,
-          constrainResolution: true,
+          constrainResolution: false,
          // rotation: Math.PI / 6,
-          zoomFactor: Math.pow(2, 1 / zoomFactorDelta),
+         // zoomFactor: Math.pow(2, 1 / zoomFactorDelta),
           zoom:300,
 
         })
@@ -1175,7 +1175,7 @@ export class FileComponent {
    // bartop.addControl(legend);
     var zoommfactor = new TextButton(
       {
-        html: ' Zoom: <input id="zoom-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="1" max="3000" step="1" type="number" value="' + map.getView().getZoom() + '"> ',
+        html: ' Zoom: <input id="zoom-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="1" max="3000" step="0.001" type="number" value="' + map.getView().getZoom() + '"> ',
         title: "Zoom factor",
         handleClick: function (event: any) {
           self.bindZoomInputs(event, faksimile);
@@ -1786,7 +1786,7 @@ export class FileComponent {
       if (currZoom != newZoom) {
         currZoom = newZoom;
         var zoomdiv: any = document.getElementById("zoom-div" + faksimile.ID);
-        currZoom = Math.round(currZoom * 100) / 100;
+        currZoom = Math.round(currZoom * 1000) / 1000;
         zoomdiv.value = currZoom;
 
 
