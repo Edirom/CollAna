@@ -4,9 +4,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { AngularDraggableModule } from 'angular2-draggable';
-import { ResizableModule } from 'angular-resizable-element';
 import { Routes, RouterModule } from '@angular/router';
-
+import { ResizableModule } from 'angular-resizable-element';
 
 
 import { AppRoutingModule } from './app-routing.module';

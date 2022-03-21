@@ -25,18 +25,17 @@
             "styles": [
               "src/styles.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
-			  "node_modules/font-awesome/css/font-awesome.css",
-			  "node_modules/ol/ol.css",
-			  "node_modules/ol-ext/dist/ol-ext.css",
-			  "node_modules/ol-ext/overlay/Magnify.css",
-			  "node_modules/angular2-draggable/css/resizable.min.css"
+              "node_modules/font-awesome/css/font-awesome.css",
+              "node_modules/ol/ol.css",
+              "node_modules/ol-ext/dist/ol-ext.css",
+              "node_modules/ol-ext/overlay/Magnify.css"
             ],
             "scripts": [
               "src/assets/library/marvinj-1.0.js",
-			  "src/assets/library/numeric-solve.min.js",
-			  "node_modules/pdfjs-dist/build/pdf.js",
-			  "node_modules/pdfjs-dist/build/pdf.worker.js",
-			  "node_modules/html2canvas/dist/html2canvas.js"
+              "src/assets/library/numeric-solve.min.js",
+              "node_modules/pdfjs-dist/build/pdf.js",
+              "node_modules/pdfjs-dist/build/pdf.worker.js",
+              "node_modules/html2canvas/dist/html2canvas.js"
             ],
             "es5BrowserSupport": true
           },

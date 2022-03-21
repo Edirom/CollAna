@@ -1,7 +1,6 @@
 @import "~@fortawesome/fontawesome-free/css/all.css";
 .ol-boxnew {
   box-sizing: border-box;
-  border-radius: 5px;
   border: 5px solid;
   height: calc(180vh - 65px);
   /*display: flex;*/
@@ -103,4 +102,11 @@ svg {
 
 i {
   vertical-align: middle;
+}
+
+.resize{
+  border: 2px solid;
+  padding: 20px;
+  resize: both;
+  overflow: auto;
 }

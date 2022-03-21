@@ -14,7 +14,7 @@ declare let html2canvas: any;
   selector: 'collation',
   template: `
   <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
-  <div fxLayout="row" fxLayoutGap="10px">
+    <div fxLayout="row" fxLayoutGap="10px">
     <div>
       <fileservice (complete)="import($event)"> </fileservice>
     </div>
@@ -22,36 +22,36 @@ declare let html2canvas: any;
       <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" (click)="export()" title="Export Overlap"> <i class="fa fa-upload fa-lg"> </i> <span class="hidden-xs-down"> </span></div>
     </div>
   </div>
-</nav>
-<div style="font-size:20px">
-  <div class="container-fluid"  *ngIf="faksimiles?.length > 0" fxLayoutAlign="space-between">
-    <div fxFlex="93%" fxLayoutGap="5px" fxLayout="column"  id="capture" >
-      <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;">
-        <div class="ol-boxnew"  cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)" id="{{ 'card-block' + a.ID}}"   [style.border-color]="a.Color">
-        <div class="example-handle" cdkDragHandle>
-            <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
-              <path d="M0 0h24v24H0z" fill="none"></path>
-            </svg>
+  </nav>
+  <div style="font-size:20px">
+    <div class="container-fluid"  *ngIf="faksimiles?.length > 0" fxLayoutAlign="space-between">
+      <div fxFlex="93%" fxLayoutGap="5px" fxLayout="column"  id="capture" >
+        <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;" fxLayout="row">
+          <div class="ol-boxnew resize"  cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)" id="{{ 'card-block' + a.ID}}"   [style.border-color]="a.Color">
+          <div class="example-handle" cdkDragHandle>
+              <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
+                <path d="M0 0h24v24H0z" fill="none"></path>
+              </svg>
+            </div>
           </div>
-        </div>
 
-        <div id="{{ 'overlay' + a.ID}}" ></div>
-        </div>
-  
-    </div>
-    <div class="faksimile-mini-boundary">
-      <div fxFlex="5%" fxLayoutGap="5px" fxLayout="column">
-        <div *ngFor="let a of faksimiles; trackBy:trackByIndex">
-          <div class="faksimile-box text " cdkDragBoundary=".faksimile-mini-boundary" cdkDrag cdkDragLockAxis="y" (cdkDragMoved)="drag_mini_block_Moved($event, a)" [style.border-color]="a.Color" [style.color]="a.Color" (cdkDragStarted)="drag_mini_block_Started($event, a)" (cdkDragEnded)="drag_mini_block_Ended($event, a)" id="{{ 'mini-card-canvas' + a.ID}}">  </div>
+          <div id="{{ 'overlay' + a.ID}}" ></div>
+          </div>
 
+      </div>
+      <div class="faksimile-mini-boundary">
+        <div fxFlex="5%" fxLayoutGap="5px" fxLayout="column">
+          <div *ngFor="let a of faksimiles; trackBy:trackByIndex">
+            <div class="faksimile-box text " cdkDragBoundary=".faksimile-mini-boundary" cdkDrag cdkDragLockAxis="y" (cdkDragMoved)="drag_mini_block_Moved($event, a)" [style.border-color]="a.Color" [style.color]="a.Color" (cdkDragStarted)="drag_mini_block_Started($event, a)" (cdkDragEnded)="drag_mini_block_Ended($event, a)" id="{{ 'mini-card-canvas' + a.ID}}">  </div>
+
+          </div>
         </div>
       </div>
     </div>
-  </div>
- </div>
+   </div>
   `,
- 
+
 })
 export class CollationComponent implements AfterViewInit {
   faksimiles: Faksimile[];
@@ -60,8 +60,8 @@ export class CollationComponent implements AfterViewInit {
     // this.removeMaps();
     this.mapService.removeAllMaps();
     this.generateMap();
-    
-    
+
+
 
   }
 
@@ -75,7 +75,7 @@ export class CollationComponent implements AfterViewInit {
   constructor(
     private fileService: FileService, private fileComponent: FileComponent, private mapService: MapService) {
     this.faksimiles = this.fileService.getFaksimiles();
-    //this.faksimiles.forEach(a => this.fileComponent.generateMap(a, a.actualPage)); 
+    //this.faksimiles.forEach(a => this.fileComponent.generateMap(a, a.actualPage));
   }
 
 
