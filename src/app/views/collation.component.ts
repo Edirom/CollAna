@@ -26,7 +26,7 @@ declare let html2canvas: any;
   <div style="font-size:20px">
     <div class="container-fluid"  *ngIf="faksimiles?.length > 0" fxLayoutAlign="space-between">
       <div fxFlex="93%" fxLayoutGap="5px" fxLayout="column"  id="capture" >
-        <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;" fxLayout="row">
+        <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;">
           <div class="ol-boxnew resize"  cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)" id="{{ 'card-block' + a.ID}}"   [style.border-color]="a.Color">
           <div class="example-handle" cdkDragHandle>
               <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
