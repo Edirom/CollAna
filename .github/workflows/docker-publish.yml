@@ -40,8 +40,8 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            ghcr.io/edirom/ehinman
-            edirom/ehinman
+            ghcr.io/edirom/collana
+            edirom/collana
           flavor: |
             latest=${{ github.ref == 'refs/heads/master' }}
 
