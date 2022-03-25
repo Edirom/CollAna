@@ -16,5 +16,5 @@ RUN npm install \
 ##################################
 FROM nginx:alpine
 LABEL maintainer="Peter Stadler for the ViFE" \
-      org.opencontainers.image.source="https://github.com/Edirom/eHinman"
+      org.opencontainers.image.source="https://github.com/Edirom/CollAna"
 COPY --from=builder /app/dist/*  /usr/share/nginx/html/ 
