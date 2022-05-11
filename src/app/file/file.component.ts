@@ -59,6 +59,8 @@ declare var solve: any;
 
 import * as pdfjsLib from 'pdfjs-dist/es5/build/pdf';
 import { pdfjsworker } from 'pdfjs-dist/es5/build/pdf.worker.entry';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsworker;
 //declare var pdfjsLib: any;
 //import * as pdfjslib from "pdfjs-dist";
 
@@ -77,6 +79,8 @@ export class FileComponent {
 
   @Output() complete: EventEmitter<any> = new EventEmitter();
   @Input() canvas_index: number;
+
+  p
 
   faksimiles: Faksimile[];
   faksimile: Faksimile;

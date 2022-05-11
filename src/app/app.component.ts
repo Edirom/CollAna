@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { Router } from "@angular/router";
-
+import { Router } from '@angular/router';
+import 'zone.js';
 
 
 @Component({
