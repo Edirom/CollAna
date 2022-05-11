@@ -3,19 +3,12 @@
   box-sizing: border-box;
   border: 5px solid;
   height: calc(180vh - 65px);
-  width: 100%;
   /*display: flex;*/
   position: relative;
   /* border-color: #2E86C1;*/
   box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
-.boundary {
-  width: auto;
-  height: calc(180vh - 65px);
-  background-color: gainsboro;
-  border: dotted #ccc 2px;
-}
 
 .example-handle {
   position: absolute;
