@@ -8,7 +8,6 @@ import { FileComponent } from '../file/file.component';
 import { saveAs } from 'file-saver';
 
 declare let html2canvas: any;
-//import { Http } from '@angular/http';
 
 @Component({
   selector: 'collation',

@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { FileService } from '../services';
-//import { Http } from '@angular/http';
 
 @Component({
   selector: 'import',
