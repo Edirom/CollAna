@@ -36,8 +36,7 @@
               "node_modules/pdfjs-dist/build/pdf.js",
               "node_modules/pdfjs-dist/build/pdf.worker.js",
               "node_modules/html2canvas/dist/html2canvas.js"
-            ],
-            "es5BrowserSupport": true
+            ]
           },
           "configurations": {
             "production": {
@@ -97,11 +96,11 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-			  {
-				"glob": "**/*",
-				"input": "node_modules/ngx-extended-pdf-viewer/assets/locale",
-				"output": "/assets/locale/"
-			  }
+              {
+                "glob": "**/*",
+                "input": "node_modules/ngx-extended-pdf-viewer/assets/locale",
+                "output": "/assets/locale/"
+              }
             ]
           }
         },
