@@ -25,7 +25,7 @@
     "@angular/router": "^9.1.13",
     "@fortawesome/angular-fontawesome": "^0.5.0",
     "@fortawesome/fontawesome-free": "^5.15.2",
-    "@ng-bootstrap/ng-bootstrap": "~5.3.0",
+    "@ng-bootstrap/ng-bootstrap": "~6.0.3",
     "@types/d3": "^5.16.4",
     "@types/ol": "^6.5.3",
     "angular-resizable-element": "^3.3.5",
