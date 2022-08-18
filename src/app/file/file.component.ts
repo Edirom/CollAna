@@ -57,8 +57,8 @@ declare var Marvin: any;
 
 declare var solve: any;
 
-import * as pdfjsLib from 'pdfjs-dist/es5/build/pdf';
-import { pdfjsworker } from 'pdfjs-dist/es5/build/pdf.worker.entry';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
+import { pdfjsworker } from 'pdfjs-dist/legacy/build/pdf.worker.entry';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsworker;
 //declare var pdfjsLib: any;
