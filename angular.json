@@ -36,7 +36,14 @@
               "node_modules/pdfjs-dist/build/pdf.js",
               "node_modules/pdfjs-dist/build/pdf.worker.js",
               "node_modules/html2canvas/dist/html2canvas.js"
-            ]
+            ],
+            "aot": false,
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
@@ -63,7 +70,8 @@
                 }
               ]
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
