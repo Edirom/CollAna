@@ -15,7 +15,7 @@ const routes: Routes = [
   { path: 'publishing', component: PublishingComponent },
   { path: 'publishing/Kollationsvorgang_mit_eHinman', component: PublicationEHinmanComponent },
   { path: 'overview', component: OverviewComponent },
-  { path: '**', redirectTo: '/overview' }
+  { path: '', redirectTo: 'overview', pathMatch: 'full' }
 ];
 
 @NgModule({
