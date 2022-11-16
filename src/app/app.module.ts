@@ -12,12 +12,13 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { FileComponent } from './file/file.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { HelpComponent } from './views/help.component';
-import { OverviewComponent } from './views/overview.component';
-import { PublishingComponent } from './views/publishing.component';
-import { ImportComponent } from './views/import.component';
-import { CollationComponent } from './views/collation.component';
-import { PublicationEHinmanComponent } from './views/publicationEHinman.component';
+
+import { HelpComponent } from './views/help/help.component';
+import { OverviewComponent } from './views/overview/overview.component';
+import { PublishingComponent } from './views/publishing/publishing.component';
+import { ImportComponent } from './views/import/import.component';
+import { CollationComponent } from './views/collation/collation.component';
+import { EHinmanComponent } from './views/publishing/e-hinman/e-hinman.component';
 
 
 @NgModule({
@@ -29,7 +30,7 @@ import { PublicationEHinmanComponent } from './views/publicationEHinman.componen
     PublishingComponent,
     ImportComponent,
     CollationComponent,
-    PublicationEHinmanComponent
+    EHinmanComponent
   ],
   imports: [
     BrowserModule,

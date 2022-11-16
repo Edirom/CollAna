@@ -2,122 +2,102 @@ import { Output, Component, EventEmitter, Injectable, Input } from '@angular/cor
 import { FileService } from '../services/file.services';
 import { MapService } from '../services/map.service';
 import { Faksimile } from '../types/faksimile';
-
+import { MapFaksimile } from '../types/mapfaksimile';
+import { Pages } from '../types/pages';
+import { createRectFromCoords } from '../types/helpers';
 
 import Map from 'ol/Map.js';
 import View from 'ol/View.js';
 import Projection from 'ol/proj/Projection';
 import { Image as ImageLayer } from 'ol/layer.js';
+// import { Tile as TileLayer } from 'ol/layer.js';
+// import {OSM} from 'ol/source';
 import Static from 'ol/source/ImageStatic.js';
-import { MapFaksimile } from '../types/mapfaksimile';
 import { Attribution, defaults as defaultControls } from 'ol/control';
 import { FullScreen, Rotate } from 'ol/control.js';
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction.js';
+import Modify from 'ol/interaction/Modify';
+import Draw, { createBox } from 'ol/interaction/Draw';
+import { Vector as VectorLayer, Layer } from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
+import { shiftKeyOnly } from 'ol/events/condition';
+import MousePosition from 'ol/control/MousePosition';
+import { Stroke, Fill, Circle, Style } from 'ol/style';
+import { Overlay } from 'ol';
+import { getCenter } from 'ol/extent';
+import GeometryType from 'ol/geom/GeometryType';
+
 import Bar from 'ol-ext/control/Bar';
 import Toggle from 'ol-ext/control/Toggle';
 import Button from 'ol-ext/control/Button';
 import TextButton from 'ol-ext/control/TextButton';
 import Magnify from 'ol-ext/overlay/Magnify';
-import Modify from 'ol/interaction/Modify';
-import { Pages } from '../types/pages';
-import Draw, { createBox } from 'ol/interaction/Draw';
-import { Vector as VectorLayer, Layer } from 'ol/layer';
-import { Vector as VectorSource } from 'ol/source';
 import FocusMap from 'ol-ext/interaction/FocusMap';
 import Transform from 'ol-ext/interaction/Transform';
 import Delete from 'ol-ext/interaction/Delete';
-import { shiftKeyOnly } from 'ol/events/condition';
-import { createRectFromCoords } from '../types/helpers';
-import MousePosition from 'ol/control/MousePosition';
+
 import { saveAs } from 'file-saver';
-
 import mergeImages from 'merge-images';
-
-
-import { getCenter } from 'ol/extent';
-
-
-
-import { Stroke, Fill, Circle, Style } from 'ol/style';
-import GeometryType from 'ol/geom/GeometryType';
-
 import * as d3 from 'd3';
-
-
-
-import { Overlay } from 'ol';
-
-
-
-
-
-
-declare var MarvinImage: any;
-declare var Marvin: any;
-
-declare var solve: any;
 
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import { pdfjsworker } from 'pdfjs-dist/legacy/build/pdf.worker.entry';
 
+
+
+// External library declaration
+declare var MarvinImage: any;
+declare var Marvin: any;
+declare var solve: any;
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsworker;
-//declare var pdfjsLib: any;
-//import * as pdfjslib from "pdfjs-dist";
+
 
 @Injectable({ providedIn: 'root' })
-  //routerLink="/import"
 @Component({
   selector: 'fileservice',
-    template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Import"><i class= "fa fa-download fa-lg" > </i><span class= "hidden-xs-down" > </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
+  templateUrl: './file.component.html',
+  // template: '<div fxLayoutGap="10px"> <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Import"><i class= "fa fa-download fa-lg" > </i><span class= "hidden-xs-down" > </span><input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" /></div></div>',
   styleUrls: ['./file.component.css']
 })
 
-
-
 export class FileComponent {
 
-
+  // All the variables required in this class
   @Output() complete: EventEmitter<any> = new EventEmitter();
   @Input() canvas_index: number;
 
-  p
+  // p;
 
   faksimiles: Faksimile[];
   faksimile: Faksimile;
   contain = '';
 
-
   imageOriginal;
   imageDisplay = new MarvinImage();
 
-
-  name;
+  // name;
   reader;
-  form;
+  // form;
   pdfDoc;
 
   svg: any;
   rect: any;
   g: any;
 
+  // mouseDown: boolean;
+  // preview: any;
 
+  // private relFactor: any;
+  // overlay: Overlay;
 
-
-  mouseDown: boolean;
-  preview: any;
-
-  private relFactor: any;
-  overlay: Overlay;
-
-  htmlElement: HTMLElement;
-
-  //projection: any;
+  // htmlElement: HTMLElement;
 
 
   constructor(private fileService: FileService, private mapService: MapService) {
-
-
     // https://github.com/wbkd/d3-extended
+
+    //Moves the file display to the front of the display
     d3.selection.prototype.moveToFront = function () {
       return this.each(function () {
         this.parentNode.appendChild(this);
@@ -133,11 +113,14 @@ export class FileComponent {
     };
   }
 
+
+  // To apply the function to the context with parameters
   wrapFunction = function (fn, context, params) {
     return function () {
       fn.apply(context, params);
     };
   }
+
 
   fun_blue_and_white;
   fun_green_and_white;
@@ -148,245 +131,149 @@ export class FileComponent {
   fun_remove_background;
 
 
-  blue_and_white = function (faksimile: Faksimile) {
+  /**
+   * Change background image color based on rgba color space
+   * @param faksimile Page for which the color needs to be changed
+   * @param pr Red color space of rgb to set in the background
+   * @param pg Green color space of rgb to set in the background
+   * @param pb Blue color space of rgb to set in the background
+   * @param pa Alpha color space of rgb to set in the background
+   */
+  anycolor_and_white = function (faksimile: Faksimile, redpixel: number, greenpixel: number, bluepixel: number, alphapixel: number) {
     var imageProcessed = new MarvinImage();
-    var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
-    var pixel = imageData.data;
-
-    var r = 0, g = 1, b = 2, a = 3;
-    for (var p = 0; p < pixel.length; p += 4) {
-
-      if (
-        pixel[p + r] != 255 ||
-        pixel[p + g] != 255 ||
-        pixel[p + b] != 255) {
-        pixel[p + r] = 5;
-        pixel[p + g] = 139;
-        pixel[p + b] = 255;
-        pixel[p + a] = 170;
-      }
-    }
-    imageProcessed = this.imageOriginal.clone();
-
-    imageProcessed.imageData = imageData;
-
-    this.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage - 1,  imageProcessed);
-    this.repaint(faksimile, faksimile.actualPage);
-
-  }
-
-  beige_and_white = function (faksimile: Faksimile) {
-    var imageProcessed = new MarvinImage();
-    var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
-    var pixel = imageData.data;
-
-    var r = 0, g = 1, b = 2, a = 3;
-    for (var p = 0; p < pixel.length; p += 4) {
-
-      if (
-        pixel[p + r] != 255 ||
-        pixel[p + g] != 255 ||
-        pixel[p + b] != 255) {
-        pixel[p + r] = 232;
-        pixel[p + g] = 189;
-        pixel[p + b] = 130;
-        pixel[p + a] = 170;
-      }
-    }
-    imageProcessed = this.imageOriginal.clone();
-
-    imageProcessed.imageData = imageData;
-    this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
-    this.repaint(faksimile, faksimile.actualPage);
-
-  }
-
-  green_and_white = function (faksimile: Faksimile) {
-    var imageProcessed = new MarvinImage();
-    var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
-    var pixel = imageData.data;
-
-    var r = 0, g = 1, b = 2, a = 3;
-    for (var p = 0; p < pixel.length; p += 4) {
-
-      if (
-        pixel[p + r] != 255 ||
-        pixel[p + g] != 255 ||
-        pixel[p + b] != 255) {
-        pixel[p + r] = 118;
-        pixel[p + g] = 167;
-        pixel[p + b] = 56;
-        pixel[p + a] = 170;
-      }
-    }
-    imageProcessed = this.imageOriginal.clone();
-
-    imageProcessed.imageData = imageData;
-    this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
-    this.repaint(faksimile, faksimile.actualPage);
-
-  }
-
-  red_and_white = function (faksimile: Faksimile) {
-    var imageProcessed = new MarvinImage();
-    var actualcontain = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
-    var imageData = actualcontain.imageData;
-
-    var pixel = imageData.data;
-
-    var r = 0, g = 1, b = 2, a = 3;
-    for (var p = 0; p < pixel.length; p += 4) {
-
-      if (
-        pixel[p + r] != 255 ||
-        pixel[p + g] != 255 ||
-        pixel[p + b] != 255) {
-        pixel[p + r] = 255;
-        pixel[p + g] = 130;
-        pixel[p + b] = 0;
-        pixel[p + a] = 200;
-      }
-    }
-
-    imageProcessed = this.imageOriginal.clone();
-
-    imageProcessed.imageData = imageData;
-    this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
-
-    this.repaint(faksimile, faksimile.actualPage);
-
-  }
-
-  black_and_white = function (faksimile: Faksimile) {
-    var imageProcessed = new MarvinImage();
-    var level = 30;
+    
+    //Get current page details to store for Undo operation
     this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
     this.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], this.imageOriginal);
-    imageProcessed = this.imageOriginal.clone();
-    Marvin.blackAndWhite(this.imageOriginal, imageProcessed, level);
-    // Marvin.colorChannel(self.imageOriginal, imageProcessed, 139,0,0);
-    this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
-    this.repaint(faksimile, faksimile.actualPage);
+
+    //Wait for the previous operation to complete to start the next operation
+    setTimeout(() => {
+      
+      // Clone the original image to keep original image intact for rollback
+      imageProcessed = this.imageOriginal.clone();
+      var imageData = imageProcessed.imageData;
+      var pixels = imageData.data;
+
+      //Changing each pixel which are not white to red
+      var red = 0, green = 1, blue = 2, alpha = 3;
+      for (var p = 0; p < pixels.length; p += 4) {
+
+        if ( pixels[p + red] != 255 || pixels[p + green] != 255 || pixels[p + blue] != 255) {
+          pixels[p + red] = redpixel;
+          pixels[p + green] = greenpixel;
+          pixels[p + blue] = bluepixel;
+          pixels[p + alpha] = alphapixel;
+        }
+      }
+
+      // Setting the pixels to the new image
+      imageProcessed.imageData = imageData;
+      this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
+      this.repaint(faksimile, faksimile.actualPage);
+    });
   }
 
+  /**
+   * Applies a gradient transparency to boundary pixels
+   * @param faksimile Page for which the boundary pixels needs to be changed
+   */
   alphaBoundary = function (faksimile: Faksimile) {
-    var imageProcessed = new MarvinImage();
-    var radius = 30;
+
     this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
     this.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], this.imageOriginal);
+    
+    var imageProcessed = new MarvinImage();
     imageProcessed = this.imageOriginal.clone();
-    Marvin.alphaBoundary(this.imageOriginal, imageProcessed, radius);
-    // Marvin.colorChannel(self.imageOriginal, imageProcessed, 139,0,0);
+    Marvin.alphaBoundary(this.imageOriginal, imageProcessed, 30);
+    
     this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
     this.repaint(faksimile, faksimile.actualPage);
   }
 
-  setOpacity = function (faksimile: Faksimile, op: number, repaint: boolean) {
+  /**
+   * Applies a opacity to the image pixel
+   * @param faksimile Page for which the opacity needs to be set
+   */
+  setOpacity = function (faksimile: Faksimile, opacity: number, repaint: boolean) {
+
     var imageProcessed = new MarvinImage();
     var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
-    var pixel = imageData.data;
+    var pixels = imageData.data;
 
-    var a = 3;
-    for (var p = 0; p < pixel.length; p += 4) {
-      pixel[p + a] = op;
-
+    for (var pixel = 0; pixel < pixels.length; pixel += 4) {
+      pixels[pixel + 3] = opacity;
     }
+    
     imageProcessed = this.imageOriginal.clone();
-
     imageProcessed.imageData = imageData;
-    // self.fileService.setActualContain(faksimile, self.imageProcessed);
     if (repaint)
       this.repaint(faksimile, faksimile.actualPage);
   }
 
-
-  remove_whitePixel = function (img) {
-    var imageProcessed = new MarvinImage();
-    imageProcessed.load(img, loaded);
-    var pixel;
-    function loaded() {
-      var imageData = imageProcessed.imageData;
-      var pixel = imageData.data;
-
-      var r = 0, g = 1, b = 2, a = 3;
-      for (var p = 0; p < pixel.length; p += 4) {
-
-        if (
-          pixel[p + r] == 255 &&
-          pixel[p + g] == 255 &&
-          pixel[p + b] == 255) // if white then change alpha to 0
-        { pixel[p + a] = 0; }
-      }
-
-    }
-    return pixel;
-  }
+  /**
+   * Remove background of the page
+   * @param faksimile Page for which the background needs to be removed
+   */
   remove_background = function (faksimile: Faksimile) {
+
     var imageProcessed = new MarvinImage();
     var imageData = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]).imageData;
-    var pixel = imageData.data;
+    var pixels = imageData.data;
 
-    var r = 0, g = 1, b = 2, a = 3;
-    for (var p = 0; p < pixel.length; p += 4) {
-
-      if (
-        pixel[p + r] == 255 &&
-        pixel[p + g] == 255 &&
-        pixel[p + b] == 255) // if white then change alpha to 0
-      { pixel[p + a] = 0; }
+    var red = 0, green = 1, blue = 2, alpha = 3;
+    for (var pixel = 0; pixel < pixels.length; pixel += 4) {
+      // Change only white color pixel alpha(or opacity) to 0
+      if (pixels[pixel + red] == 255 && pixels[pixel + green] == 255 && pixels[pixel + blue] == 255) { 
+        pixels[pixel + alpha] = 0; 
+      }
     }
 
     imageProcessed = this.imageOriginal.clone();
-
     imageProcessed.imageData = imageData;
     this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
-
     this.repaint(faksimile, faksimile.actualPage);
   }
 
-  remove_background_crop = function (cropImage: any, map: Map) {
+  /**
+   * Remove background only for the cropped section of the image
+   * @param cropImage Cropped section of the image
+   * @returns Processed image
+   */
+  remove_background_crop = function (cropImage: any) {
     var imageProcessed = new MarvinImage();
     var imageData = cropImage.imageData;
-    var pixel = imageData.data;
+    var pixels = imageData.data;
 
-    var r = 0, g = 1, b = 2, a = 3;
-    for (var p = 0; p < pixel.length; p += 4) {
-
-      if (
-        pixel[p + r] == 255 &&
-        pixel[p + g] == 255 &&
-        pixel[p + b] == 255) // if white then change alpha to 0
-      { pixel[p + a] = 0; }
+    // Change white color pixel alpha(or opacity) to 0
+    var red = 0, green = 1, blue = 2, alpha = 3;
+    for (var pixel = 0; pixel < pixels.length; pixel += 4) {
+      if (pixels[pixel + red] == 255 && pixels[pixel + green] == 255 && pixels[pixel + blue] == 255) { 
+        pixels[pixel + alpha] = 0; 
+      }
     }
+
     var canvas: any = document.createElement('canvas');
     canvas.width = imageData.width;
     canvas.height = imageData.height;
     var ctx = canvas.getContext('2d');
 
-
     ctx.putImageData(imageData, 0, 0);
-
-
-    //ctx.save();
-    // prep canvas for rotation
-    //ctx.translate(map.getView().getCenter()[0], map.getView().getCenter()[1]);                   // translate to canvas center
-    //ctx.rotate(map.getView().getRotation()*180 / Math.PI);                 // add rotation transform
-    //ctx.globalCompositeOperation = "copy";   // set comp. mode to "copy"
-   // ctx.drawImage(ctx.canvas, 0, 0, canvas.width, canvas.height, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
-    //ctx.restore();
-
-
     imageProcessed.canvas = canvas;
     imageProcessed.imageData = imageData;
 
     return imageProcessed;
-
   }
 
+  /**
+   * Mark edges in the page
+   * @param faksimile Page for which the edges need to be set
+   */
   edge_detection = function (faksimile: Faksimile) {
-    var imageProcessed = new MarvinImage();
+    
     this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
     this.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], this.imageOriginal);
+    
+    var imageProcessed = new MarvinImage();
     imageProcessed = this.imageOriginal.clone();
     imageProcessed.clear(0xFF000000);
 
@@ -397,6 +284,7 @@ export class FileComponent {
     this.repaint(faksimile, faksimile.actualPage);
   }
 
+
   getMap(id): MapFaksimile {
     var obj: MapFaksimile = this.mapService.getMaps().filter(function (node) {
       return node.ID == id;
@@ -404,6 +292,7 @@ export class FileComponent {
 
     return obj;
   }
+
 
   setActualContain(faksimile: Faksimile, page: Pages, num, src) {
     var self = this;
@@ -441,7 +330,11 @@ export class FileComponent {
     this.generateMap(data, num);
   }
 
-  exportPNG(map: Map, faksimile: Faksimile) {
+  /**
+   * Export page to PNG format
+   * @param faksimile Faksimile page which will be exported
+   */
+  exportPNG(faksimile: Faksimile) {
     var actualContaint:any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
     var canvas: any = actualContaint.canvas;
     // draw to canvas...
@@ -452,7 +345,6 @@ export class FileComponent {
     });
 
   }
-
 
   updateMinPreview() {
     var self = this;
@@ -489,8 +381,6 @@ export class FileComponent {
   }
 
   onSelectFile(event: any) {
-    //this.fileService.getFaksimiles().forEach(a => this.generateMap(a, a.actualPage));
-
     var self = this;
     var file: File = event.target.files[0];
     var faksimile;
@@ -536,6 +426,9 @@ export class FileComponent {
     else
       if (file.type == "application/pdf") {
         this.reader.readAsArrayBuffer(file);
+
+
+        console.log("Mayank check here")
 
         this.reader.onloadend = function () {
           self.complete.next({
@@ -690,7 +583,7 @@ export class FileComponent {
       //cropImage.canvas.getContext("2d").rotate(map.getView().getRotation() * 180 / Math.PI);
 
 
-      var imageWithoutBackground = that.remove_background_crop(cropImage, map);
+      var imageWithoutBackground = that.remove_background_crop(cropImage);
 
 
       var url = imageWithoutBackground.canvas.toDataURL();
@@ -1001,7 +894,6 @@ export class FileComponent {
 
   }
 
-
   buildOverlaySVG(map: Map, faksimile: Faksimile) {
 
     var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
@@ -1029,9 +921,6 @@ export class FileComponent {
     d3.select("#card-block" + faksimile.ID).selectAll("svg").remove();
   }
 
-
-
-
   mousePosition: MousePosition;
   generateMap(faksimile: Faksimile, num: number) {
     if (num == null)
@@ -1040,8 +929,8 @@ export class FileComponent {
     var imageProcessed = new MarvinImage();
     if (typeof faksimile.pages[num - 1] == "undefined")
       return;
-    var containt: any = faksimile.pages[num - 1].actualcontain;
 
+    var containt: any = faksimile.pages[num - 1].actualcontain;
     var extent: [number, number, number, number]  = [0, 0, containt.canvas.width, containt.canvas.height];
     var projection = new Projection({
       code: 'xkcd-image',
@@ -1069,25 +958,14 @@ export class FileComponent {
         mapfk.map.removeLayer(layers.getArray()[i]);
       }
 
-
-
       //Es ist wichtig für die Lupefunktion
 
      // mapfk.map.removeOverlay(mapfk.map.getOverlays().getArray()[0]);
     }
     else {
-
-
-      var zoomFactorDelta = 100;
-
-
-
-      var map = new Map({
+      var map = new Map(
+      {
         target: 'card-block' + faksimile.ID,
-
-        /*interactions: defaultInteractions().extend([
-          new DragRotateAndZoom()
-        ]),*/
         controls: [attribution],
         interactions: defaultInteractions({
           doubleClickZoom: false,
@@ -1098,32 +976,21 @@ export class FileComponent {
         keyboardEventTarget: document,
         view: new View({
           resolution: 1,        // important for 100% image size!
-          //maxResolution: 300,
           projection: projection,
           center: getCenter(extent),
           constrainRotation: false,
           constrainResolution: false,
-         // rotation: Math.PI / 6,
-         // zoomFactor: Math.pow(2, 1 / zoomFactorDelta),
           zoom:300,
-
         })
-
       });
-
-
-        var mapf = new MapFaksimile(map, faksimile);
-        this.mapService.addMap(mapf);
-
+      var mapf = new MapFaksimile(map, faksimile);
+      this.mapService.addMap(mapf);
    }
-
     map.addControl(attribution);
 
-    var layer: any =
-      new ImageLayer({
+    var layer: any = new ImageLayer({
         source: new Static({
           url: url,
-          //imageSize: [containt.canvas.width, containt.canvas.height],
           projection: projection,
           imageExtent: extent,
           attributions: [
@@ -1131,7 +998,6 @@ export class FileComponent {
           ]
         })
       });
-
     map.addLayer(layer);
 
     var source = new VectorSource({ wrapX: false });
@@ -1154,40 +1020,43 @@ export class FileComponent {
         })
       })
     });
-
-
-    map.addLayer(this.vector);
+    // map.addLayer(this.vector);
 
 
    /* var zoomslider = new ZoomSlider();
     map.addControl(zoomslider);*/
     faksimile.size = [containt.canvas.width, containt.canvas.height];
 
-
-    var bartop = new Bar();
-
-    map.addControl(bartop);
-
-    bartop.setPosition("top");
+    
+    /**
+     * To set the top panel of the page
+     */
+    var barTop = new Bar();
+    map.addControl(barTop);
+    barTop.setPosition("top");
 
     /*var legend = new Legend({
       title: faksimile.title,
       collapsed: false
     });*/
+    //barTop.addControl(legend);
 
-
-   // bartop.addControl(legend);
-    var zoommfactor = new TextButton(
+    /**
+     * input the zoom factor for the page
+     */
+    var zoomFactor = new TextButton(
       {
         html: ' Zoom: <input id="zoom-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="1" max="3000" step="0.001" type="number" value="' + map.getView().getZoom() + '"> ',
         title: "Zoom factor",
         handleClick: function (event: any) {
           self.bindZoomInputs(event, faksimile);
         }
-
       });
-    bartop.addControl(zoommfactor);
+    barTop.addControl(zoomFactor);
 
+    /**
+     * input the rotation factor for the page
+     */
     var rotation = new TextButton(
       {
         html: ' Rotation: <input id= "rotation-div' + faksimile.ID + '" class= "fa fa-lg" style="width: 3em;" min="-360" max="360" step="1.0" type="number" value="' + map.getView().getRotation() * 180 / Math.PI + '"> ',// * 180 / Math.PI + '"> ',
@@ -1197,154 +1066,136 @@ export class FileComponent {
         }
 
       });
-    bartop.addControl(rotation);
-
-    var mainbartopright = new Bar();
-    map.addControl(mainbartopright);
-    mainbartopright.setPosition("top-right");
-    mainbartopright.set("id", "bar " + faksimile.ID);
+    barTop.addControl(rotation);
 
 
-
+    /** Right side panel which contains hold and other action buttons */
+    var barRight = new Bar();
+    map.addControl(barRight);
+    barRight.setPosition("top-right");
+    barRight.set("id", "bar " + faksimile.ID);
 
     var self = this;
 
-
+    /** Hold button */
     var hold = new Toggle(
-      {
-        html: '<i class="fa fa-check-circle"></i>',
-        title: "Hold",
-        active: faksimile.funqueueexecute,
-        onToggle: function (active) {
-
-          if (active) {
-            // Remove and execute all items in the array
-            faksimile.funqueueexecute = true;
-          }
-
-          else {
-            faksimile.funqueueexecute = false;
-            // Remove all items in the array
-            while (faksimile.funqueue.length > 0) {
-              faksimile.funqueue.shift();
-            }
-
+    {
+      html: '<i class="fa fa-check-circle"></i>',
+      title: "Hold",
+      active: faksimile.funqueueexecute,
+      onToggle: function (active) {
+        if (active) {
+          // Remove and execute all items in the array
+          faksimile.funqueueexecute = true;
+        }
+        else {
+          faksimile.funqueueexecute = false;
+          // Remove all items in the array
+          while (faksimile.funqueue.length > 0) {
+            faksimile.funqueue.shift();
           }
         }
-      });
+      }
+    });
+    barRight.addControl(hold);
 
-    mainbartopright.addControl(hold);
 
+    /** Black color button */
     var blackwhite = new Button(
-      {
-        html: '<i class="fa fa-adjust"></i>',
-        title: 'Black and White',
-        handleClick: function () {
-         /* var controls = map.getControls();
-          controls.forEach(element => map.removeControl(element));*/
-          self.black_and_white(faksimile);
-          self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
+    {
+      html: '<i class="fa fa-adjust"></i>',
+      title: 'Black and White',
+      handleClick: function () {
+          self.anycolor_and_white(faksimile, 0, 0, 0, 250);
+          self.fun_black_and_white = self.wrapFunction(self.anycolor_and_white, self, [faksimile]);
           faksimile.funqueue.push(self.fun_black_and_white);
-        }
-      });
-    mainbartopright.addControl(blackwhite);
+      }
+    });
+    barRight.addControl(blackwhite);
 
+
+    /** Red color button */
     var red_white = new Button(
-      {
-        html: '<i class="fa fa-adjust" style="color:#ffc0cb;"></i>',
-        title: 'Red and White',
-        handleClick: function () {
-          /*var controls = map.getControls();
-          controls.forEach(element => map.removeControl(element));*/
-          self.black_and_white(faksimile);
-          self.red_and_white(faksimile);
-          self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
-          self.fun_red_and_white = self.wrapFunction(self.red_and_white, self, [faksimile]);
-          faksimile.funqueue.push(self.fun_black_and_white);
-          faksimile.funqueue.push(self.fun_red_and_white);
+    {
+      html: '<i class="fa fa-adjust" style="color:#ffc0cb;"></i>',
+      title: 'Red and White',
+      handleClick: function () {
+        self.anycolor_and_white(faksimile, 255, 130, 0, 200);
+        self.fun_red_and_white = self.wrapFunction(self.anycolor_and_white, self, [faksimile]);
+        faksimile.funqueue.push(self.fun_red_and_white);
+      }
+    });
+    barRight.addControl(red_white);
 
-        }
-      });
-    mainbartopright.addControl(red_white);
 
-    var blue_white = new Button(
-      {
-        html: '<i class="fa fa-adjust" style="color:#0000ff;"></i>',
-        title: 'Blue and White',
-        handleClick: function () {
-         /* var controls = map.getControls();
-          controls.forEach(element => map.removeControl(element));*/
-          self.black_and_white(faksimile);
-          self.blue_and_white(faksimile);
-          self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
-          self.fun_blue_and_white = self.wrapFunction(self.blue_and_white, self, [faksimile]);
-          faksimile.funqueue.push(self.fun_black_and_white);
-          faksimile.funqueue.push(self.fun_blue_and_white);
-        }
-      });
-    mainbartopright.addControl(blue_white);
+    /** Blue color button */
+    var blueWhite = new Button(
+    {
+      html: '<i class="fa fa-adjust" style="color:#0000ff;"></i>',
+      title: 'Blue and White',
+      handleClick: function () {
+        self.anycolor_and_white(faksimile, 5, 139, 255, 170);
+        self.fun_blue_and_white = self.wrapFunction(self.anycolor_and_white, self, [faksimile]);
+        faksimile.funqueue.push(self.fun_blue_and_white);
+      }
+    });
+    barRight.addControl(blueWhite);
 
-    var green_white = new Button(
-      {
-        html: '<i class="fa fa-adjust" style="color:#a9da42;"></i>',
-        title: 'Green and White',
-        handleClick: function () {
-         /* var controls = map.getControls();
-          controls.forEach(element => map.removeControl(element));*/
-          self.black_and_white(faksimile);
-          self.green_and_white(faksimile);
-          self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
-          self.fun_green_and_white = self.wrapFunction(self.green_and_white, self, [faksimile]);
-          faksimile.funqueue.push(self.fun_black_and_white);
-          faksimile.funqueue.push(self.fun_green_and_white);
-        }
-      });
-    mainbartopright.addControl(green_white);
 
-    var beige_white = new Button(
-      {
-        html: '<i class="fa fa-adjust" style="color:#e8bd82;"></i>',
-        title: 'Beige and White',
-        handleClick: function () {
-         /* var controls = map.getControls();
-          controls.forEach(element => map.removeControl(element));*/
-          self.black_and_white(faksimile);
-          self.beige_and_white(faksimile);
-          self.fun_black_and_white = self.wrapFunction(self.black_and_white, self, [faksimile]);
-          self.fun_beige_and_white = self.wrapFunction(self.beige_and_white, self, [faksimile]);
-          faksimile.funqueue.push(self.fun_black_and_white);
-          faksimile.funqueue.push(self.fun_beige_and_white);
-        }
-      });
-    mainbartopright.addControl(beige_white);
+    /** Green color button */
+    var greenWhite = new Button(
+    {
+      html: '<i class="fa fa-adjust" style="color:#a9da42;"></i>',
+      title: 'Green and White',
+      handleClick: function () {
+        self.anycolor_and_white(faksimile, 118, 167, 56, 170);
+        self.fun_green_and_white = self.wrapFunction(self.anycolor_and_white, self, [faksimile]);
+        faksimile.funqueue.push(self.fun_green_and_white);
+      }
+    });
+    barRight.addControl(greenWhite);
 
-    var edgedetection = new Button(
-      {
-        html: '<i class="fa fa-music"  style="color:'+ faksimile.Color+'" ></i>',
-        title: 'Edge Detection',
-        handleClick: function () {
-         /* var controls = map.getControls();
-          controls.forEach(element => map.removeControl(element));*/
-          self.edge_detection(faksimile);
-          self.fun_edge_detection = self.wrapFunction(self.edge_detection, self, [faksimile]);
-          faksimile.funqueue.push(self.fun_edge_detection);
-        }
-      });
-    mainbartopright.addControl(edgedetection);
 
-    var removebackground = new Button(
-      {
-        html: '<i class="fa fa-eraser" style="color:' + faksimile.Color +'"></i>',
-        title: 'Remove Background',
-        handleClick: function () {
-         /* var controls = map.getControls();
-          controls.forEach(element => map.removeControl(element));*/
-          self.remove_background(faksimile);
-          self.fun_remove_background = self.wrapFunction(self.remove_background, self, [faksimile]);
-          faksimile.funqueue.push(self.fun_remove_background);
-        }
-      });
-    mainbartopright.addControl(removebackground);
+    /** Beige color button */
+    var beigeWhite = new Button(
+    {
+      html: '<i class="fa fa-adjust" style="color:#e8bd82;"></i>',
+      title: 'Beige and White',
+      handleClick: function () {
+        self.anycolor_and_white(faksimile, 232, 189, 130, 170);
+        self.fun_beige_and_white = self.wrapFunction(self.anycolor_and_white, self, [faksimile]);
+        faksimile.funqueue.push(self.fun_beige_and_white);
+      }
+    });
+    barRight.addControl(beigeWhite);
+
+
+    /** Edge detection button */
+    var edgeDetection = new Button(
+    {
+      html: '<i class="fa fa-music"  style="color:'+ faksimile.Color+'" ></i>',
+      title: 'Edge Detection',
+      handleClick: function () {
+        self.edge_detection(faksimile);
+        self.fun_edge_detection = self.wrapFunction(self.edge_detection, self, [faksimile]);
+        faksimile.funqueue.push(self.fun_edge_detection);
+      }
+    });
+    barRight.addControl(edgeDetection);
+
+
+    /** Remove background button */
+    var removeBackground = new Button(
+    {
+      html: '<i class="fa fa-eraser" style="color:' + faksimile.Color +'"></i>',
+      title: 'Remove Background',
+      handleClick: function () {
+        self.remove_background(faksimile);
+        self.fun_remove_background = self.wrapFunction(self.remove_background, self, [faksimile]);
+        faksimile.funqueue.push(self.fun_remove_background);
+      }
+    });
+    barRight.addControl(removeBackground);
 
 
     var geometryFunction = createBox();
@@ -1365,66 +1216,47 @@ export class FileComponent {
 
     var modify_interaction = new Modify({
       source: this.vector.getSource(),
-      // insertVertexCondition: function(){ return false; }
     });
 
     var self = this;
 
 
-    var overlay = new Overlay({
-      element: document.getElementById('overlay' + faksimile.ID),
-    });
+    // var overlay = new Overlay({
+    //   element: document.getElementById('overlay' + faksimile.ID),
+    // });
 
-    var element = overlay.getElement();
-    element.innerHTML = "";
-    overlay.setPosition([0, faksimile.size[1]]);
+    // var element = overlay.getElement();
+    // element.innerHTML = "";
+    // overlay.setPosition([0, faksimile.size[1]]);
 
-    // and add it to the map
-    map.addOverlay(overlay);
+    // // and add it to the map
+    // map.addOverlay(overlay);
 
-
+    
+    /** Draw box button */
     var drawBox = new Toggle(
-      {
-        html: '<i class="fas fa-border-all" style="color:' + faksimile.Color +'"></i>',
-        title: 'Perspective Transformation',
-        active: false,
-        onToggle: function (active) {
-          if (active) {
-
-            mergeArea.setActive(false);
-
-           // map.removeInteraction(modify_interaction);
-            //map.removeInteraction(transform_interaction);
-            //map.removeInteraction(delete_interaction);
-            //map.removeInteraction(focusmap);
-            /*var controls = map.getControls();
-            controls.forEach(element => map.removeControl(element));*/
-            self.setOpacity(faksimile, 80, true);
-
-            //self.resetOverlaySVG(map, faksimile);
-            //self.buildOverlaySVG(map, faksimile);
-
-            self.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.pages[faksimile.actualPage - 1].actualcontain);
-            self.activateSVGMode(faksimile, map);
-
-
-
-          }
-
-
-          else {
-
-            //self.resetOverlaySVG(map, faksimile);
-            //map.un("click", mapclick);
-            self.svg.on('click', null).on('mousemove', null);
-          }
+    {
+      html: '<i class="fas fa-border-all" style="color:' + faksimile.Color +'"></i>',
+      title: 'Perspective Transformation',
+      active: false,
+      onToggle: function (active) {
+        if (active) {
+          mergeArea.setActive(false);
+          self.setOpacity(faksimile, 80, true);
+          self.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.pages[faksimile.actualPage - 1].actualcontain);
+          self.activateSVGMode(faksimile, map);
         }
-      });
-    mainbartopright.addControl(drawBox);
+        else {
+          self.svg.on('click', null).on('mousemove', null);
+        }
+      }
+    });
+    barRight.addControl(drawBox);
 
     drawBox.on("change:disable", function (e) {
       console.log("Edition is " + (e.disable ? "disabled" : "enabled"));
     });
+
 
     function getSVGString(svgNode, width, height ) {
       svgNode.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
@@ -1480,8 +1312,6 @@ export class FileComponent {
             extractedCSSText += cssRules[r].cssText;
           }
         }
-
-
         return extractedCSSText;
 
         function contains(str, arr) {
@@ -1498,6 +1328,7 @@ export class FileComponent {
         element.insertBefore(styleElement, refNode);
       }
     }
+
 
     function svgString2Image(svgString, width, height, format, callback, map: Map) {
       var format = format ? format : 'png';
@@ -1523,17 +1354,15 @@ export class FileComponent {
 
 
       };
-
-      //= imgsrc;
     }
 
 
     function save(url) {
       self.cropImageString(url, faksimile, map);
-
     }
 
 
+    /** Merge button */
     var mergeArea = new Toggle(
       {
         html: '<i class="fas fa-link" style="color:' + faksimile.Color +'"></i>',
@@ -1542,107 +1371,119 @@ export class FileComponent {
         onToggle: function (active) {
           if (active) {
             drawBox.setActive(false);
-            //remove.setActive(false);
-           /* var controls = map.getControls();
-            controls.forEach(element => map.removeControl(element));*/
             map.removeInteraction(draw);
             map.removeInteraction(modify_interaction);
             map.removeInteraction(delete_interaction);
-            //map.addInteraction(focusmap);
-            //map.addInteraction(transform_interaction);
 
             self.setOpacity(faksimile, 170, true);
-
             self.svg.selectAll("circle").remove();
-
             self.svg.selectAll(".line--x").remove();
             self.svg.selectAll(".line--y").remove();
 
             var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
-
-
             var svgString = getSVGString(self.svg.node(), containt.canvas.width / map.getView().getResolution(), containt.canvas.height / map.getView().getResolution());
 
             var cropImageString = svgString2Image(svgString, containt.canvas.width, containt.canvas.height, 'png', save, map); // passes Blob and filesize String to the callback
-
-
             self.svg = null;
-
           }
-
           else {
             //map.removeInteraction(draw);
           }
         }
       });
-    mainbartopright.addControl(mergeArea);
+    barRight.addControl(mergeArea);
 
 
+    /** Undo button */
     var undo = new Button(
       {
         html: '<i class="fa fa-reply" style="color:' + faksimile.Color +'"></i>',
         title: 'Undo',
         handleClick: function () {
-         /* var controls = map.getControls();
-          controls.forEach(element => map.removeControl(element));*/
           map.removeInteraction(draw);
-          self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], faksimile.pages[num - 1].previouscontain);
-          self.repaint(faksimile, num);
-
+          if(faksimile.pages[num - 1]["previouscontain"]) {
+            self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], faksimile.pages[num - 1].previouscontain);
+            setTimeout(() => {
+              self.repaint(faksimile, num);
+            });
+          }
         }
       });
-    mainbartopright.addControl(undo);
+    barRight.addControl(undo);
 
 
+    /** Reset button */
     var reset = new Button(
       {
         html: '<i class="fa fa-reply-all" style="color:' + faksimile.Color +'"></i>',
         title: 'Reset',
         handleClick: function () {
-          /*var controls = map.getControls();
-          controls.forEach(element => map.removeControl(element));*/
           map.removeInteraction(draw);
           self.imageOriginal.load(faksimile.pages[num - 1].contain, imageLoaded);
-
           function imageLoaded() {
             imageProcessed = self.imageOriginal.clone();
             self.fileService.setPreviosContain(faksimile, faksimile.pages[num - 1], imageProcessed);
             self.fileService.setActualContain(faksimile, faksimile.pages[num - 1], imageProcessed);
             self.repaint(faksimile, num);
           }
-
         }
       });
-    mainbartopright.addControl(reset);
+    barRight.addControl(reset);
 
-   /* var magnify = new Toggle(
-      {
-        html: '<i class="fa fa-search"></i>',
-        title: "Magnify",
-        active: false,
-        onToggle: function (active) {
-          var ov = new Magnify(
-            {
-              layers: [layer],
-              zoomOffset: 1,
-              projection: projection,
-              imageExtent: extent
-            });
 
-          if (active) {
-            map.addOverlay(ov);
-          }
+    // Extent for Magnify Feature (Needs work in future)
+    // var magnifyExtent: [number, number, number, number]  = [
+    //   -containt.canvas.width/2, -containt.canvas.height/2, 
+    //   containt.canvas.width/2, containt.canvas.height/2
+    // ];
 
-          else {
-            ov.stopEvent = true;
-            map.removeOverlay(ov);
-            map.getOverlays().getArray().forEach(function (element) { if (element.getElement().classList.contains("ol-magnify")) map.removeOverlay(element); })
+    // Projection for Magnify Feature (Needs work in future)
+    // var magnifyProjection = new Projection({
+    //   code: 'xkcd-image',
+    //   units: 'pixels',
+    //   extent: magnifyExtent,
+    // });
 
-          }
-        }
-      });
+    // Layer for Magnify Feature (Needs work in future)
+    // var magnifyLayer: any = new ImageLayer({
+    //   source: new Static({
+    //     url: url,
+    //     projection: magnifyProjection,
+    //     imageExtent: magnifyExtent,
+    //     attributions: []
+    //   })
+    // });
 
-    mainbartopright.addControl(magnify);*/
+    /** Magnify Button */
+    // var magnify = new Toggle(
+    // {
+    //   html: '<i class="fa fa-search style="color:' + faksimile.Color +'"></i>',
+    //   title: "Magnify",
+    //   active: false,
+    //   onToggle: function (active) {
+    //     debugger;
+    //     var ov = new Magnify(
+    //     {
+    //       layers: [magnifyLayer],
+    //       zoomOffset: 1,
+    //       // element: document.getElementById("overlay" + faksimile.ID)
+    //     });
+    //     if (active) {
+    //       map.addOverlay(ov);
+    //     }
+    //     else {
+    //       ov.stopEvent = true;
+    //       map.removeOverlay(ov);
+    //       map.getOverlays().getArray().forEach(function (element) {
+    //          if (element.getElement().classList.contains("ol-magnify")) {
+    //           map.removeOverlay(element); 
+    //          }
+    //         })
+    //     }
+    //   }
+    // });
+    // barRight.addControl(magnify);
+
 
     // var mainbarbuttom = new Bar();
     //map.addControl(mainbarbuttom);
@@ -1650,19 +1491,18 @@ export class FileComponent {
 
     // mainbar.addControl(new Magnify(faksimile, map));
 
-    bartop.addControl(new FullScreen());
+    barTop.addControl(new FullScreen());
 
     if (faksimile.type == "pdf") {
-
+      /**
+       * Synchronously go to previous page
+       */
       var synchronous_previous = new Button(
         {
           html: '<i class="fa fa-backward" style="color:' + faksimile.Color +'"></i>',
-          title: "Previous",
+          title: "Synchronous Previous",
           handleClick: function () {
-
             var faksimiles: Faksimile[] = self.fileService.getFaksimiles();
-
-
             for (let a of faksimiles) {
               if (a.actualPage <= 1) {
                 return;
@@ -1672,8 +1512,11 @@ export class FileComponent {
             }
           }
         });
-      bartop.addControl(synchronous_previous);
+      barTop.addControl(synchronous_previous);
 
+      /**
+       * Previous page button
+       */
       var previous = new Button(
         {
           html: '<i class="fa fa-arrow-left" style="color:' + faksimile.Color +'"></i>',
@@ -1688,15 +1531,14 @@ export class FileComponent {
 
           }
         });
-      bartop.addControl(previous);
+      barTop.addControl(previous);
 
-      //[value] = "username" (input) = "username = $event.target.value"
+      /**
+       * Page number
+       */
       var pagenum = new TextButton(
         {
           html: '<input class= "fa fa-lg" style="width: 2.5em;" type="number"  value = ' + faksimile.actualPage + ' (input) = "faksimile.actualPage  = event.target.value" > / ' + faksimile.numPages + '',
-
-         // html: '<input class= "fa fa-lg" style="width: 2.5em;" type="number" value="' + faksimile.actualPage + '"> / ' + faksimile.numPages + '',
-          // html: '<input [value]="pagenr" (input)="pagenr = $event.target.value" type="number" min = "1">',
           title: "Page number",
           handleClick: function (event: any) {
             self.bindInputs(event, faksimile);
@@ -1706,10 +1548,12 @@ export class FileComponent {
             barRighth.style.borderColor = faksimile.Color;
             barTop.style.borderColor = faksimile.Color;
           }
-
         });
-      bartop.addControl(pagenum);
+      barTop.addControl(pagenum);
 
+      /**
+       * Next page button
+       */
       var next = new Button(
         {
           html: '<i class="fa fa-arrow-right" style="color:' + faksimile.Color +'"></i>',
@@ -1723,16 +1567,17 @@ export class FileComponent {
 
           }
         });
-      bartop.addControl(next);
+      barTop.addControl(next);
 
+      /**
+       * Synchronously go to next page
+       */
       var synchronous_next = new Button(
         {
           html: '<i class="fa fa-forward" style="color:' + faksimile.Color +'"></i>',
           title: "Synchronous Next",
           handleClick: function () {
             var faksimiles: Faksimile[] = self.fileService.getFaksimiles();
-
-
             for (let a of faksimiles) {
               if (a.actualPage >= a.numPages) {
                 return;
@@ -1740,13 +1585,14 @@ export class FileComponent {
               a.actualPage++;
               self.queueRenderPage(a, a.actualPage, a.title, a.numPages);
             }
-
           }
         });
-      bartop.addControl(synchronous_next);
+      barTop.addControl(synchronous_next);
     }
 
-
+    /** 
+     * Close button 
+     */
     var close = new Button(
       {
         html: '<i class="fa fa-times-circle" style="color:' + faksimile.Color +'"></i>',
@@ -1758,22 +1604,23 @@ export class FileComponent {
 
 
         }
-      });
-    bartop.addControl(close);
+    });
+    barTop.addControl(close);
 
 
-    //< i class="fa fa-upload" > </i>
+    /**
+     * Export button
+     */
     var download = new Button(
-      {
-        html: '<i class="far fa-file-image" style="color:' + faksimile.Color +'"></i>',
-        title: "Export current Page",
-        handleClick: function () {
+    {
+      html: '<i class="far fa-file-image" style="color:' + faksimile.Color +'"></i>',
+      title: "Export current Page",
+      handleClick: function () {
+        self.exportPNG(faksimile);
+      }
+    });
+    barTop.addControl(download);
 
-          self.exportPNG(map, faksimile);
-
-        }
-      });
-    bartop.addControl(download);
 
     var currRotation = map.getView().getRotation();
     var currZoom = map.getView().getZoom();
@@ -1804,11 +1651,7 @@ export class FileComponent {
 
       }
     });
-
-
-
   }
-
 
   cropImageString(cropImageString, faksimile: Faksimile, map: Map): any {
     var cropImage1 = new MarvinImage();
@@ -1925,6 +1768,7 @@ export class FileComponent {
     //this.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.actualPage, img);
 
   }
+
   bindInputs(event: any, faksimile: Faksimile) {
     var idxInput = event.target;
     var self = this;
@@ -1943,8 +1787,6 @@ export class FileComponent {
     };
     //idxInput.value = String(layer.getZIndex());
   }
-
-
 
   bindZoomInputs(event: any, faksimile: Faksimile) {
     var idxInput = event.target;
@@ -1978,6 +1820,7 @@ export class FileComponent {
   pageRendering = false;
   scale = 2;
   renderQueue = [];
+
   /**
    * If another page rendering in progress, waits until the rendering is
    * finised. Otherwise, executes rendering immediately.
@@ -1988,10 +1831,8 @@ export class FileComponent {
     }
     else {
       this.renderPage(faksimile, num, title, numPages, faksimile.pdfDoc);
-
     }
   }
-
 
   /**
  * Get page info from document, resize canvas accordingly, and render page.
@@ -2010,11 +1851,10 @@ export class FileComponent {
         console.log('Page loaded');
 
         var viewport = page.getViewport({ scale: self.scale });
-
         // Prepare canvas using PDF page dimensions
         var canvas: any = document.createElement('canvas');
-
         var context = canvas.getContext('2d');
+
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
@@ -2030,24 +1870,24 @@ export class FileComponent {
 
           if (faksimile == null) {
             faksimile = new Faksimile("pdf", filename, null, numPages, num, pdfDoc, false, null);
-
             var page: Pages = new Pages(num, faksimile.title, src, src);
             faksimile.pages.push(page);
             self.fileService.addFaksimile(faksimile);
-
-          }
-
-          else {
+          } else {
             var page: Pages = new Pages(num, faksimile.title, src, src);
             if (!self.fileService.checkPage(faksimile, page)) {
               self.fileService.addPage(faksimile, page);
             }
           }
+
           self.imageOriginal = new MarvinImage();
           self.imageOriginal.load(src, imageLoaded);
 
           function imageLoaded() {
             var imageProcessed = self.imageOriginal.clone();
+
+            console.log("Image Loaded from PDF", imageProcessed)
+            self.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
             self.fileService.setActualContain(faksimile, page, imageProcessed);
             imageProcessed = faksimile.pages[num - 1].actualcontain;
             if (faksimile.funqueueexecute) {
@@ -2120,7 +1960,4 @@ export class FileComponent {
         this.generateMinPreview(faksimile);
       }*/
   }
-
-
-
 }

@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { HelpComponent } from './views/help.component';
-import { OverviewComponent } from './views/overview.component';
-import { PublishingComponent } from './views/publishing.component';
-import { ImportComponent } from './views/import.component';
-import { CollationComponent } from './views/collation.component';
-import { PublicationEHinmanComponent } from './views/publicationEHinman.component';
+import { HelpComponent } from './views/help/help.component';
+import { OverviewComponent } from './views/overview/overview.component';
+import { PublishingComponent } from './views/publishing/publishing.component';
+import { ImportComponent } from './views/import/import.component';
+import { CollationComponent } from './views/collation/collation.component';
+import { EHinmanComponent } from './views/publishing/e-hinman/e-hinman.component';
 
 
 const routes: Routes = [
@@ -13,7 +13,7 @@ const routes: Routes = [
   { path: 'import', component: ImportComponent },
   { path: 'help', component: HelpComponent },
   { path: 'publishing', component: PublishingComponent },
-  { path: 'publishing/Kollationsvorgang_mit_eHinman', component: PublicationEHinmanComponent },
+  { path: 'publishing/Kollationsvorgang_mit_eHinman', component: EHinmanComponent },
   { path: 'overview', component: OverviewComponent },
   { path: '', redirectTo: '/overview', pathMatch: 'full' }
 ];

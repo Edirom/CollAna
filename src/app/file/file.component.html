@@ -1,0 +1,7 @@
+<div fxLayoutGap="10px"> 
+    <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Import">
+        <i class= "fa fa-download fa-lg" ></i>
+        <span class= "hidden-xs-down" > </span>
+        <input type="file"  #fileUpload (click)="fileUpload.value = null"(change)="onSelectFile($event)" accept=".jpg, .png, .pdf" />
+    </div>
+</div>
