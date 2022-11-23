@@ -15,9 +15,9 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { HelpComponent } from './views/help/help.component';
 import { OverviewComponent } from './views/overview/overview.component';
-import { PublishingComponent } from './views/publishing/publishing.component';
 import { ImportComponent } from './views/import/import.component';
 import { CollationComponent } from './views/collation/collation.component';
+import { PublishingComponent } from './views/publishing/publishing.component';
 import { EHinmanComponent } from './views/publishing/e-hinman/e-hinman.component';
 
 
