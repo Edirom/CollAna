@@ -1,9 +1,12 @@
 import { Component, AfterViewInit } from '@angular/core';
+import { CdkDragEnd, CdkDragMove } from "@angular/cdk/drag-drop";
+
 import { FileService } from '../../services';
 import { MapService } from '../../services/map.service';
-import { Faksimile } from '../../types/faksimile';
-import { CdkDragEnd, CdkDragMove } from "@angular/cdk/drag-drop";
+
 import { FileComponent } from '../../file/file.component';
+
+import { Faksimile } from '../../types/faksimile';
 
 import { saveAs } from 'file-saver';
 
@@ -28,7 +31,6 @@ export class CollationComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.faksimiles = this.fileService.getFaksimiles();
-    // this.removeMaps();
     this.mapService.removeAllMaps();
     this.generateMap();
   }
@@ -50,7 +52,7 @@ export class CollationComponent implements AfterViewInit {
   /** 
    * Import the file to process
   */
-  import(data: any): void {
+  import(): void {
     this.faksimiles = this.fileService.getFaksimiles();
   }
 

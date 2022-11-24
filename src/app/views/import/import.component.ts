@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+
 import { FileService } from '../../services';
 
 @Component({
@@ -8,7 +9,6 @@ import { FileService } from '../../services';
 })
 export class ImportComponent {
 
-  constructor(
-    private fileService: FileService) {
+  constructor(private fileService: FileService) {
   }
 }

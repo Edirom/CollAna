@@ -15,13 +15,15 @@ import Projection from 'ol/proj/Projection';
 import { Image as ImageLayer } from 'ol/layer.js';
 import Static from 'ol/source/ImageStatic.js';
 import { Attribution, defaults as defaultControls } from 'ol/control';
-import { FullScreen, Rotate } from 'ol/control.js';
-import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction.js';
+import { FullScreen } from 'ol/control.js';
+// import {Rotate} from 'ol/control.js';
+import { defaults as defaultInteractions} from 'ol/interaction.js';
+// import {DragRotateAndZoom } from 'ol/interaction.js';
 import Bar from 'ol-ext/control/Bar';
 import Toggle from 'ol-ext/control/Toggle';
 import Button from 'ol-ext/control/Button';
 import TextButton from 'ol-ext/control/TextButton';
-import Magnify from 'ol-ext/overlay/Magnify';
+// import Magnify from 'ol-ext/overlay/Magnify';
 import Modify from 'ol/interaction/Modify';
 import Draw, { createBox } from 'ol/interaction/Draw';
 import { Vector as VectorLayer, Layer } from 'ol/layer';
@@ -61,16 +63,16 @@ export class FileComponent {
   @Input() canvas_index: number;
 
   //Extra variables for the testing
-  p
-  name;
-  form;
-  rect: any;
-  mouseDown: boolean;
-  preview: any;
-  private relFactor: any;
-  overlay: Overlay;
-  htmlElement: HTMLElement;
-  mousePosition: MousePosition;
+  // p
+  // name;
+  // form;
+  // rect: any;
+  // mouseDown: boolean;
+  // preview: any;
+  // private relFactor: any;
+  // overlay: Overlay;
+  // htmlElement: HTMLElement;
+  // mousePosition: MousePosition;
 
   // All the variables required in this class
 
@@ -104,6 +106,8 @@ export class FileComponent {
   fun_edge_detection;
   fun_remove_background;
 
+  first_time_counter = 0;
+
 
   constructor(private fileService: FileService, private mapService: MapService) {
     // https://github.com/wbkd/d3-extended
@@ -134,7 +138,6 @@ export class FileComponent {
     var file: File = event.target.files[0];
     var faksimile;
 
-    this.imageOriginal = new MarvinImage();
     var imageProcessed = new MarvinImage();
     this.reader = new FileReader();
 
@@ -156,11 +159,12 @@ export class FileComponent {
         
         var page: Pages = new Pages(1, faksimile.title, self.contain, imageProcessed);
         self.fileService.addPage(faksimile, page);
+        self.imageOriginal = new MarvinImage();
         self.imageOriginal.load(self.contain, imageLoaded);
 
         // Called when the image is loaded successfully as Marvin Image
         function imageLoaded() {
-          imageProcessed = self.imageOriginal.clone();
+          var imageProcessed = self.imageOriginal.clone();
           self.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
           self.fileService.setActualContain(faksimile, page, imageProcessed);
           self.generateMap(faksimile, 1);
@@ -206,7 +210,7 @@ export class FileComponent {
    * @param pb Blue color space of rgb to set in the background
    * @param pa Alpha color space of rgb to set in the background
    */
-  anycolor_and_white = function (faksimile: Faksimile, redpixel: number, greenpixel: number, bluepixel: number, alphapixel: number) {
+  anycolor_and_white = function (faksimile: Faksimile, pr: number, pg: number, pb: number, pa: number) {
     var imageProcessed = new MarvinImage();
     
     //Get current page details to store for Undo operation
@@ -214,30 +218,36 @@ export class FileComponent {
     this.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], this.imageOriginal);
 
     //Wait for the previous operation to complete to start the next operation
-    setTimeout(() => {
-      
-      // Clone the original image to keep original image intact for rollback
       imageProcessed = this.imageOriginal.clone();
+      if(this.first_time_counter === 0) {
+        Marvin.blackAndWhite(this.imageOriginal, imageProcessed, 30);
+        this.first_time_counter = 1;
+      }
+      
       var imageData = imageProcessed.imageData;
-      var pixels = imageData.data;
+      var pixel = imageData.data;
 
       //Changing each pixel which are not white to red
-      var red = 0, green = 1, blue = 2, alpha = 3;
-      for (var p = 0; p < pixels.length; p += 4) {
-
-        if ( pixels[p + red] != 255 || pixels[p + green] != 255 || pixels[p + blue] != 255) {
-          pixels[p + red] = redpixel;
-          pixels[p + green] = greenpixel;
-          pixels[p + blue] = bluepixel;
-          pixels[p + alpha] = alphapixel;
+      var r = 0, g = 1, b = 2, a = 3;
+      for (var p = 0; p < pixel.length; p += 4) {
+        if ( pixel[p + r] != 255 || pixel[p + g] != 255 || pixel[p + b] != 255) {
+          pixel[p + r] = pr;
+          pixel[p + g] = pg;
+          pixel[p + b] = pb;
+          pixel[p + a] = pa;
         }
       }
-
-      // Setting the pixels to the new image
       imageProcessed.imageData = imageData;
       this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
       this.generateMap(faksimile, faksimile.actualPage);
-    });
+    
+      // imageProcessed.clear(0xFF000000);
+
+      // Marvin.prewitt(this.imageOriginal, imageProcessed, 1);
+      // Marvin.invertColors(imageProcessed, imageProcessed);
+      // Marvin.thresholding(imageProcessed, imageProcessed, 150);
+      
+    
   }
 
   /**
@@ -433,9 +443,13 @@ export class FileComponent {
   }
 
 
+  /**
+   * All Perspective transformation operations
+   */
   activateSVGMode(faksimile: Faksimile, map: Map) {
-    this.resetOverlaySVG(map, faksimile);
+    this.resetOverlaySVG(faksimile);
     this.buildOverlaySVG(map, faksimile);
+    
     var container = document.getElementById('card-block' + faksimile.ID);
     var mousePosition;
     container.addEventListener('mousemove', function (event) {
@@ -445,6 +459,7 @@ export class FileComponent {
 
     this.svg.selectAll("g").remove();
     this.svg.on('click', drawingstarted).on('mousemove', drawpreview);
+
     // var final: boolean = true;
     var final: boolean = false;
     var point1: number[] = [];
@@ -455,6 +470,10 @@ export class FileComponent {
     var that = this;
     var preview;
     this.g = this.svg.append('g');
+
+    /**
+     * To draw rectangle when perspective transformation is clicked
+     */
     function drawingstarted() {
       that.svg.selectAll("image").remove();
       that.svg.selectAll(".line--x").remove();
@@ -521,7 +540,12 @@ export class FileComponent {
       // }
     }
 
-
+    /**
+     * Change perspective transformation of the selected coordinates
+     * @param coord 
+     * @param faksimile 
+     * @param cutCoord 
+     */
     function perspectiveTransformation(coord, faksimile: Faksimile, cutCoord) {
       that.svg.selectAll("image").remove();
       that.svg.selectAll(".line--x").remove();
@@ -571,7 +595,6 @@ export class FileComponent {
         .attr("y", "0")
         .attr("width", width)
         .attr("height", height);
-
 
       svgTransform.select("g").selectAll(".line--x")
         .data(d3.range(0, width + 1, 40))
@@ -755,6 +778,9 @@ export class FileComponent {
       }
     }
 
+    /**
+     * 
+     */
     function drawpreview() {
       if (mouseDown) {
         point2 = d3.mouse(this);
@@ -764,7 +790,10 @@ export class FileComponent {
         });
       }
     }
-
+    
+    /**
+     * Called when the drawing is completed
+     */
     function drawingended() {
       mouseDown = false;
       point1 = null;
@@ -785,7 +814,11 @@ export class FileComponent {
     }
   }
 
-
+  /**
+   * Build the overlay SVG image for perspective transformation
+   * @param map 
+   * @param faksimile 
+   */
   buildOverlaySVG(map: Map, faksimile: Faksimile) {
     var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
     d3.select("#overlay" + faksimile.ID).selectAll("svg").remove();
@@ -796,12 +829,16 @@ export class FileComponent {
       .attr("id", function (d) { return d; })
       .attr('viewBox', '0 0 ' + containt.canvas.width / map.getView().getResolution() + ' ' + containt.canvas.height / map.getView().getResolution())
       .attr('preserveAspectRatio', 'xMidYMid meet')
-      .attr("width", containt.canvas.width / map.getView().getResolution())//* map.getView().getZoom()))
+      .attr("width", containt.canvas.width / map.getView().getResolution())
       .attr("height", containt.canvas.height / map.getView().getResolution())
-      .classed("svg-content", true);// * map.getView().getZoom()));
+      .classed("svg-content", true);
   }
 
-  resetOverlaySVG(map: Map, faksimile: Faksimile) {
+  /**
+   * Reset SVG overlay before starting new perspective transformation
+   * @param faksimile 
+   */
+  resetOverlaySVG(faksimile: Faksimile) {
     d3.select("#card-block" + faksimile.ID).selectAll("svg").remove();
   }
 
@@ -1111,7 +1148,9 @@ export class FileComponent {
     map.addOverlay(overlay);
 
     
-    /** Draw box button */
+    /** 
+     * Perspective Transformation button 
+     */
     var drawBox = new Toggle(
       {
         html: '<i class="fas fa-border-all" style="color:' + faksimile.Color +'"></i>',
@@ -1122,7 +1161,9 @@ export class FileComponent {
             mergeArea.setActive(false);
             self.setOpacity(faksimile, 80, true);
             self.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], faksimile.pages[faksimile.actualPage - 1].actualcontain);
-            self.activateSVGMode(faksimile, map);
+            setTimeout(() => {
+              self.activateSVGMode(faksimile, map);
+            });
           }
           else {
             self.svg.on('click', null).on('mousemove', null);
@@ -1131,9 +1172,9 @@ export class FileComponent {
       });
     barRight.addControl(drawBox);
 
-    drawBox.on("change:disable", function (e) {
-      console.log("Edition is " + (e.disable ? "disabled" : "enabled"));
-    });
+    // drawBox.on("change:disable", function (e) {
+    //   console.log("Edition is " + (e.disable ? "disabled" : "enabled"));
+    // });
 
 
     function getSVGString(svgNode, width, height ) {
@@ -1521,7 +1562,6 @@ export class FileComponent {
     });
   }
 
-
   cropImageString(cropImageString, faksimile: Faksimile, map: Map): any {
     var cropImage1 = new MarvinImage();
     cropImage1.load(cropImageString, imageLoaded);
@@ -1583,7 +1623,7 @@ export class FileComponent {
    * @param faksimile 
    * @param img 
    */
-   updateImg(faksimile, img) {
+  updateImg(faksimile, img) {
     var image = new MarvinImage();
     image.load(img, imageLoaded);
     var self = this;
@@ -1767,4 +1807,5 @@ export class FileComponent {
       this.generateMinPreview(faksimile);
     }
   }
+
 }
