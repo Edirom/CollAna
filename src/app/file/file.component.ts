@@ -62,18 +62,6 @@ export class FileComponent {
   @Output() complete: EventEmitter<any> = new EventEmitter();
   @Input() canvas_index: number;
 
-  //Extra variables for the testing
-  // p
-  // name;
-  // form;
-  // rect: any;
-  // mouseDown: boolean;
-  // preview: any;
-  // private relFactor: any;
-  // overlay: Overlay;
-  // htmlElement: HTMLElement;
-  // mousePosition: MousePosition;
-
   // All the variables required in this class
 
   faksimiles: Faksimile[];
@@ -132,7 +120,7 @@ export class FileComponent {
    * To select a file to import
    * @param event Event which has the file in it
    */
-   onSelectFile(event: any) {
+  onSelectFile(event: any) {
 
     var self = this;
     var file: File = event.target.files[0];
@@ -317,21 +305,19 @@ export class FileComponent {
    * @param cropImage Cropped section of the image
    * @returns Processed image
    */
-  // can be further optimized
    remove_background_crop = function (cropImage: any, map: Map) {
     var imageProcessed = new MarvinImage();
     var imageData = cropImage.imageData;
-    var pixel = imageData.data;
+    var pixels = imageData.data;
 
-    var r = 0, g = 1, b = 2, a = 3;
-    for (var p = 0; p < pixel.length; p += 4) {
-
-      if (
-        pixel[p + r] == 255 &&
-        pixel[p + g] == 255 &&
-        pixel[p + b] == 255) // if white then change alpha to 0
-      { pixel[p + a] = 0; }
+    var red = 0, green = 1, blue = 2, alpha = 3;
+    for (var pixel = 0; pixel < pixels.length; pixel += 4) {
+      if (pixels[pixel + red] == 255 && pixels[pixel + green] == 255 && pixels[pixel + blue] == 255) // if white then change alpha to 0
+      { 
+        pixels[pixel + alpha] = 0; 
+      }
     }
+
     var canvas: any = document.createElement('canvas');
     canvas.width = imageData.width;
     canvas.height = imageData.height;
@@ -340,7 +326,6 @@ export class FileComponent {
     imageProcessed.canvas = canvas;
     imageProcessed.imageData = imageData;
     return imageProcessed;
-
   }
 
   /**
@@ -427,7 +412,6 @@ export class FileComponent {
    */
   // TODO: Check again later on this 
   updateMinPreview() {
-    var self = this;
     this.fileService.getFaksimiles().forEach(function (faksimile) {
       this.generateMinPreview(faksimile);
     })
@@ -441,7 +425,6 @@ export class FileComponent {
     var element: any = document.getElementById("mini-card-canvas" + faksimile.ID);
     element.innerText = faksimile.index + 1;
   }
-
 
   /**
    * All Perspective transformation operations
@@ -1270,9 +1253,9 @@ export class FileComponent {
       };
     }
 
-    function save(url) {
-      self.cropImageString(url, faksimile, map);
-    }
+    // function save(url) {
+    //   self.cropImageString(url, faksimile);
+    // }
 
     /** Merge button */
     var mergeArea = new Toggle(
@@ -1295,7 +1278,7 @@ export class FileComponent {
             var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
             var svgString = getSVGString(self.svg.node(), containt.canvas.width / map.getView().getResolution(), containt.canvas.height / map.getView().getResolution());
 
-            var cropImageString = svgString2Image(svgString, containt.canvas.width, containt.canvas.height, 'png', save, map); // passes Blob and filesize String to the callback
+            // var cropImageString = svgString2Image(svgString, containt.canvas.width, containt.canvas.height, 'png', save, map); // passes Blob and filesize String to the callback
             self.svg = null;
           }
           else {
@@ -1562,7 +1545,7 @@ export class FileComponent {
     });
   }
 
-  cropImageString(cropImageString, faksimile: Faksimile, map: Map): any {
+  cropImageString(cropImageString, faksimile: Faksimile): any {
     var cropImage1 = new MarvinImage();
     cropImage1.load(cropImageString, imageLoaded);
     var cropCoord = faksimile.pages[faksimile.actualPage - 1].cropCoord;
@@ -1588,9 +1571,7 @@ export class FileComponent {
 
       cropImage.draw(cropImage.canvas);
 
-
       url = cropImage.canvas.toDataURL();
-
 
       var origImage: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
       var origImgUrl = origImage.canvas.toDataURL();
