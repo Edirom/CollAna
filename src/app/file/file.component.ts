@@ -94,9 +94,6 @@ export class FileComponent {
   fun_edge_detection;
   fun_remove_background;
 
-  first_time_counter = 0;
-
-
   constructor(private fileService: FileService, private mapService: MapService) {
     // https://github.com/wbkd/d3-extended
 
@@ -145,7 +142,7 @@ export class FileComponent {
         faksimile = new Faksimile("image", file.name, null, 1, 1, false, null);
         self.fileService.addFaksimile(faksimile);
         
-        var page: Pages = new Pages(1, faksimile.title, self.contain, imageProcessed);
+        var page: Pages = new Pages(1, faksimile.title, self.contain, 0, imageProcessed);
         self.fileService.addPage(faksimile, page);
         self.imageOriginal = new MarvinImage();
         self.imageOriginal.load(self.contain, imageLoaded);
@@ -205,11 +202,16 @@ export class FileComponent {
     this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
     this.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], this.imageOriginal);
 
+    console.log("Faksimile actual page count");
+    console.log(faksimile.actualPage);
+    console.log(faksimile)
+    // console.log(faksimile.pages[faksimile.actualPage - 1].colourcounter);
+
     //Wait for the previous operation to complete to start the next operation
       imageProcessed = this.imageOriginal.clone();
-      if(this.first_time_counter === 0) {
+      if(faksimile.pages[faksimile.actualPage - 1].colourcounter === 0) {
         Marvin.blackAndWhite(this.imageOriginal, imageProcessed, 30);
-        this.first_time_counter = 1;
+        faksimile.pages[faksimile.actualPage - 1].colourcounter = 1;
       }
       
       var imageData = imageProcessed.imageData;
@@ -1736,11 +1738,11 @@ export class FileComponent {
 
           if (faksimile == null) {
             faksimile = new Faksimile("pdf", filename, null, numPages, num, pdfDoc, false, null);
-            var page: Pages = new Pages(num, faksimile.title, src, src);
+            var page: Pages = new Pages(num, faksimile.title, src, src, 0);
             faksimile.pages.push(page);
             self.fileService.addFaksimile(faksimile);
           } else {
-            var page: Pages = new Pages(num, faksimile.title, src, src);
+            var page: Pages = new Pages(num, faksimile.title, src, src, 0);
             if (!self.fileService.checkPage(faksimile, page)) {
               self.fileService.addPage(faksimile, page);
             }
