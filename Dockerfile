@@ -8,7 +8,6 @@ WORKDIR /app
 
 # build app
 COPY . /app/
-RUN export NODE_OPTIONS=--openssl-legacy-provider
 RUN npm install && \
     NODE_OPTIONS='--openssl-legacy-provider' npm run build
 
