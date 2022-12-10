@@ -19,6 +19,9 @@ import { ImportComponent } from './views/import/import.component';
 import { CollationComponent } from './views/collation/collation.component';
 import { PublishingComponent } from './views/publishing/publishing.component';
 import { EHinmanComponent } from './views/publishing/e-hinman/e-hinman.component';
+import { ExportComponent } from './views/help/user-guide/export/export.component';
+import { VideoTutorialComponent } from './views/help/user-guide/video-tutorial/video-tutorial.component';
+import { ImportGuideComponent } from './views/help/user-guide/import-guide/import-guide.component';
 
 
 @NgModule({
@@ -30,7 +33,10 @@ import { EHinmanComponent } from './views/publishing/e-hinman/e-hinman.component
     PublishingComponent,
     ImportComponent,
     CollationComponent,
-    EHinmanComponent
+    EHinmanComponent,
+    ExportComponent,
+    VideoTutorialComponent,
+    ImportGuideComponent
   ],
   imports: [
     BrowserModule,

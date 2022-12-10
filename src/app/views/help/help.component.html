@@ -1,8 +1,24 @@
 <div id="mySidenav" class="sidenav">
-    <a>Publishing</a>
-    <a>User guide</a>
-    <a>Contact</a>
+    <a id="guide-menu" class="collapsible" (click)="collapse()">
+       <span style="margin-bottom:20px;">User guide</span>
+        <i class="fa fa-chevron-down" aria-hidden="true" style="margin-left: 60px;font-size: 18px;" *ngIf="isCollapsed"></i>
+        <i class="fa fa-chevron-up" aria-hidden="true" style="margin-left: 60px;font-size: 18px;" *ngIf="!isCollapsed"></i>
+    </a>
+    <div id="content" class="content">
+        <a class="sub-menu" [class.active]="activeGuideType === guideType.ImportGuide" (click)="show(guideType.ImportGuide)">Import</a>
+        <a class="sub-menu" [class.active]="activeGuideType === guideType.ExportGuide" (click)="show(guideType.ExportGuide)">Export</a>
+        <a class="sub-menu" [class.active]="activeGuideType === guideType.VideoTutorialGuide" (click)="show(guideType.VideoTutorialGuide)">Video tutorial</a>
+    </div>
+    <a id="contact-menu" class="contact-menu" (click)="contact()">Contact</a>
   </div>
   <div id="main">
-    <app-e-hinman></app-e-hinman>
+    <div *ngIf="showList">
+       purpose of user guide
+    </div>
+    <app-import-guide #importGuide *ngIf="activeGuideType === guideType.ImportGuide"></app-import-guide>
+    <app-export #exportGuide *ngIf="activeGuideType === guideType.ExportGuide"></app-export>
+    <app-video-tutorial #videoTutorialGuide *ngIf="activeGuideType === guideType.VideoTutorialGuide"></app-video-tutorial>
+    <div class="contact-me" *ngIf="isContact">
+        For more information contact here
+    </div>
   </div>
