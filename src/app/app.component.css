@@ -24,3 +24,8 @@ displayed {
   margin-left:auto;
   margin-right:auto;
 }
+
+.abc-main
+{
+  z-index: 100;
+}

@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import {MatDrawerMode} from '@angular/material/sidenav';
+
 
 @Component({
   selector: 'app-help',
@@ -8,6 +11,8 @@ import { Component, OnInit } from '@angular/core';
 export class HelpComponent implements OnInit {
 
   constructor() { }
+  mode = new FormControl('over' as MatDrawerMode);
+  shouldRun = /(^|.)(stackblitz|webcontainer).(io|com)$/.test(window.location.host);
 
   ngOnInit(): void {
   }
