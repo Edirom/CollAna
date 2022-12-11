@@ -12,7 +12,8 @@ export class Pages {
   miny: any;
   maxx: any;
   maxy: any;
-  constructor(index: number, title: string, contain: string, actualcontain?: any, previouscontain?: any, alpha?: number, cropImage?: string, cropCoord?: any, minx?: any, miny?: any, maxx?: any, maxy?: any) {
+  colourcounter: number;
+  constructor(index: number, title: string, contain: string , colourcounter:number, actualcontain?: any, previouscontain?: any, alpha?: number, cropImage?: string, cropCoord?: any, minx?: any, miny?: any, maxx?: any, maxy?: any) {
     this.index = index;
     this.title = title;
     this.contain = contain;
@@ -25,5 +26,6 @@ export class Pages {
     this.miny = miny;
     this.maxx = maxx;
     this.maxy = maxy;
+    this.colourcounter = colourcounter;
   }
 }
