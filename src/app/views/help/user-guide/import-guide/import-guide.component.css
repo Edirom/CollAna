@@ -1,0 +1,26 @@
+.table-content
+{
+    font-size: 20px;
+    line-height: 1.5;
+}
+.content-title
+{
+    font-size: 25px !important;
+    margin-top: 20px;
+}
+
+.content
+{
+    font-size: 18px;
+    line-height: 2.5;
+}
+
+.margin-top-20
+{
+    margin-top: 20px;
+}
+
+.image
+{
+    width: 100px;
+}
