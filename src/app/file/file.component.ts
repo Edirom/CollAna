@@ -1255,9 +1255,9 @@ export class FileComponent {
       };
     }
 
-    // function save(url) {
-    //   self.cropImageString(url, faksimile);
-    // }
+    function save(url) {
+      self.cropImageString(url, faksimile);
+    }
 
     /** Merge button */
     var mergeArea = new Toggle(
@@ -1280,11 +1280,11 @@ export class FileComponent {
             var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
             var svgString = getSVGString(self.svg.node(), containt.canvas.width / map.getView().getResolution(), containt.canvas.height / map.getView().getResolution());
 
-            // var cropImageString = svgString2Image(svgString, containt.canvas.width, containt.canvas.height, 'png', save, map); // passes Blob and filesize String to the callback
+            var cropImageString = svgString2Image(svgString, containt.canvas.width, containt.canvas.height, 'png', save, map); // passes Blob and filesize String to the callback
             self.svg = null;
           }
           else {
-            //map.removeInteraction(draw);
+            map.removeInteraction(draw);
           }
         }
       });
