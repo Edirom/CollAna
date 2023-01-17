@@ -80,12 +80,12 @@ export class FileComponent {
 
   vector;
 
-  // Variables needed for page rendering 
+  // Variables needed for page rendering
   pageRendering = false;
   scale = 2;
   pageRenderQueue = [];
 
-  // Variables needed for different changes in the page. They are sent to queue for processing 
+  // Variables needed for different changes in the page. They are sent to queue for processing
   fun_blue_and_white;
   fun_green_and_white;
   fun_beige_and_white;
@@ -141,7 +141,7 @@ export class FileComponent {
         // Generate Faksimile Page for the image data and load the page
         faksimile = new Faksimile("image", file.name, null, 1, 1, false, null);
         self.fileService.addFaksimile(faksimile);
-        
+
         var page: Pages = new Pages(1, faksimile.title, self.contain, 0, imageProcessed);
         self.fileService.addPage(faksimile, page);
         self.imageOriginal = new MarvinImage();
@@ -167,7 +167,7 @@ export class FileComponent {
           });
           pdfjsLib.getDocument({ data: this.result }).promise.then(function (pdfDoc_) {
             self.pdfDoc = pdfDoc_;
-            // Render the 1st page of the PDF document 
+            // Render the 1st page of the PDF document
             self.renderPage(null, 1, file.name, self.pdfDoc.numPages, self.pdfDoc);
           });
         };
@@ -179,7 +179,7 @@ export class FileComponent {
    * @param fn Function which needs to be wrapped
    * @param context Context means the class to which the function is applied
    * @param params Refers to the parameter needed for the function to be applied
-   * @returns 
+   * @returns
    */
   wrapFunction = function (fn, context, params) {
     return function () {
@@ -197,23 +197,23 @@ export class FileComponent {
    */
   anycolor_and_white = function (faksimile: Faksimile, pr: number, pg: number, pb: number, pa: number) {
     var imageProcessed = new MarvinImage();
-    
+
     //Get current page details to store for Undo operation
     this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
     this.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], this.imageOriginal);
 
     console.log("Faksimile actual page count");
     console.log(faksimile.actualPage);
-    console.log(faksimile)
+    console.log(faksimile);
     // console.log(faksimile.pages[faksimile.actualPage - 1].colourcounter);
 
     //Wait for the previous operation to complete to start the next operation
       imageProcessed = this.imageOriginal.clone();
-      if(faksimile.pages[faksimile.actualPage - 1].colourcounter === 0) {
-        Marvin.blackAndWhite(this.imageOriginal, imageProcessed, 30);
-        faksimile.pages[faksimile.actualPage - 1].colourcounter = 1;
-      }
-      
+      //if(faksimile.pages[faksimile.actualPage - 1].colourcounter != 0) {
+      Marvin.blackAndWhite(this.imageOriginal, imageProcessed, 30);
+      //  faksimile.pages[faksimile.actualPage - 1].colourcounter = 1;
+      //}
+
       var imageData = imageProcessed.imageData;
       var pixel = imageData.data;
 
@@ -230,14 +230,14 @@ export class FileComponent {
       imageProcessed.imageData = imageData;
       this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
       this.generateMap(faksimile, faksimile.actualPage);
-    
+
       // imageProcessed.clear(0xFF000000);
 
       // Marvin.prewitt(this.imageOriginal, imageProcessed, 1);
       // Marvin.invertColors(imageProcessed, imageProcessed);
       // Marvin.thresholding(imageProcessed, imageProcessed, 150);
-      
-    
+
+
   }
 
   /**
@@ -250,10 +250,10 @@ export class FileComponent {
 
     this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
     this.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], this.imageOriginal);
-    
+
     imageProcessed = this.imageOriginal.clone();
     Marvin.alphaBoundary(this.imageOriginal, imageProcessed, 30);
-    
+
     this.fileService.setActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
     this.generateMap(faksimile, faksimile.actualPage);
   }
@@ -271,7 +271,7 @@ export class FileComponent {
     for (var pixel = 0; pixel < pixels.length; pixel += 4) {
       pixels[pixel + 3] = opacity;
     }
-    
+
     imageProcessed = this.imageOriginal.clone();
     imageProcessed.imageData = imageData;
     if (repaintCheck)
@@ -291,8 +291,8 @@ export class FileComponent {
     var red = 0, green = 1, blue = 2, alpha = 3;
     for (var pixel = 0; pixel < pixels.length; pixel += 4) {
       // Change only white color pixel alpha(or opacity) to 0
-      if (pixels[pixel + red] == 255 && pixels[pixel + green] == 255 && pixels[pixel + blue] == 255) { 
-        pixels[pixel + alpha] = 0; 
+      if (pixels[pixel + red] == 255 && pixels[pixel + green] == 255 && pixels[pixel + blue] == 255) {
+        pixels[pixel + alpha] = 0;
       }
     }
 
@@ -315,8 +315,8 @@ export class FileComponent {
     var red = 0, green = 1, blue = 2, alpha = 3;
     for (var pixel = 0; pixel < pixels.length; pixel += 4) {
       if (pixels[pixel + red] == 255 && pixels[pixel + green] == 255 && pixels[pixel + blue] == 255) // if white then change alpha to 0
-      { 
-        pixels[pixel + alpha] = 0; 
+      {
+        pixels[pixel + alpha] = 0;
       }
     }
 
@@ -335,11 +335,11 @@ export class FileComponent {
    * @param faksimile Page for which the edges need to be set
    */
   edge_detection = function (faksimile: Faksimile) {
-    
+
     var imageProcessed = new MarvinImage();
     this.imageOriginal = this.fileService.getActualContain(faksimile, faksimile.pages[faksimile.actualPage - 1]);
     this.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], this.imageOriginal);
-    
+
     imageProcessed = this.imageOriginal.clone();
     imageProcessed.clear(0xFF000000);
 
@@ -368,7 +368,7 @@ export class FileComponent {
    * @param num Page number for the content change
    * @param src Page which has the changed content
    */
-  // TODO: Check again later on this 
+  // TODO: Check again later on this
   // setActualContain(faksimile: Faksimile, page: Pages, num, src) {
   //   var self = this;
   //   var imageOriginal = new MarvinImage();
@@ -412,7 +412,7 @@ export class FileComponent {
   /**
    * Update Preview page with the content
    */
-  // TODO: Check again later on this 
+  // TODO: Check again later on this
   updateMinPreview() {
     this.fileService.getFaksimiles().forEach(function (faksimile) {
       this.generateMinPreview(faksimile);
@@ -420,7 +420,7 @@ export class FileComponent {
   }
 
   /**
-   * 
+   *
    * @param faksimile Faksimile Page
    */
   generateMinPreview(faksimile: Faksimile) {
@@ -434,7 +434,7 @@ export class FileComponent {
   activateSVGMode(faksimile: Faksimile, map: Map) {
     this.resetOverlaySVG(faksimile);
     this.buildOverlaySVG(map, faksimile);
-    
+
     var container = document.getElementById('card-block' + faksimile.ID);
     var mousePosition;
     container.addEventListener('mousemove', function (event) {
@@ -527,9 +527,9 @@ export class FileComponent {
 
     /**
      * Change perspective transformation of the selected coordinates
-     * @param coord 
-     * @param faksimile 
-     * @param cutCoord 
+     * @param coord
+     * @param faksimile
+     * @param cutCoord
      */
     function perspectiveTransformation(coord, faksimile: Faksimile, cutCoord) {
       that.svg.selectAll("image").remove();
@@ -764,7 +764,7 @@ export class FileComponent {
     }
 
     /**
-     * 
+     *
      */
     function drawpreview() {
       if (mouseDown) {
@@ -775,7 +775,7 @@ export class FileComponent {
         });
       }
     }
-    
+
     /**
      * Called when the drawing is completed
      */
@@ -801,8 +801,8 @@ export class FileComponent {
 
   /**
    * Build the overlay SVG image for perspective transformation
-   * @param map 
-   * @param faksimile 
+   * @param map
+   * @param faksimile
    */
   buildOverlaySVG(map: Map, faksimile: Faksimile) {
     var containt: any = faksimile.pages[faksimile.actualPage - 1].actualcontain;
@@ -821,7 +821,7 @@ export class FileComponent {
 
   /**
    * Reset SVG overlay before starting new perspective transformation
-   * @param faksimile 
+   * @param faksimile
    */
   resetOverlaySVG(faksimile: Faksimile) {
     d3.select("#card-block" + faksimile.ID).selectAll("svg").remove();
@@ -829,9 +829,9 @@ export class FileComponent {
 
   /**
    * Generate complete Map including the Legends and all the buttons. The main function in this code.
-   * @param faksimile 
-   * @param num 
-   * @returns 
+   * @param faksimile
+   * @param num
+   * @returns
    */
   generateMap(faksimile: Faksimile, num: number) {
     if (num == null)
@@ -927,7 +927,7 @@ export class FileComponent {
 
     faksimile.size = [containt.canvas.width, containt.canvas.height];
 
-    
+
     /**
      * To set the top panel of the page
      */
@@ -1132,9 +1132,9 @@ export class FileComponent {
     // and add it to the map
     map.addOverlay(overlay);
 
-    
-    /** 
-     * Perspective Transformation button 
+
+    /**
+     * Perspective Transformation button
      */
     var drawBox = new Toggle(
       {
@@ -1329,7 +1329,7 @@ export class FileComponent {
 
     // Extent for Magnify Feature (Needs work in future)
     // var magnifyExtent: [number, number, number, number]  = [
-    //   -containt.canvas.width/2, -containt.canvas.height/2, 
+    //   -containt.canvas.width/2, -containt.canvas.height/2,
     //   containt.canvas.width/2, containt.canvas.height/2
     // ];
 
@@ -1372,7 +1372,7 @@ export class FileComponent {
     //       map.removeOverlay(ov);
     //       map.getOverlays().getArray().forEach(function (element) {
     //          if (element.getElement().classList.contains("ol-magnify")) {
-    //           map.removeOverlay(element); 
+    //           map.removeOverlay(element);
     //          }
     //         })
     //     }
@@ -1486,8 +1486,8 @@ export class FileComponent {
       barTop.addControl(synchronous_next);
     }
 
-    /** 
-     * Close button 
+    /**
+     * Close button
      */
     var close = new Button(
       {
@@ -1602,9 +1602,9 @@ export class FileComponent {
   }
 
   /**
-   * 
-   * @param faksimile 
-   * @param img 
+   *
+   * @param faksimile
+   * @param img
    */
   updateImg(faksimile, img) {
     var image = new MarvinImage();
@@ -1683,12 +1683,12 @@ export class FileComponent {
   }
 
   /**
-   * Queue to render page. If another page rendering in progress, waits until the rendering is finised. 
+   * Queue to render page. If another page rendering in progress, waits until the rendering is finised.
    * Otherwise, executes rendering immediately.
-   * @param faksimile 
-   * @param num 
-   * @param title 
-   * @param numPages 
+   * @param faksimile
+   * @param num
+   * @param title
+   * @param numPages
    */
   queueRenderPage(faksimile: Faksimile, num: number, title: string, numPages: number) {
     if (this.pageRendering) {
@@ -1702,17 +1702,17 @@ export class FileComponent {
 
   /**
    * Render page for PDF document. Get page info from document, resize canvas accordingly, and render page.
-   * @param faksimile 
+   * @param faksimile
    * @param num Page number to render
    * @param filename Filename to process data from
    * @param numPages Total number of pages
    * @param pdfDoc PDF document to render to page
    */
   renderPage(faksimile: Faksimile, num: number, filename: string, numPages: number, pdfDoc: any) {
-    
+
     // If no previous faksimile data is present
     if (faksimile === null || typeof faksimile.pages[num - 1] === "undefined" || typeof faksimile.pages[num - 1].contain === "undefined" || typeof faksimile.pages[num - 1].actualcontain === "undefined") {
-      
+
       var self = this;
       this.pageRendering = true;
 
