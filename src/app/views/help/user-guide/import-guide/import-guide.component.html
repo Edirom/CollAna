@@ -1,24 +1,42 @@
-<div>
-    <span><b>Table of content</b></span>
-    <ol class="table-content">
-        <li><a href="/help#importfiles">Import file for comparison</a></li>
-        <li>
-            <a href="/help#functionalities">Functionalities
-                <ul>
-                    <li><span>Drag and drop</span></li>
-                    <li><span>Color change</span></li>
-                    <li><span>Zoom in zoom out</span></li>
-                    <li><span>Hold</span></li>
-                    <li><span>Edge detection</span></li>
-                    <li><span>Remove background</span></li>
-                    <li><span>Perspective transformation</span></li>
-                    <li><span>Merge area</span></li>
-                    <li><span>Undo</span></li>
-                    <li><span>Reset</span></li>
-                </ul>
-            </a>
-        </li>
-    </ol>
+<div style="display: flex;flex-direction: row;">
+    <div>
+        <span><b>Table of content</b></span>
+        <ol class="table-content">
+            <li><a href="/help#importfiles">Import file for comparison</a></li>
+            <li>
+                <a href="/help#functionalities">Functionalities
+                    <ul>
+                        <li><span>Drag and drop</span></li>
+                        <li><span>Color change</span></li>
+                        <li><span>Zoom in zoom out</span></li>
+                        <li><span>Hold</span></li>
+                        <li><span>Edge detection</span></li>
+                        <li><span>Remove background</span></li>
+                        <li><span>Perspective transformation</span></li>
+                        <li><span>Merge area</span></li>
+                        <li><span>Undo</span></li>
+                        <li><span>Reset</span></li>
+                    </ul>
+                </a>
+            </li>
+        </ol>
+    </div>
+    <div style="margin:auto">
+        <div class="btn btn-file btn-outline-primary">
+            <span (click)="open(content)">Workflow</span>
+            <ng-template #content let-modal>
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modal-basic-title">Workflow Diagramm</h4>
+                </div>
+                <div class="modal-body">
+                    <ngx-flowchart [data]="flowData" [options]="flowOptions" (clickName)="clickN($event)" class="defaultSVG"></ngx-flowchart>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark" (click)="modal.close('')">Close</button>
+                </div>
+            </ng-template>
+        </div>
+    </div>
 </div>
 <div>
     <div id="importfiles">

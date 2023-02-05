@@ -22,6 +22,7 @@ import { EHinmanComponent } from './views/publishing/e-hinman/e-hinman.component
 import { ExportComponent } from './views/help/user-guide/export/export.component';
 import { VideoTutorialComponent } from './views/help/user-guide/video-tutorial/video-tutorial.component';
 import { ImportGuideComponent } from './views/help/user-guide/import-guide/import-guide.component';
+import { NgxFlowchartModule } from 'ngx-flowchart';
 
 
 @NgModule({
@@ -46,7 +47,8 @@ import { ImportGuideComponent } from './views/help/user-guide/import-guide/impor
     FlexLayoutModule,
     AngularDraggableModule,
     DragDropModule,
-    ResizableModule
+    ResizableModule,
+    NgxFlowchartModule
   ],
   exports: [RouterModule],
   bootstrap: [AppComponent],
