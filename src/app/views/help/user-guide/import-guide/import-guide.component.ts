@@ -17,43 +17,59 @@ export class ImportGuideComponent implements OnInit {
   flowData: NgxFlowChatData[] = [
     {
       id: "1",
-      name: "Import zwei Quellen",
+      name: "Import sources for comparision",
       groupData: [{
         id: "2",
-        name: "unterstützte Formate: pdf, jpg, png",
+        name: "Two sources can be imported and the supported formats are: *.pdf, *.jpg, *.png",
       }]
     },
     {
       id: "3",
-      name: "Übereinanderlegen"
-    },
-    {
-      id: "4",
-      name: "Passend skalieren und rotieren",
+      name: "Change the color of imported source",
+      groupData: [{
+        id: "4",
+        name: "The color of both the source files can be changed for better differentiation. The supported colors are: Red, Blue, Green, Orange",
+      }]
     },
     {
       id: "5",
-      name: "Zeichenfarbe anpassen",
+      name: "Drag and drop for comparision between two sources",
       groupData: [{
         id: "6",
-        name: "Unterstützte Farben: rot, blau, grün, orange",
+        name: "The superimposing using the drag and drop function can help to see the content on top of one another. The removal of background in the sources is also possible for more clarity.",
       }]
     },
     {
       id: "7",
-      name: "Hintergrund entfernen",
-    },
-    {
-      id: "8",
-      name: "Falls nötig ist, die einzelne Bildbereiche mit  Funktion “perspektivischen Transformation” anpassen",
+      name: "Scaling and Rotation to adjust pages",
+      groupData: [{
+        id: "8",
+        name: "Both the source file displays can be scale and rotated as per the user's requirement for the best results.",
+      }]
     },
     {
       id: "9",
-      name: "Quellen vergleichen",
+      name: "Perspective Transformation",
+      groupData: [{
+        id: "10",
+        name: "If neccessary, the individual image areas can be adjusted using this function.",
+      }]
     },
     {
-      id: "10",
-      name: "das Ergebnis exportieren",
+      id: "11",
+      name: "Compare sources",
+      groupData: [{
+        id: "12",
+        name: "The sources can be compared before the the final export of the pictures.",
+      }]
+    },
+    {
+      id: "13",
+      name: "Export corrected prints",
+      groupData: [{
+        id: "14",
+        name: "The final result can be exported in any of the following formats: *.jpg,*.png",
+      }]
     },
   ];
 
@@ -66,7 +82,7 @@ export class ImportGuideComponent implements OnInit {
     shadow: '0 2px 4px 0 #333',
     borderRadius: '5px',
     textColor: '#fff',
-    width: '200px'
+    width: '300px'
   };
 
   clickN(event) {
@@ -74,7 +90,7 @@ export class ImportGuideComponent implements OnInit {
   }
 
   open(content) {
-		this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' }).result;
+		this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title',centered: true, size: 'lg' }).result;
 	}
 
 }

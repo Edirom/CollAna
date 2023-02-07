@@ -1,4 +1,4 @@
-<div style="display: flex;flex-direction: row;">
+<div style="display: flex;flex-direction: row;" >
     <div>
         <span><b>Table of content</b></span>
         <ol class="table-content">
@@ -26,13 +26,11 @@
             <span (click)="open(content)">Workflow</span>
             <ng-template #content let-modal>
                 <div class="modal-header">
-                    <h4 class="modal-title" id="modal-basic-title">Workflow Diagramm</h4>
+                    <h4 class="modal-title" id="modal-basic-title">Workflow Diagram</h4>
+                    <button type="button" class="btn btn-close" aria-label="Close" (click)="modal.close('')">Close</button>
                 </div>
                 <div class="modal-body">
                     <ngx-flowchart [data]="flowData" [options]="flowOptions" (clickName)="clickN($event)" class="defaultSVG"></ngx-flowchart>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-dark" (click)="modal.close('')">Close</button>
                 </div>
             </ng-template>
         </div>
