@@ -60,7 +60,7 @@ export class ImportGuideComponent implements OnInit {
       name: "Compare sources",
       groupData: [{
         id: "12",
-        name: "The sources can be compared before the the final export of the pictures.",
+        name: "After all the above preparatory steps, the sources can be compared before the the final export of the pictures so that the differences are now quickly noticed.",
       }]
     },
     {
@@ -68,7 +68,7 @@ export class ImportGuideComponent implements OnInit {
       name: "Export corrected prints",
       groupData: [{
         id: "14",
-        name: "The final result can be exported in any of the following formats: *.jpg,*.png",
+        name: "For documentation, the view of superimposed sources can be exported as an image. The final result can be exported in any of the following formats: *.jpg,*.png.",
       }]
     },
   ];
