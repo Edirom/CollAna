@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxFlowChatOptions, NgxFlowChatData } from 'ngx-flowchart'
 
 
@@ -9,11 +8,12 @@ import { NgxFlowChatOptions, NgxFlowChatData } from 'ngx-flowchart'
   styleUrls: ['./import-guide.component.css']
 })
 export class ImportGuideComponent implements OnInit {
-  constructor(private modalService: NgbModal) { }
+  constructor() { }
 
   ngOnInit(): void {
   }
 
+  
   flowData: NgxFlowChatData[] = [
     {
       id: "1",
@@ -88,9 +88,5 @@ export class ImportGuideComponent implements OnInit {
   clickN(event) {
     console.log(event);
   }
-
-  open(content) {
-		this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title',centered: true, size: 'lg' }).result;
-	}
 
 }

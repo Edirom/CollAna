@@ -1,65 +1,80 @@
-<div style="display: flex;flex-direction: row;" >
-    <div>
-        <span><b>Table of content</b></span>
-        <ol class="table-content">
-            <li><a href="/help#importfiles">Import file for comparison</a></li>
-            <li>
-                <a href="/help#functionalities">Functionalities
-                    <ul>
-                        <li><span>Drag and drop</span></li>
-                        <li><span>Color change</span></li>
-                        <li><span>Zoom in zoom out</span></li>
-                        <li><span>Hold</span></li>
-                        <li><span>Edge detection</span></li>
-                        <li><span>Remove background</span></li>
-                        <li><span>Perspective transformation</span></li>
-                        <li><span>Merge area</span></li>
-                        <li><span>Undo</span></li>
-                        <li><span>Reset</span></li>
-                    </ul>
-                </a>
-            </li>
-        </ol>
-    </div>
-    <div style="margin:auto">
-        <div class="btn btn-file btn-outline-primary">
-            <span (click)="open(content)">Workflow</span>
-            <ng-template #content let-modal>
-                <div class="modal-header">
-                    <h4 class="modal-title" id="modal-basic-title">Workflow Diagram</h4>
-                    <button type="button" class="btn btn-close" aria-label="Close" (click)="modal.close('')">Close</button>
+<ul ngbNav #nav="ngbNav" [activeId]="2" class="nav-tabs justify-content-center">
+	<li ngbDropdown class="nav-item">
+		<a href (click)="false" class="nav-link" ngbDropdownToggle style="font-weight:bold">Import Detailed Explanation</a>
+		<div ngbDropdownMenu>
+			<button ngbDropdownItem (click)="nav.select(2)">Full Page</button>
+			<div class="dropdown-divider"></div>
+            <button ngbDropdownItem>Drag and drop</button>
+            <button ngbDropdownItem>Color change</button>
+            <button ngbDropdownItem>Zoom in zoom out</button>
+            <button ngbDropdownItem>Hold</button>
+            <button ngbDropdownItem>Edge detection</button>
+            <button ngbDropdownItem>Remove background</button>
+            <button ngbDropdownItem>Perspective transformation</button>
+            <button ngbDropdownItem>Merge area</button>
+            <button ngbDropdownItem>Undo</button>
+            <button ngbDropdownItem>Reset</button>
+		</div>
+	</li>
+    <li [ngbNavItem]="1">
+		<a ngbNavLink style="font-weight:bold">Import Flowchart</a>
+		<ng-template ngbNavContent>
+            <div style="width:50vw;margin:auto;padding:20px">
+                <ngx-flowchart [data]="flowData" [options]="flowOptions" (clickName)="clickN($event)" class="defaultSVG"></ngx-flowchart>
+            </div>
+		</ng-template>
+	</li>
+    <li [ngbNavItem]="2">
+		<ng-template ngbNavContent>
+            <div>
+                <div>
+                    <span><b>Table of content</b></span>
+                    <ol class="table-content">
+                        <li><a href="/help#importfiles">Import file for comparison</a></li>
+                        <li>
+                            <a href="/help#functionalities">Functionalities
+                                <ul>
+                                    <li><span>Drag and drop</span></li>
+                                    <li><span>Color change</span></li>
+                                    <li><span>Zoom in zoom out</span></li>
+                                    <li><span>Hold</span></li>
+                                    <li><span>Edge detection</span></li>
+                                    <li><span>Remove background</span></li>
+                                    <li><span>Perspective transformation</span></li>
+                                    <li><span>Merge area</span></li>
+                                    <li><span>Undo</span></li>
+                                    <li><span>Reset</span></li>
+                                </ul>
+                            </a>
+                        </li>
+                    </ol>
                 </div>
-                <div class="modal-body">
-                    <ngx-flowchart [data]="flowData" [options]="flowOptions" (clickName)="clickN($event)" class="defaultSVG"></ngx-flowchart>
+                <div>
+                    <div id="importfiles">
+                        <b class="content-title">1. Import files</b><br>
+                        <div class="content">
+                        
+                        <span>Collana allows users to import file with multiple formats such as JPEG, PNG and PDF</span><br>
+                        <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Import">
+                            <i class= "fa fa-download fa-lg" ></i>
+                            <span class= "hidden-xs-down" > </span>
+                        </div><br>
+                        <span>By clicking on this button you can see you file explorer and choose your file for sheet music comparison</span>
+                        </div>
+                    </div>
+                    <div id="functionalities">
+                        <b class="content-title">2) Functionalities</b><br>
+                        <div class="content">
+                            <span>Collana offers users multiple Functionalities for comparison of sheet music</span>
+                            <div>
+                                <b>2.1) Drag and drop</b><br>
+                                <img src="../../../../../assets/images/drag-and-drop.png" class="image">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </ng-template>
-        </div>
-    </div>
-</div>
-<div>
-    <div id="importfiles">
-        <b class="content-title">1. Import files</b><br>
-        <div class="content">
-        
-        <span>Collana allows users to import file with multiple formats such as JPEG, PNG and PDF</span><br>
-        <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Import">
-            <i class= "fa fa-download fa-lg" ></i>
-            <span class= "hidden-xs-down" > </span>
-        </div><br>
-        <span>By clicking on this button you can see you file explorer and choose your file for sheet music comparison</span>
-        </div>
-    </div>
-   <div id="functionalities">
-    <b class="content-title">2) Functionalities</b><br>
-    <div class="content">
-        
-        <span>Collana offers users multiple Functionalities for comparison of sheet music</span>
-        <div>
-            <b>2.1) Drag and drop</b><br>
-            <img src="../../../../../assets/images/drag-and-drop.png" class="image">
-        </div>
-
-    </div>
-   </div>
-    
-</div>
+            </div>
+    	</ng-template>
+	</li>
+</ul>
+<div [ngbNavOutlet]="nav" class="mt-2"></div>
