@@ -8,7 +8,7 @@ import { NgxFlowChatOptions, NgxFlowChatData } from 'ngx-flowchart'
   styleUrls: ['./import-guide.component.css']
 })
 export class ImportGuideComponent implements OnInit {
-  active = 'detailedInstructions';
+  active = 'flowchart';
   constructor() { }
 
   ngOnInit(): void {
