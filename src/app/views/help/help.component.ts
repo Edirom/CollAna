@@ -10,7 +10,7 @@ import { VideoTutorialComponent } from './user-guide/video-tutorial/video-tutori
 })
 export class HelpComponent implements OnInit {
 
-  activeElement = 'contact'
+  activeElement = 'guideMenu'
   userGuideDropdown = 'none'
 
   @ViewChild('importGuide')
@@ -28,7 +28,7 @@ export class HelpComponent implements OnInit {
 
   public toggleGuideMenu()
   { 
-    this.userGuideDropdown = this.userGuideDropdown === 'none'?'block':'none'
+    // this.userGuideDropdown = this.userGuideDropdown === 'none'?'block':'none'
     this.activeElement = 'guideMenu'
   }
 

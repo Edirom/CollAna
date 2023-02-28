@@ -1,80 +1,305 @@
-<ul ngbNav #nav="ngbNav" [activeId]="2" class="nav-tabs justify-content-center">
-	<li ngbDropdown class="nav-item">
-		<a href (click)="false" class="nav-link" ngbDropdownToggle style="font-weight:bold">Import Detailed Explanation</a>
-		<div ngbDropdownMenu>
-			<button ngbDropdownItem (click)="nav.select(2)">Full Page</button>
-			<div class="dropdown-divider"></div>
-            <button ngbDropdownItem>Drag and drop</button>
-            <button ngbDropdownItem>Color change</button>
-            <button ngbDropdownItem>Zoom in zoom out</button>
-            <button ngbDropdownItem>Hold</button>
-            <button ngbDropdownItem>Edge detection</button>
-            <button ngbDropdownItem>Remove background</button>
-            <button ngbDropdownItem>Perspective transformation</button>
-            <button ngbDropdownItem>Merge area</button>
-            <button ngbDropdownItem>Undo</button>
-            <button ngbDropdownItem>Reset</button>
-		</div>
-	</li>
-    <li [ngbNavItem]="1">
-		<a ngbNavLink style="font-weight:bold">Import Flowchart</a>
-		<ng-template ngbNavContent>
-            <div style="width:50vw;margin:auto;padding:20px">
-                <ngx-flowchart [data]="flowData" [options]="flowOptions" (clickName)="clickN($event)" class="defaultSVG"></ngx-flowchart>
-            </div>
-		</ng-template>
-	</li>
-    <li [ngbNavItem]="2">
-		<ng-template ngbNavContent>
-            <div>
-                <div>
-                    <span><b>Table of content</b></span>
-                    <ol class="table-content">
-                        <li><a href="/help#importfiles">Import file for comparison</a></li>
-                        <li>
-                            <a href="/help#functionalities">Functionalities
-                                <ul>
-                                    <li><span>Drag and drop</span></li>
-                                    <li><span>Color change</span></li>
-                                    <li><span>Zoom in zoom out</span></li>
-                                    <li><span>Hold</span></li>
-                                    <li><span>Edge detection</span></li>
-                                    <li><span>Remove background</span></li>
-                                    <li><span>Perspective transformation</span></li>
-                                    <li><span>Merge area</span></li>
-                                    <li><span>Undo</span></li>
-                                    <li><span>Reset</span></li>
-                                </ul>
-                            </a>
-                        </li>
-                    </ol>
-                </div>
-                <div>
-                    <div id="importfiles">
-                        <b class="content-title">1. Import files</b><br>
-                        <div class="content">
-                        
-                        <span>Collana allows users to import file with multiple formats such as JPEG, PNG and PDF</span><br>
-                        <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Import">
-                            <i class= "fa fa-download fa-lg" ></i>
-                            <span class= "hidden-xs-down" > </span>
-                        </div><br>
-                        <span>By clicking on this button you can see you file explorer and choose your file for sheet music comparison</span>
-                        </div>
+<div class="container">
+    <div class="jumbotron" style="padding: 2rem 1rem;">
+        <h1>CollAna User Guide</h1>      
+    </div>
+    <div class="d-flex">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="vertical">
+            <li ngbNavItem="flowchart">
+                <a ngbNavLink><b>Flowchart</b></a>
+                <ng-template ngbNavContent>
+                    <div class="container" style="max-width:60%">
+                        <ngx-flowchart [data]="flowData" [options]="flowOptions" (clickName)="clickN($event)" class="defaultSVG"></ngx-flowchart>
                     </div>
-                    <div id="functionalities">
-                        <b class="content-title">2) Functionalities</b><br>
-                        <div class="content">
-                            <span>Collana offers users multiple Functionalities for comparison of sheet music</span>
-                            <div>
-                                <b>2.1) Drag and drop</b><br>
-                                <img src="../../../../../assets/images/drag-and-drop.png" class="image">
-                            </div>
-                        </div>
+                </ng-template>
+            </li>
+            <li ngbNavItem="detailedInstructions">
+                <a ngbNavLink><b>Detailed Instructions</b></a>
+                <ng-template ngbNavContent>
+                    <div class="container">
+                        <ngb-accordion [closeOthers]="true" activeIds="static-1">
+                            <ngb-panel id="static-1">
+                                <ng-template ngbPanelTitle>
+                                    <span><b>Import Files</b></span>
+                                </ng-template>
+                                <ng-template ngbPanelContent>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="margin:10px; padding:5px">
+                                            <p>
+                                                Collana allows users to import file with multiple formats such as JPEG, PNG and PDF. 
+                                                By clicking on this button you can see you file explorer and choose your file for sheet music comparison.
+                                                Previously saved projects in form of json files can also be loaded to their saved state in this application.
+                                                Multiple instances of images can be loaded one after another which will be shown in seperate image canvas along with their numbered icons on the side.
+                                                Collana offers users multiple Functionalities for comparison of sheet music.
+                                            </p>
+                                        </div>
+                                        <div style="margin:5px; padding:5px">
+                                            <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Import Files">
+                                                <i class= "fa fa-download fa-lg" ></i>
+                                                <span class= "hidden-xs-down" > </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </ngb-panel>
+                            <ngb-panel id="static-2">
+                                <ng-template ngbPanelTitle>
+                                    <span><b>Drag & Drop</b></span>
+                                </ng-template>
+                                <ng-template ngbPanelContent>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="margin:10px; padding:5px;display:flex;flex-direction: column;">
+                                            <div>
+                                                <p>
+                                                    Multiple images or pdfs that are opened can be dragged and placed on top of one other. 
+                                                    The superimposing using the drag and drop function can help to see the content on top of one another.
+                                                    To drag and drop function you can just click on the drag icon on a particular image canvas and move it on top of another or you can simply drag the particular image canvas numbered icon on another one.
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <img src="../../../../../assets/images/dragndrop.png" class="help-sample-images">
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </ngb-panel>
+                            <ngb-panel id="static-3">
+                                <ng-template ngbPanelTitle>
+                                    <span><b>Color Change</b></span>
+                                </ng-template>
+                                <ng-template ngbPanelContent>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="margin:10px; padding:5px;display:flex;flex-direction: column;">
+                                            <div>
+                                                <p>
+                                                    This function enables a user to change the forefront of the image containing characters to a more distinguishable color and the background of image to white (which acts a contrast to the forefront color for better differentiation).
+                                                    This function can be applied to all the opened images in different canvases seperately. 
+                                                    The supported colors are: Red, Blue, Green, Orange, Beige. For all of these colors the background is set to white.
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <img src="../../../../../assets/images/color_change.png" class="help-sample-images">
+                                            </div>
+                                            
+                                        </div>
+                                        <div style="margin:5px; padding:5px">
+                                            <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Change Color">
+                                                <i class= "fa fa-adjust" ></i>
+                                                <span class= "hidden-xs-down" > </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </ngb-panel>
+                            <ngb-panel id="static-4">
+                                <ng-template ngbPanelTitle>
+                                    <span><b>Zoom in/ Zoom out</b></span>
+                                </ng-template>
+                                <ng-template ngbPanelContent>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="margin:10px; padding:5px;display:flex;flex-direction: column;">
+                                            <div>
+                                                <p>
+                                                    All the imported source image files can be individually be zoomed in or out inside the canvas depending on the requirements for the clarity of the characters' source images.
+                                                    This function can be applied to individual image sources seperately by entering a zoom value in the zoom bar or using the up/down arrow in zoom bar.
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <img src="../../../../../assets/images/zoom_in_out.png" class="help-sample-images">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </ngb-panel>
+                            <ngb-panel id="static-5">
+                                <ng-template ngbPanelTitle>
+                                    <span><b>Edge Detection</b></span>
+                                </ng-template>
+                                <ng-template ngbPanelContent>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="margin:10px; padding:5px;display:flex;flex-direction: column;">
+                                            <div>
+                                                <p>
+                                                    Edge detection is an image processing feature for finding the boundaries of any given area/object in any given source image.
+                                                    It basically detects and highlights all the edges in the image. This function is useful when you cannot seperate the foreground from the background.
+                                                    This function can be applied to individual images in different canvases seperately.
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <img src="../../../../../assets/images/EdgeDetection.png" class="help-sample-images">
+                                            </div>
+                                            
+                                        </div>
+                                        <div style="margin:5px; padding:5px">
+                                            <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Edge Detection">
+                                                <i class= "fa fa-music" ></i>
+                                                <span class= "hidden-xs-down" > </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </ngb-panel>
+                            <ngb-panel id="static-6">
+                                <ng-template ngbPanelTitle>
+                                    <span><b>Hold</b></span>
+                                </ng-template>
+                                <ng-template ngbPanelContent>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="margin:10px; padding:5px;display:flex;flex-direction: column;">
+                                            <div>
+                                                <p>
+                                                    This function works when a PDF file is loaded with multiple images. 
+                                                    This function applies the changes made on one image to all the other images in that PDF file.
+                                                    For instance, you make some adjustments to an image such as recoloring and the removal of the background. If you click on the 'Hold' icon, all the adjustments performed will be saved.
+                                                    Now you can switch to other pages in the pdf and all the previous adjustments will be applied to other images automatically.
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <img src="../../../../../assets/images/Hold.png" class="help-sample-images">
+                                            </div>
+                                        </div>
+                                        <div style="margin:5px; padding:5px">
+                                            <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Hold">
+                                                <i class= "fa fa-check-circle" ></i>
+                                                <span class= "hidden-xs-down" > </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </ngb-panel>
+                            <ngb-panel id="static-7">
+                                <ng-template ngbPanelTitle>
+                                    <span><b>Remove Background</b></span>
+                                </ng-template>
+                                <ng-template ngbPanelContent>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="margin:10px; padding:5px;display:flex;flex-direction: column;">
+                                            <div>
+                                                <p>
+                                                    This function removes the background of an image by making the background pixels transparent. 
+                                                    The basic requirement of this feature is that the background should be initially white. If the image does not have a white background by default, you can recolor the background white by using the color change function.
+                                                    This function can be applied to individual images in different canvases seperately.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div style="margin:5px; padding:5px">
+                                            <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Remove Background">
+                                                <i class= "fa fa-eraser" ></i>
+                                                <span class= "hidden-xs-down" > </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </ngb-panel>
+                            <ngb-panel id="static-8">
+                                <ng-template ngbPanelTitle>
+                                    <span><b>Perspective Transformation</b></span>
+                                </ng-template>
+                                <ng-template ngbPanelContent>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="margin:10px; padding:5px;display:flex;flex-direction: column;">
+                                            <div>
+                                                <p>
+                                                    It happens oftenly that some areas on the imported images are worn out/disfigured. 
+                                                    This can be due to the conversion of the digitized material itself or it can be related to the streching of the printing plates.
+                                                    These individual disfigured areas in the images can be corrected with the 'Perspective Transformation' function.
+                                                    To use it click on this function's icon and then you can define a rectangle around the disfigured image area which you want to adjust. 
+                                                    Now with the help of the blue dots that appear on the corners of the rectangle, the image area is arbitrarily consumed.
+                                                    Also, with the help of the red dot, this image area can be moved. This is useful in cases when you want to compare one clef with another clef within the image.
+                                                    This function can be applied to individual images in different canvases seperately.
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <img src="../../../../../assets/images/PerspectiveTransformation.png" class="help-sample-images">
+                                            </div>
+                                        </div>
+                                        <div style="margin:5px; padding:5px">
+                                            <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Perspective Transformation">
+                                                <i class= "fas fa-border-all" ></i>
+                                                <span class= "hidden-xs-down" > </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </ngb-panel>
+                            <ngb-panel id="static-9">
+                                <ng-template ngbPanelTitle>
+                                    <span><b>Merge Area</b></span>
+                                </ng-template>
+                                <ng-template ngbPanelContent>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="margin:10px; padding:5px;display:flex;flex-direction: column;">
+                                            <div>
+                                                <p>
+                                                    This function can be used after applying the Perspective Transformation to a image. 
+                                                    This function will allow you to merge the corrected area (which is initially shown as an overlay) with the original image.
+                                                    This function can be applied to individual images in different canvases seperately. 
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div style="margin:5px; padding:5px">
+                                            <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Merge Area">
+                                                <i class= "fas fa-link" ></i>
+                                                <span class= "hidden-xs-down" > </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </ngb-panel>
+                            <ngb-panel id="static-10">
+                                <ng-template ngbPanelTitle>
+                                    <span><b>Undo</b></span>
+                                </ng-template>
+                                <ng-template ngbPanelContent>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="margin:10px; padding:5px;display:flex;flex-direction: column;">
+                                            <div>
+                                                <p>
+                                                    This function helps you to change the state of the image to the state before the last function applied on it.
+                                                    This function can be applied to individual images in different canvases seperately. 
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div style="margin:5px; padding:5px">
+                                            <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Undo">
+                                                <i class= "fa fa-reply" ></i>
+                                                <span class= "hidden-xs-down" > </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </ngb-panel>
+                            <ngb-panel id="static-11">
+                                <ng-template ngbPanelTitle>
+                                    <span><b>Reset</b></span>
+                                </ng-template>
+                                <ng-template ngbPanelContent>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div style="margin:10px; padding:5px;display:flex;flex-direction: column;">
+                                            <div>
+                                                <p>
+                                                    This function helps you to change the state of the image to the original state when it was initially loaded in the canvas.
+                                                    This function can be applied to individual images in different canvases seperately. 
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div style="margin:5px; padding:5px">
+                                            <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Reset">
+                                                <i class= "fa fa-reply-all" ></i>
+                                                <span class= "hidden-xs-down" > </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </ngb-panel>
+                        </ngb-accordion>
                     </div>
-                </div>
-            </div>
-    	</ng-template>
-	</li>
-</ul>
-<div [ngbNavOutlet]="nav" class="mt-2"></div>
+                </ng-template>
+            </li>
+        </ul>
+    
+        <div [ngbNavOutlet]="nav" class="ms-4"></div>
+    </div>
+</div>
+            
+                
