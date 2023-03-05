@@ -1,29 +1,20 @@
 <div style="display: flex;">
   <div class="sidebar">
-    <h6><a (click)="toggleGuideMenu()">
-      <!-- <i class="fa fa-caret-down"></i>  -->
+    <a (click)="toggleGuideMenu()"><h6>
+      <i class="fa fa-caret-down"></i> 
       User Guide
-    </a></h6>
-    <!-- <div [ngStyle]="{'display': userGuideDropdown}">
-      <a (click)="open('import')">Import</a>
-      <a (click)="open('export')">Export</a>
-      <a (click)="open('videoTutorial')">Video tutorial</a>
-    </div> -->
-    <h6><a (click)="open('contact')">Contact</a></h6>
+    </h6></a>
+    <div [ngStyle]="{'display': userGuideDropdown}">
+      <a (click)="open('introduction')" id="introduction"><span style="padding-left: 10%;">Introduction</span></a>
+      <a (click)="open('instruction')" id="instruction"><span style="padding-left: 10%;">Instructions</span></a>
+    </div>
+    <a (click)="open('contact')" id="contact"><h6>Contact</h6></a>
   </div>
   
   <div class="content">
-    <!-- <div *ngIf="activeElement === 'guideMenu'">Purpose of user guide</div> -->
-    <app-import-guide #importGuide *ngIf="activeElement === 'guideMenu'"></app-import-guide>
-    <app-export #exportGuide *ngIf="activeElement === 'contact'"></app-export>
-    <!-- <app-video-tutorial #videoTutorialGuide *ngIf="activeElement === 'videoTutorial'"></app-video-tutorial>
-    <div *ngIf="activeElement === 'contact'" class="container">
-      <div class="row align-items-center">
-        <div class="col-4 align-self-center">
-          Hey there
-        </div>
-      </div>
-    </div> -->
+    <app-introduction *ngIf="activeElement === 'introduction'"></app-introduction>
+    <app-instruction *ngIf="activeElement === 'instruction'"></app-instruction>
+    <app-contact *ngIf="activeElement === 'contact'"></app-contact>  
   </div>
 </div>
   

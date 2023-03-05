@@ -3,18 +3,17 @@ import { NgxFlowChatOptions, NgxFlowChatData } from 'ngx-flowchart'
 
 
 @Component({
-  selector: 'app-import-guide',
-  templateUrl: './import-guide.component.html',
-  styleUrls: ['./import-guide.component.css']
+  selector: 'app-introduction',
+  templateUrl: './introduction.component.html',
+  styleUrls: ['./introduction.component.css']
 })
-export class ImportGuideComponent implements OnInit {
-  active = 'flowchart';
+export class IntroductionComponent implements OnInit {
+
   constructor() { }
 
   ngOnInit(): void {
   }
 
-  
   flowData: NgxFlowChatData[] = [
     {
       id: "1",

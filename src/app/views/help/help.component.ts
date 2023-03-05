@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ExportComponent } from './user-guide/export/export.component';
-import { ImportGuideComponent } from './user-guide/import-guide/import-guide.component';
-import { VideoTutorialComponent } from './user-guide/video-tutorial/video-tutorial.component';
+import { ContactComponent } from './contact/contact.component';
+import { InstructionComponent } from './instruction/instruction.component';
+import { IntroductionComponent } from './introduction/introduction.component';
 
 @Component({
   selector: 'app-help',
@@ -10,30 +10,46 @@ import { VideoTutorialComponent } from './user-guide/video-tutorial/video-tutori
 })
 export class HelpComponent implements OnInit {
 
-  activeElement = 'guideMenu'
-  userGuideDropdown = 'none'
+  activeElement = 'introduction'
+  userGuideDropdown = 'block'
 
-  @ViewChild('importGuide')
-  importGuide: ImportGuideComponent;
+  @ViewChild('contact')
+  contact: ContactComponent;
 
-  @ViewChild('exportGuide')
-  exportGuide: ExportComponent;
+  @ViewChild('introduction')
+  introduction: IntroductionComponent;
 
-  @ViewChild('videoTutorialGuide')
-  videoTutorialGuide: VideoTutorialComponent;
+  @ViewChild('instruction')
+  instruction: InstructionComponent;
 
   constructor() {}
   
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    document.getElementById('introduction').classList.add('active')
+  }
 
   public toggleGuideMenu()
   { 
-    // this.userGuideDropdown = this.userGuideDropdown === 'none'?'block':'none'
-    this.activeElement = 'guideMenu'
+    if(this.userGuideDropdown === "none"){
+      this.userGuideDropdown = 'block'
+      this.removeActiveClass()
+      this.activeElement = 'introduction'
+      document.getElementById('introduction').classList.add('active')
+    }else{
+      this.userGuideDropdown = 'none'
+    }
+  }
+
+  removeActiveClass(){
+    document.getElementById('introduction').classList.remove('active')
+    document.getElementById('instruction').classList.remove('active')
+    document.getElementById('contact').classList.remove('active')
   }
 
   open(id){
-    this.activeElement = id
+    this.removeActiveClass()
+    this.activeElement = id 
+    document.getElementById(id).classList.add('active')
   }
 
 }
