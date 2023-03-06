@@ -19,6 +19,10 @@ import { ImportComponent } from './views/import/import.component';
 import { CollationComponent } from './views/collation/collation.component';
 import { PublishingComponent } from './views/publishing/publishing.component';
 import { EHinmanComponent } from './views/publishing/e-hinman/e-hinman.component';
+import { NgxFlowchartModule } from 'ngx-flowchart';
+import { ContactComponent } from './views/help/contact/contact.component';
+import { IntroductionComponent } from './views/help/introduction/introduction.component';
+import { InstructionComponent } from './views/help/instruction/instruction.component';
 
 
 @NgModule({
@@ -30,7 +34,10 @@ import { EHinmanComponent } from './views/publishing/e-hinman/e-hinman.component
     PublishingComponent,
     ImportComponent,
     CollationComponent,
-    EHinmanComponent
+    EHinmanComponent,
+    ContactComponent,
+    IntroductionComponent,
+    InstructionComponent
   ],
   imports: [
     BrowserModule,
@@ -40,7 +47,8 @@ import { EHinmanComponent } from './views/publishing/e-hinman/e-hinman.component
     FlexLayoutModule,
     AngularDraggableModule,
     DragDropModule,
-    ResizableModule
+    ResizableModule,
+    NgxFlowchartModule
   ],
   exports: [RouterModule],
   bootstrap: [AppComponent],

@@ -1,0 +1,42 @@
+<div class="container">
+    <div class="jumbotron" style="padding: 2rem 1rem;">
+        <h1>CollAna User Guide</h1>      
+    </div>
+    <div class="container">
+        <ngb-accordion [closeOthers]="true" activeIds="static-2">
+            <ngb-panel id="static-1">
+                <ng-template ngbPanelTitle>
+                    <span><b>Video Tutorial</b></span>
+                </ng-template>
+                <ng-template ngbPanelContent>
+                    <div style="display: flex; justify-content: center;">
+                        <video width="60%" height="40%" controls>
+                            <source src="../../../../../assets/videos/CollAna.mp4" type="video/mp4">
+                          Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </ng-template>
+            </ngb-panel>
+            <ngb-panel id="static-2">
+                <ng-template ngbPanelTitle>
+                    <span><b>CollAna Introduction</b></span>
+                </ng-template>
+                <ng-template ngbPanelContent>
+                    <div class="container">
+                        <div>
+                            <p>
+                                The following workflow diagram describes the whole process involved from starting to end for the collation and analysis for the printed music:
+                            </p>
+                        </div>
+                        <div style="max-width: 50%; margin:auto">
+                            <ngx-flowchart [data]="flowData" [options]="flowOptions" (clickName)="clickN($event)" class="defaultSVG"></ngx-flowchart>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngb-panel>
+        </ngb-accordion>    
+        
+    </div>
+</div>
+            
+                

@@ -1,1 +1,20 @@
-<h1>Help*</h1>
+<div style="display: flex;">
+  <div class="sidebar">
+    <a (click)="toggleGuideMenu()"><h6>
+      <i class="fa fa-caret-down"></i> 
+      User Guide
+    </h6></a>
+    <div [ngStyle]="{'display': userGuideDropdown}">
+      <a (click)="open('introduction')" id="introduction"><span style="padding-left: 10%;">CollAna overview</span></a>
+      <a (click)="open('instruction')" id="instruction"><span style="padding-left: 10%;">Instructions</span></a>
+    </div>
+    <a (click)="open('contact')" id="contact"><h6>Contact</h6></a>
+  </div>
+  
+  <div class="content">
+    <app-introduction *ngIf="activeElement === 'introduction'"></app-introduction>
+    <app-instruction *ngIf="activeElement === 'instruction'"></app-instruction>
+    <app-contact *ngIf="activeElement === 'contact'"></app-contact>  
+  </div>
+</div>
+  

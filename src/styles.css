@@ -65,6 +65,9 @@ svg {
   top: 0;
   left: 0;
 }
+.defaultSVG svg{
+  position: relative;
+}
 
 .line {
   stroke: cyan;
@@ -110,3 +113,6 @@ i {
   resize: both;
   overflow: auto;
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

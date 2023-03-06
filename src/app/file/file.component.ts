@@ -142,6 +142,7 @@ export class FileComponent {
         faksimile = new Faksimile("image", file.name, null, 1, 1, false, null);
         self.fileService.addFaksimile(faksimile);
 
+
         var page: Pages = new Pages(1, faksimile.title, self.contain, 0, imageProcessed);
         self.fileService.addPage(faksimile, page);
         self.imageOriginal = new MarvinImage();
@@ -204,15 +205,21 @@ export class FileComponent {
 
     console.log("Faksimile actual page count");
     console.log(faksimile.actualPage);
-    console.log(faksimile);
-    // console.log(faksimile.pages[faksimile.actualPage - 1].colourcounter);
 
     //Wait for the previous operation to complete to start the next operation
       imageProcessed = this.imageOriginal.clone();
+
       //if(faksimile.pages[faksimile.actualPage - 1].colourcounter != 0) {
       Marvin.blackAndWhite(this.imageOriginal, imageProcessed, 30);
       //  faksimile.pages[faksimile.actualPage - 1].colourcounter = 1;
       //}
+
+/*
+      if(faksimile.pages[faksimile.actualPage - 1].colourcounter === 0) {
+        Marvin.blackAndWhite(this.imageOriginal, imageProcessed, 30);
+        faksimile.pages[faksimile.actualPage - 1].colourcounter = 1;
+      }
+*/
 
       var imageData = imageProcessed.imageData;
       var pixel = imageData.data;
