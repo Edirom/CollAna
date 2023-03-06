@@ -8,7 +8,7 @@ WORKDIR /app
 
 # build app
 COPY . /app/
-RUN npm install && 
+RUN npm install && \
     npm run build --openssl-legacy-provider
 
 ##################################
