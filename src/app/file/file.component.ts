@@ -174,6 +174,32 @@ export class FileComponent {
     }
   }
 
+  importJsonImage(name: string,image: string){
+    console.log(name,image)
+    let self = this
+    let faksimile;
+    let imageProcessed = new MarvinImage()
+    self.contain = image
+    self.complete.next({
+      fileContent: self.contain,
+      fileName: name
+    })
+    faksimile = new Faksimile('image',name,null,1,1,false,null)
+    self.fileService.addFaksimile(faksimile)
+    let page: Pages = new Pages(1,faksimile.title,self.contain,0,imageProcessed)
+    self.fileService.addPage(faksimile,page)
+    self.imageOriginal = new MarvinImage()
+    self.imageOriginal.load(self.contain,imageLoaded)
+    
+    function imageLoaded() {
+      let imageProcessed = self.imageOriginal.clone();
+      self.fileService.setPreviosContain(faksimile, faksimile.pages[faksimile.actualPage - 1], imageProcessed);
+      self.fileService.setActualContain(faksimile, page, imageProcessed);
+      self.generateMap(faksimile, 1);
+      self.generateMinPreview(faksimile);
+    }
+  }
+
   /**
    * To wrap any function with context and parameter to the variable for queue
    * @param fn Function which needs to be wrapped

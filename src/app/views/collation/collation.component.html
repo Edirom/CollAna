@@ -6,6 +6,12 @@
     <div>
       <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" (click)="export()" title="Export Overlap"> <i class="fa fa-upload fa-lg"> </i> <span class="hidden-xs-down"> </span></div>
     </div>
+    <div>
+      <label for="file-upload" class="btn btn-file btn-outline-primary">
+        <i class="fa fa-cloud-upload"></i> Import Project
+      </label>
+      <input id="file-upload" type="file" (change)="importJson($event.target.files,addToCanvas)"/>
+    </div>
   </div>
 </nav>
 <div style="font-size:20px">
@@ -13,11 +19,11 @@
     <div fxFlex="93%" class="canvas_div" fxLayoutGap="5px" fxLayout="column"  id="capture" >
       <div id="{{ 'card-div' + a.ID}}" *ngFor="let a of faksimiles;">
         <div class="ol-boxnew resize"  cdkDrag (cdkDragMoved)="drag_maxi_block_Moved($event, a)" (cdkDragStarted)="drag_maxi_block_Started($event, a)" id="{{ 'card-block' + a.ID}}"   [style.border-color]="a.Color">
-        <div class="example-handle" cdkDragHandle>
-            <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
-              <path d="M0 0h24v24H0z" fill="none"></path>
-            </svg>
+          <div class="example-handle" cdkDragHandle>
+              <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
+                <path d="M0 0h24v24H0z" fill="none"></path>
+              </svg>
           </div>
         </div>
         <div id="{{ 'overlay' + a.ID}}" ></div>

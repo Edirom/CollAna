@@ -9,6 +9,7 @@ import { FileComponent } from '../../file/file.component';
 import { Faksimile } from '../../types/faksimile';
 
 import { saveAs } from 'file-saver';
+import { ModalDismissReasons, NgbDatepickerModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 declare let html2canvas: any;
 
@@ -23,9 +24,10 @@ export class CollationComponent implements AfterViewInit {
   inc_index = 100;
   mini_old_boundingClientRect: any;
   maxi_old_boundingClientRect: any;
+  imageData = "";
 
   constructor(
-    private fileService: FileService, private fileComponent: FileComponent, private mapService: MapService) {
+    private fileService: FileService, private fileComponent: FileComponent, private mapService: MapService,private modalService: NgbModal) {
     this.faksimiles = this.fileService.getFaksimiles();
   }
 
@@ -65,16 +67,67 @@ export class CollationComponent implements AfterViewInit {
       return;
     }
 
-    var input = "";
-    var output = "";
-    this.faksimiles.forEach(function (faksimile) {
-      input = faksimile.title;
-      output = output + input.substr(0, input.lastIndexOf('.')) + "_" + "Page" + faksimile.actualPage + "_";
-    });
-    html2canvas(document.querySelector("#capture")).then(canvas => {
-      canvas.toBlob(function (blob) {
-        saveAs(blob, output + ".png");
-      });
+    // var input = "";
+    // var output = "";
+    // this.faksimiles.forEach(function (faksimile) {
+    //   input = faksimile.title;
+    //   output = output + input.substr(0, input.lastIndexOf('.')) + "_" + "Page" + faksimile.actualPage + "_";
+    // });
+    let data = []
+    this.faksimiles.forEach(fakesmile=>{
+      let canvas = document.getElementById('card-block'+fakesmile.ID).querySelector('canvas')
+      let anchor = document.createElement('a')
+      anchor.download = fakesmile.ID + '.png'
+      anchor.href = canvas.toDataURL('image/png')
+      let object = {
+        name: fakesmile.ID,
+        image: anchor.href
+      }
+      data.push(object)
+      anchor.click()
+      anchor.remove()
+    })
+
+    var uri = "data:application/json;charset=UTF-8," + encodeURIComponent(JSON.stringify(data));
+    let anchor = document.createElement('a')
+    anchor.download = 'export.json'
+    anchor.href = uri
+    anchor.click()
+    anchor.remove()
+    // html2canvas(document.querySelector("#capture")).then(canvas => {
+    //   canvas.toBlob(function (blob) {
+    //     var reader = new FileReader();
+    //     reader.readAsDataURL(blob);
+    //     reader.onload = function () {
+    //       let data = {
+    //         image: reader.result
+    //       }
+    //       let dataBlob = new Blob([JSON.stringify(data)], { type: 'application/json' })
+    //       saveAs(dataBlob, output + ".json");
+    //       // console.log(reader.result);
+    //     };
+    //     reader.onerror = function (error) {
+    //       // console.log('Error: ', error);
+    //     };
+    //     saveAs(blob, output + ".png");
+    //   });
+    // });
+  }
+
+  importJson(file: File[],callback){
+    let tempFile = file[0];
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        callback(e.target.result.toString())
+    };
+    reader.readAsText(tempFile);
+  }
+  
+
+  addToCanvas = (data) =>{
+    let jsonData = JSON.parse(data)
+    jsonData.forEach(element => {
+      this.fileComponent.importJsonImage(element['name'],element['image'])
     });
   }
 
