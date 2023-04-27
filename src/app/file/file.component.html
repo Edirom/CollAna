@@ -1,7 +1,47 @@
-<div fxLayoutGap="10px"> 
+<!-- <div fxLayoutGap="10px">  -->
+<label data-toggle="tooltip" data-placement="right" title="Import">
+    <i class= "fa fa-download fa-lg" ></i> Image/PDF
+    <input type="file"  #fileUpload (click)="fileUpload.value = null" (change)="onSelectFile($event)" accept=".jpg, .png, .pdf" hidden />
+</label>
+<!-- </div> -->
+<!-- <div fxLayoutGap="10px"> 
     <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" title="Import">
         <i class= "fa fa-download fa-lg" ></i>
         <span class= "hidden-xs-down" > </span>
         <input type="file"  #fileUpload (click)="fileUpload.value = null" (change)="onSelectFile($event)" accept=".jpg, .png, .pdf" />
     </div>
-</div>
+</div> -->
+<!-- <div>
+    <label for="file-upload" style="padding: 5px;">
+      <i class="fa fa-cloud-upload"></i> Import Project
+    </label>
+    <input id="file-upload" type="file" (change)="importJson($event.target.files,addToCanvas)"/>
+  </div> -->
+
+  <!-- <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+    <div class="loading" hidden id="loader">Loading&#8230;</div>
+    <div fxLayout="row" fxLayoutGap="10px">
+      <div>
+        <fileservice (complete)="import($event)"> </fileservice>
+      </div>
+      <div>
+        <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" (click)="export()" title="Export Overlap"> <i class="fa fa-upload fa-lg"> </i> <span class="hidden-xs-down"> </span></div>
+      </div>
+      <div>
+        <label for="file-upload" class="btn btn-file btn-outline-primary">
+          <i class="fa fa-cloud-upload"></i> Import Project
+        </label>
+        <input id="file-upload" type="file" (change)="importJson($event.target.files,addToCanvas)"/>
+      </div>
+      <div (click)="exportAsPDF()">
+        <label class="btn btn-file btn-outline-primary">
+          <i class="fa fa-cloud-upload"></i> Export Pdf
+        </label>
+      </div>
+      <div (click)="exportAsSingleImage()">
+        <label class="btn btn-file btn-outline-primary">
+          <i class="fa fa-cloud-upload"></i> Export Single Image
+        </label>
+      </div>
+    </div>
+  </nav> -->

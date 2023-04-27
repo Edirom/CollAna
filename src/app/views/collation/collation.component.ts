@@ -9,7 +9,8 @@ import { FileComponent } from '../../file/file.component';
 import { Faksimile } from '../../types/faksimile';
 
 import { saveAs } from 'file-saver';
-import { ModalDismissReasons, NgbDatepickerModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbDropdownModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { jsPDF } from "jspdf";
 
 declare let html2canvas: any;
 
@@ -58,21 +59,55 @@ export class CollationComponent implements AfterViewInit {
     this.faksimiles = this.fileService.getFaksimiles();
   }
 
+  exportAsPDF(){
+    document.getElementById('loader').hidden = false
+    if (this.faksimiles.length == 0) {
+      window.alert("No Data to export!");
+      document.getElementById('loader').hidden = true
+      return;
+    }
+    
+    this.faksimiles.forEach(faksmile=>{
+      // this.fileComponent.getMap(faksmile.ID).map.getView().setZoom(1)
+      let doc = new jsPDF();
+      faksmile.pages.forEach(page=>{
+          doc.addImage(
+            page.contain,
+            'PNG',
+            5,
+            5,
+            180,
+            180
+          );
+          doc.addPage()
+      })
+      doc.save(faksmile.title.split('.')[0]+'.pdf');
+    })
+    document.getElementById('loader').hidden = true
+  }
+
+  exportAsSingleImage(){
+    document.getElementById('loader').hidden = false
+    document.getElementById('capture').querySelectorAll('.ol-unselectable.ol-control.ol-bar.ol-top').forEach(element=>{
+      element.remove()
+    })
+    html2canvas(document.getElementById("capture")).then(canvas => {
+      canvas.toBlob(function (blob) {
+        saveAs(blob, "testImage.png");
+      });
+    });
+    document.getElementById('loader').hidden = true
+  }
   /** 
    * Export the current page data to Image file
   */
   export() {
+    document.getElementById('loader').hidden = false
     if (this.faksimiles.length == 0) {
       window.alert("No Data to export!");
+      document.getElementById('loader').hidden = true
       return;
     }
-
-    // var input = "";
-    // var output = "";
-    // this.faksimiles.forEach(function (faksimile) {
-    //   input = faksimile.title;
-    //   output = output + input.substr(0, input.lastIndexOf('.')) + "_" + "Page" + faksimile.actualPage + "_";
-    // });
     let data = []
     this.faksimiles.forEach(fakesmile=>{
       let canvas = document.getElementById('card-block'+fakesmile.ID).querySelector('canvas')
@@ -94,6 +129,15 @@ export class CollationComponent implements AfterViewInit {
     anchor.href = uri
     anchor.click()
     anchor.remove()
+
+    document.getElementById('loader').hidden = true
+    // var input = "";
+    // var output = "";
+    // this.faksimiles.forEach(function (faksimile) {
+    //   input = faksimile.title;
+    //   output = output + input.substr(0, input.lastIndexOf('.')) + "_" + "Page" + faksimile.actualPage + "_";
+    // });
+    
     // html2canvas(document.querySelector("#capture")).then(canvas => {
     //   canvas.toBlob(function (blob) {
     //     var reader = new FileReader();
@@ -115,6 +159,7 @@ export class CollationComponent implements AfterViewInit {
   }
 
   importJson(file: File[],callback){
+    document.getElementById('loader').hidden = false
     let tempFile = file[0];
     var reader = new FileReader();
     reader.onload = function (e) {
@@ -126,10 +171,19 @@ export class CollationComponent implements AfterViewInit {
 
   addToCanvas = (data) =>{
     let jsonData = JSON.parse(data)
-    jsonData.forEach(element => {
-      this.fileComponent.importJsonImage(element['name'],element['image'])
-    });
+
+    function forEachWithDelay(array, callback, delay) {
+      let i = 0;
+      let interval = setInterval(() => {
+        callback(array[i], i, array);
+        if (++i === array.length) clearInterval(interval);
+      }, delay);
+    }
+    
+    forEachWithDelay(jsonData, (item) => this.fileComponent.importJsonImage(item['name'],item['image']), 1000);
+    document.getElementById('loader').hidden = true
   }
+  
 
   drag_maxi_block_Moved(event: CdkDragMove, faksimile: Faksimile) {
     let element = document.getElementById('card-block' + faksimile.ID);

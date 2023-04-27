@@ -1,18 +1,41 @@
 <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
-  <div fxLayout="row" fxLayoutGap="10px">
-    <div>
-      <fileservice (complete)="import($event)"> </fileservice>
-    </div>
-    <div>
-      <div class="btn btn-file btn-outline-primary" data-toggle="tooltip" data-placement="right" (click)="export()" title="Export Overlap"> <i class="fa fa-upload fa-lg"> </i> <span class="hidden-xs-down"> </span></div>
-    </div>
-    <div>
-      <label for="file-upload" class="btn btn-file btn-outline-primary">
-        <i class="fa fa-cloud-upload"></i> Import Project
-      </label>
-      <input id="file-upload" type="file" (change)="importJson($event.target.files,addToCanvas)"/>
-    </div>
-  </div>
+  <div class="loading" hidden id="loader">Loading&#8230;</div>
+  <ul ngbNav #nav="ngbNav" class="nav-tabs justify-content-center">
+    <li ngbDropdown class="nav-item" role="presentation">
+      <button type="button" class="nav-link" ngbDropdownToggle>Import</button>
+      <div ngbDropdownMenu>
+        <div style="padding: 5px;">
+          <fileservice (complete)="import($event)"> </fileservice>
+        </div>
+        <div>
+          <label for="file-upload" style="padding: 5px;">
+            <i class="fa fa-cloud-upload"></i> Project
+          </label>
+          <input id="file-upload" type="file" (change)="importJson($event.target.files,addToCanvas)"/>
+        </div>
+      </div>
+    </li>
+    <li ngbDropdown class="nav-item" role="presentation">
+      <button type="button" class="nav-link" ngbDropdownToggle>Export</button>
+      <div ngbDropdownMenu>
+        <div (click)="export()" style="padding: 5px;">
+          <label>
+            <i class="fa fa-upload fa-lg"></i> As Image/Project
+          </label>
+        </div>
+        <div (click)="exportAsPDF()" style="padding: 5px;">
+          <label>
+            <i class="fa fa-cloud-upload"></i> As Pdf
+          </label>
+        </div>
+        <div (click)="exportAsSingleImage()" style="padding: 5px;">
+          <label>
+            <i class="fa fa-cloud-upload"></i> As Single Image
+          </label>
+        </div>
+      </div>
+    </li>
+  </ul>
 </nav>
 <div style="font-size:20px">
   <div class="container-fluid"  *ngIf="faksimiles?.length > 0" fxLayoutAlign="space-between">
