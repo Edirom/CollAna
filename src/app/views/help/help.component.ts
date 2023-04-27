@@ -24,6 +24,7 @@ export class HelpComponent implements OnInit {
 
   constructor() {}
   
+
   ngOnInit(): void {
     document.getElementById('introduction').classList.add('active')
   }
