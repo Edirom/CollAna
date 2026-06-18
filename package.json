@@ -15,7 +15,7 @@
     "@angular-devkit/build-angular": "^14.2.13",
     "@angular/animations": "^14.3.0",
     "@angular/cdk": "^12.0.0",
-    "@angular/common": "^14.3.0",
+    "@angular/common": "^20.3.25",
     "@angular/compiler": "^14.3.0",
     "@angular/core": "^14.3.0",
     "@angular/flex-layout": "^12.0.0-beta.35",
