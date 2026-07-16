@@ -492,7 +492,7 @@ export class FileComponent {
     /**
      * To draw rectangle when perspective transformation is clicked
      */
-    function drawingstarted() {
+    function drawingstarted(event) {
       that.svg.selectAll("image").remove();
       that.svg.selectAll(".line--x").remove();
       that.svg.selectAll(".line--y").remove();
@@ -511,7 +511,7 @@ export class FileComponent {
 
       if(final) {
         final = false; faksimile
-        point2 = d3.mouse(this);
+        point2 = d3.pointer(event, this);
         cutCoord2 = mousePosition.map(x => parseInt(x));
         cutCoord2[1] = faksimile.size[1] - cutCoord2[1];
         if(point1.length != 0) {
@@ -526,7 +526,7 @@ export class FileComponent {
           drawingended();
         }
       } else {
-        point1 = d3.mouse(this);
+        point1 = d3.pointer(event, this);
         cutCoord1 = mousePosition.map(x => parseInt(x));
         cutCoord1[1] = faksimile.size[1] - cutCoord1[1];
         final = true;
@@ -660,14 +660,14 @@ export class FileComponent {
         .attr("class", "handle")
         .attr("transform", function (d) { return "translate(" + d + ")"; })
         .attr("r", 5)
-        .on('mouseover', function (d, i) {
+        .on('mouseover', function (event, d) {
           // make the mouseover'd element
           d3.select(this)
             .transition()
             .duration(100)
             .attr('r', 20);
         })
-        .on('mouseout', function (d, i) {
+        .on('mouseout', function (event, d) {
           // return the mouseover'd element
           d3.select(this)
             .transition()
@@ -675,7 +675,7 @@ export class FileComponent {
             .attr('r', 5);
         })
         .call(d3.drag()
-          .subject(function (d) { return { x: d[0], y: d[1] }; })
+          .subject(function (event, d) { return { x: d[0], y: d[1] }; })
           .on("drag", dragged));
 
       svgFlat.select("g").selectAll(".draggable")
@@ -685,30 +685,30 @@ export class FileComponent {
         .attr("class", "draggable")
         .attr("transform", function (d) { return "translate(" + d + ")"; })
         .attr("r", 5)
-        .on('mouseover', function (d, i) {
+        .on('mouseover', function (event, d) {
           d3.select(this)
             .transition()
             .duration(100)
             .attr('r', 20);
         })
-        .on('mouseout', function (d, i) {
+        .on('mouseout', function (event, d) {
           d3.select(this)
             .transition()
             .duration(100)
             .attr('r', 5);
         })
         .call(d3.drag()
-          .subject(function (d) { return { x: d[0], y: d[1] }; })
+          .subject(function (event, d) { return { x: d[0], y: d[1] }; })
           .on("drag", draggedcenter));
 
-      function draggedcenter(d) {
+      function draggedcenter(event, d) {
         var xdistance = 0;
         var ydistance = 0;
-        if (d[0] != d3.event.x)
-           xdistance = d[0] - d3.event.x;
-        if (d[1] != d3.event.y)
-           ydistance = d[1] - d3.event.y;
-        d3.select(this).attr("transform", "translate(" + (d[0] = d3.event.x) + "," + (d[1] = d3.event.y) + ")");
+        if (d[0] != event.x)
+           xdistance = d[0] - event.x;
+        if (d[1] != event.y)
+           ydistance = d[1] - event.y;
+        d3.select(this).attr("transform", "translate(" + (d[0] = event.x) + "," + (d[1] = event.y) + ")");
         center = [[d[0], d[1]]]
         movetargets(xdistance, ydistance);
       }
@@ -726,8 +726,8 @@ export class FileComponent {
         transformed();
      }
 
-      function dragged(d) {
-        d3.select(this).attr("transform", "translate(" + (d[0] = d3.event.x) + "," + (d[1] = d3.event.y) + ")");
+      function dragged(event, d) {
+        d3.select(this).attr("transform", "translate(" + (d[0] = event.x) + "," + (d[1] = event.y) + ")");
         var id = this.id;
         var mousePosition;
         container.addEventListener('pointerup', function (event) {
@@ -799,9 +799,9 @@ export class FileComponent {
     /**
      *
      */
-    function drawpreview() {
+    function drawpreview(event) {
       if (mouseDown) {
-        point2 = d3.mouse(this);
+        point2 = d3.pointer(event, this);
         var previewPoints = createRectFromCoords(point1, point2);
         preview.attr('points', function () {
           return previewPoints;
@@ -823,12 +823,12 @@ export class FileComponent {
         .attr("transform", function (d) { return "translate(" + d + ")"; })
         .attr("r", 7)
         .call(d3.drag()
-          .subject(function (d) { return { x: d[0], y: d[1] }; })
+          .subject(function (event, d) { return { x: d[0], y: d[1] }; })
           .on("drag", dragged));
     }
 
-    function dragged(d) {
-      d3.select(this).attr("transform", "translate(" + (d[0] = d3.event.x) + "," + (d[1] = d3.event.y) + ")");
+    function dragged(event, d) {
+      d3.select(this).attr("transform", "translate(" + (d[0] = event.x) + "," + (d[1] = event.y) + ")");
     }
   }
 
